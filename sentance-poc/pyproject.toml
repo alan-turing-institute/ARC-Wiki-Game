@@ -1,0 +1,21 @@
+[project]
+name = "sentance_poc"
+version = "0.1.0"
+
+dependencies = [
+    "pip",
+    "h5py",
+    "mwxml",
+    "numpy",
+    "matplotlib",
+    "pandas",
+    "scipy",
+    "cython",
+    "jupyter",
+    "notebook",
+    "colorcet",
+    "tqdm",
+    "mwparserfromhell",
+    "sentence-transformers",
+    "pytorch-lightning",
+]
