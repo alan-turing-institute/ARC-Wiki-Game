@@ -3,6 +3,10 @@
 sentance-poc/training_data/*
 sentance-poc/notebook/lightning_logs/
 
+# Em-Sim-Agent
+
+em-sim-agent/training_data/*
+
 
 
 ### ~~~~ FROM PYTHON TEMPLATE ~~~~ ###
