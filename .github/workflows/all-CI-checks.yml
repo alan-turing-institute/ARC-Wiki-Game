@@ -46,4 +46,4 @@ jobs:
         run: python -m pip install ${{ matrix.package }}/.
 
       - name: Test package
-        run: python -m pytest -ra --cov --cov-report=term --durations=20
+        run: python -m pytest ${{ matrix.package }}/tests/ -ra --cov --cov-report=term --durations=20
