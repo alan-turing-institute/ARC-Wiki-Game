@@ -172,5 +172,30 @@ class AgentTools:
             summaries.append([int(link), self.get_article_summaray(link)])
         return summaries
 
+    def get_article_id(self, title: str) -> int | None:
+        """Get the article ID for the given article title.
+
+        Args:
+            title (str): The title of the article for which the article ID is to be
+                fetched.
+
+        Returns:
+            int: The article ID for the given article title.
+        """
+        title_loc = np.where(self.title_ary == title)[0]
+        if len(title_loc) == 0:
+            warn(
+                f"Title {title} not found in the Matrix Index Info Table", stacklevel=1
+            )
+            return None
+        if len(title_loc) > 1:
+            warn(
+                f"Multiple entries found for Title {title} in the Matrix Index Info "
+                "Table",
+                stacklevel=1,
+            )
+            return None
+        return self.matidx_ary[title_loc[0]]
+
 
 __all__ = ["AgentTools"]
