@@ -4,6 +4,9 @@ version = "0.1.0"
 
 dependencies = [
     "pip",
+    "pre-commit",
+    "pytest",
+    "pytest-cov",
     "h5py",
     "mwxml",
     "numpy",

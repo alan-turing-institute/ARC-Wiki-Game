@@ -3,9 +3,9 @@
 sentance-poc/training_data/*
 sentance-poc/notebook/lightning_logs/
 
-# Em-Sim-Agent
+# Agents
 
-em-sim-agent/training_data/*
+agents/training_data/*
 
 
 
