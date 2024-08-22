@@ -199,7 +199,7 @@ class AgentTools:
                 stacklevel=1,
             )
             return None
-        return self.matidx_ary[title_loc[0]]
+        return int(self.matidx_ary[title_loc[0]])
 
 
 __all__ = ["AgentTools"]

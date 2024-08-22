@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from huggingface_hub import HfApi
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, SimilarityFunction
 
 
 def get_model_from_name(model_name: str) -> SentenceTransformer:
@@ -33,5 +33,8 @@ def get_model_from_name(model_name: str) -> SentenceTransformer:
     )
     model_ids = [model.id for model in list(models)]
     if "sentence-transformers/" + model_name in model_ids or model_name in model_ids:
-        return SentenceTransformer("sentence-transformers/" + model_name)
+        return SentenceTransformer(
+            "sentence-transformers/" + model_name,
+            similarity_fn_name=SimilarityFunction.COSINE,
+        )
     raise ValueError("The model name " + model_name + " is not a valid model name.")
