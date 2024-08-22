@@ -118,7 +118,7 @@ class AgentTools:
         )
         return None
 
-    def get_article_summaray(self, article_id) -> str | None:
+    def get_article_summary(self, article_id) -> str | None:
         """Get the summary of the article for the given article ID.
 
         Args:
@@ -169,7 +169,7 @@ class AgentTools:
         forward_links = self.get_forward_links(article_id)
         summaries = []
         for link in forward_links:
-            summaries.append([int(link), self.get_article_summaray(link)])
+            summaries.append([int(link), self.get_article_summary(link)])
         return summaries
 
     def get_article_id(self, title: str) -> int | None:
