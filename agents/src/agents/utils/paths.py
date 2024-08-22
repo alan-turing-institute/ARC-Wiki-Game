@@ -62,3 +62,20 @@ def get_output_dir(file_path: str):
         The file path of the output directory
     """
     return os.path.join(find_project_root(file_path), "output")
+
+
+def get_test_data_dir(file_path: str):
+    """
+    Given a file path, returns the `test_data` directory
+
+    Parameters
+    ----------
+    file_path: str
+        The file path from where the function is called
+
+    Returns
+    -------
+    str
+        The file path of the test data directory
+    """
+    return os.path.join(find_project_root(file_path), "test_data")
