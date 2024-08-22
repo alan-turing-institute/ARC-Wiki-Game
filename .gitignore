@@ -6,7 +6,7 @@ sentance-poc/notebook/lightning_logs/
 # Agents
 
 agents/training_data/*
-
+em-sim-agent/*
 
 
 ### ~~~~ FROM PYTHON TEMPLATE ~~~~ ###
