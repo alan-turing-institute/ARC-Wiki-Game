@@ -1,6 +1,7 @@
 # SentancePOC
 
 sentance-poc/training_data/*
+!sentance-poc/training_data/README-training-data.md
 sentance-poc/notebook/lightning_logs/
 
 # Agents
@@ -9,6 +10,7 @@ agents/training_data/*
 agents/data/*
 agents/scripts/scratch.py
 em-sim-agent/*
+!agents/training_data/README-training-data.md
 
 .vscode/
 
