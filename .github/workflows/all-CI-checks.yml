@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [em-sim-agent, sentance-poc]
+        package: [agents, sentance-poc]
         python-version: ["3.11"]  # test oldest and latest supported versions
         runs-on: [ubuntu-latest]  # can be extended to other OSes, e.g. [ubuntu-latest, macos-latest, windows-latest]
 

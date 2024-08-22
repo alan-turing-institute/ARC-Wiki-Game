@@ -1,4 +1,4 @@
-# Embedding Similarity Agent `em-sim-agent`
+# Wiki Game Agent `agents`
 
 This agent will play the Wikipedia game using pre-trained language embedding models.
 The plan is an agent that will compare the similarity of the pages using an embedding model and go to the page with the closest embeddings.
