@@ -1,4 +1,4 @@
-# Wiki Game Agent `agents`
+# Wiki Game Agent
 
 The agents in this package will play the Wikipedia game. There is an abstract class of `Agent`, which the derived classes will inherit from.
 
