@@ -6,8 +6,11 @@ sentance-poc/notebook/lightning_logs/
 # Agents
 
 agents/training_data/*
+agents/data/*
+agents/scripts/scratch.py
 em-sim-agent/*
 
+.vscode/
 
 ### ~~~~ FROM PYTHON TEMPLATE ~~~~ ###
 

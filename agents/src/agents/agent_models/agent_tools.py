@@ -118,7 +118,7 @@ class AgentTools:
         )
         return None
 
-    def get_article_summaray(self, article_id) -> str | None:
+    def get_article_summary(self, article_id) -> str | None:
         """Get the summary of the article for the given article ID.
 
         Args:
@@ -137,6 +137,10 @@ class AgentTools:
             )
             return None
 
+        if not hasattr(self, "summary_file"):
+            with open(self._summary_path, "rb") as f:
+                f.seek(offset, 0)
+                return str(f.readline(), encoding="utf-8").split("\t")[-1]
         self.summary_file.seek(offset, 0)
         return str(self.summary_file.readline(), encoding="utf-8").split("\t")[-1]
 
@@ -169,7 +173,7 @@ class AgentTools:
         forward_links = self.get_forward_links(article_id)
         summaries = []
         for link in forward_links:
-            summaries.append([int(link), self.get_article_summaray(link)])
+            summaries.append([int(link), self.get_article_summary(link)])
         return summaries
 
     def get_article_id(self, title: str) -> int | None:
