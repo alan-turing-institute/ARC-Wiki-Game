@@ -6,6 +6,7 @@ Examining language models' ability to explore graphs.
 
 This has an early version of the dataloader which passes summaries of Wikipedia pages to the model.
 
-## Embedding Similarity Agent `em-sim-agent`
+## Wiki Game Agents `agents`
 
-This agent will play the Wikipedia game using pre-trained language embedding models.
+These agents will play the Wikipedia game.
+The first one will be using pre-trained language embedding models.
