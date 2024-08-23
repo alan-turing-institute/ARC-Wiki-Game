@@ -1,0 +1,13 @@
+
+experiments:
+  initial_test_100:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - wikipedia_test_100
+    models:
+      - all-distilroberta-v1
+      - all-mpnet-base-v2
+      - all-MiniLM-L12-v2
+      - all-MiniLM-L6-v2
+    params:
+      max_rounds: 50
