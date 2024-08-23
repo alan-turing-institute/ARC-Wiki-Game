@@ -5,11 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 
 dependencies = [
+    # Python Packaging
     "pip",
     "pre-commit",
     "pytest",
     "pytest-cov",
     "mypy",
+    # Data Science
     "numpy",
     "matplotlib",
     "pandas",
@@ -19,6 +21,9 @@ dependencies = [
     "notebook",
     "colorcet",
     "tqdm",
+    # Wiki Media Data Parsing
+    "mwxml",
+    "mwparserfromhell",
 ]
 
 
