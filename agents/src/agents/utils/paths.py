@@ -61,12 +61,12 @@ def get_output_dir(file_path: str):
     str
         The file path of the output directory
     """
-    return os.path.join(find_project_root(file_path), "output")
+    return os.path.join(get_data_dir(file_path), "output_data")
 
 
-def get_test_data_dir(file_path: str):
+def get_input_dir(file_path: str):
     """
-    Given a file path, returns the `test_data` directory
+    Given a file path, returns the `output` directory
 
     Parameters
     ----------
@@ -76,6 +76,30 @@ def get_test_data_dir(file_path: str):
     Returns
     -------
     str
-        The file path of the test data directory
+        The file path of the output directory
     """
-    return os.path.join(find_project_root(file_path), "test_data")
+    return os.path.join(get_data_dir(file_path), "input_data")
+
+
+def get_wiki_data_paths(file_path: str):
+    """
+    Given a file path, returns the `output` directory
+
+    Parameters
+    ----------
+    file_path: str
+        The file path from where the function is called
+
+    Returns
+    -------
+    str
+        The file path of the three wikipedia data files
+    """
+
+    data_dir = get_input_dir(file_path)
+
+    hdf5_file_path = os.path.join(data_dir, "wikipedia", "wiki_forward.hdf5")
+    matrix_info_path = os.path.join(data_dir, "wikipedia", "matidx_sum_table.csv")
+    summary_path = os.path.join(data_dir, "wikipedia", "summary.csv")
+
+    return hdf5_file_path, matrix_info_path, summary_path
