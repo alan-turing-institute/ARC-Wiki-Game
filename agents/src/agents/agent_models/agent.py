@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from torch import backends, cuda, device
 
-from agents.agent_models.agent_tools import AgentTools
+from agents.agent_models.tools import AgentTools
 from agents.utils.models import get_model_from_name
 from agents.utils.paths import get_output_dir
 
