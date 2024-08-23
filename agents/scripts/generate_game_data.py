@@ -1,0 +1,72 @@
+from __future__ import annotations
+
+import argparse
+import os
+
+from numpy import savetxt
+from numpy.random import choice
+
+from agents.agent_models.agent_tools import AgentTools
+from agents.utils.paths import get_game_dir, get_wiki_data_paths
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Get settings for creating test dataset"
+    )
+
+    parser.add_argument(
+        "-n",
+        "--num_records",
+        required=True,
+        type=int,
+        help="The number of records to be created.",
+    )
+    parser.add_argument(
+        "-d",
+        "--dataset_name",
+        required=True,
+        help="The name of the dataset to be created",
+    )
+    parser.add_argument(
+        "-i",
+        "--input_dataset",
+        required=True,
+        help="The name of the input dataset to be used",
+    )
+
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+
+    num_records = args.num_records
+    dataset_name = args.dataset_name
+    input_dataset_name = args.input_dataset
+
+    assert input_dataset_name in [
+        "wikipedia"
+    ], "Invalid dataset name, currently only `wikipedia` is valid."
+
+    game_data_dir = get_game_dir(__file__)
+    os.makedirs(os.path.join(game_data_dir, input_dataset_name), exist_ok=True)
+    game_data_path = os.path.join(
+        game_data_dir, input_dataset_name, dataset_name + ".txt"
+    )
+    if os.path.exists(game_data_path):  # To prevent accidently overriding results
+        raise ValueError(
+            "The file for the test data already exists: \n" + game_data_path
+        )
+
+    hdf5_file_path, matrix_info_path, summary_path = get_wiki_data_paths(__file__)
+
+    tools = AgentTools(hdf5_file_path, matrix_info_path, summary_path)
+
+    source_target_ids = choice(tools.matidx_ary.max(), (num_records, 2), replace=False)
+
+    savetxt(game_data_path, source_target_ids, delimiter="\t", fmt="%i")
+
+
+if __name__ == "__main__":
+    main()
