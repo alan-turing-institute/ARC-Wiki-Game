@@ -374,7 +374,7 @@ class GreedyEmbeddingAgent(Agent):
         ) = self._initialise_game(source_page, target_page)
         source_embedding = self._model.encode(source_summary)
         target_embedding = self._model.encode(target_summary)
-        similarity = self._model.similarity(source_embedding, target_embedding)
+        similarity = float(self._model.similarity(source_embedding, target_embedding))
 
         current_id = source_id
         route = [source_id]
