@@ -7,10 +7,9 @@ sentance-poc/notebook/lightning_logs/
 # Agents
 
 agents/training_data/*
-agents/data/*
+agents/data/input_data/*
 agents/scripts/scratch.py
-em-sim-agent/*
-!agents/training_data/README-training-data.md
+!agents/input_data/README-input-data.md
 
 .vscode/
 
