@@ -9,7 +9,7 @@ sentance-poc/notebook/lightning_logs/
 agents/training_data/*
 agents/data/input_data/*
 agents/scripts/scratch.py
-!agents/input_data/README-input-data.md
+!agents/data/input_data/README-input-data.md
 
 .vscode/
 
