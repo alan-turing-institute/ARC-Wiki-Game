@@ -1,0 +1,14 @@
+# This is a config file to store the models and parameters that were run on the Wikipedia_test_100 dataset
+
+dataset:
+  - wikipedia_test_100
+
+agent:
+  class_name: GreedyEmbeddingAgent
+  models:
+    - all-distilroberta-v1
+    - all-mpnet-base-v2
+    - all-MiniLM-L12-v2
+    - all-MiniLM-L6-v2
+  params:
+    max_rounds: 50
