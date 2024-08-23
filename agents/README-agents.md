@@ -11,14 +11,14 @@ Each dervied class will be initialised by passing an instance of `AgentTools` an
 
 The `play_games` method will save the output of the games at regular intervals, where as the singular `play_game` method will not save the output, but this can be achieved by running the `save_game` method.
 
-The script `play_single_game.py` can be run to play an instance of the Wikipedia game. Currently the only valid agent that can be used is the `GreedyEmbeddingAgent`. 
+The script `play_single_game.py` can be run to play an instance of the Wikipedia game. Currently the only valid agent that can be used is the `GreedyEmbeddingAgent`.
 
 A script `play_multiple_games.py` has yet to be implemented, but this will set up an agent to play a pre-determined list of games (defined by source and target IDs).
 
 ### GreedyEmbeddingAgent
 This implementation uses a pre-trained sentence transformer model to play the Wikipedia game. It uses the model to encode the summaries of all links on a page, and selects the one that is most similar to the encoded summary of the target page. This agent is not allowed to navigate back to a page it has already visited, as this approach will cause to enter a loop; therefore, this agent may also fail to complete a game if it reaches a page where there are no links available that it has not already visited.
 
-Arguments that are specific to use this agent to play a game are the `model_name`. This has to match the name of an existing model in the 'sentence-transformer' HuggingFace library. Currently this is limited to the original models in the library (those authored by 'sentence-transformers'), but this restriction could be lifted if required in future. 
+Arguments that are specific to use this agent to play a game are the `model_name`. This has to match the name of an existing model in the 'sentence-transformer' HuggingFace library. Currently this is limited to the original models in the library (those authored by 'sentence-transformers'), but this restriction could be lifted if required in future.
 
 
 ### LLMPromptAgent

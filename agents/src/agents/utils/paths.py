@@ -98,8 +98,8 @@ def get_wiki_data_paths(file_path: str):
 
     data_dir = get_input_dir(file_path)
 
-    hdf5_file_path = os.path.join(data_dir, "wiki_forward.hdf5")
-    matrix_info_path = os.path.join(data_dir, "matidx_sum_table.csv")
-    summary_path = os.path.join(data_dir, "summary.csv")
+    hdf5_file_path = os.path.join(data_dir, "wikipedia", "wiki_forward.hdf5")
+    matrix_info_path = os.path.join(data_dir, "wikipedia", "matidx_sum_table.csv")
+    summary_path = os.path.join(data_dir, "wikipedia", "summary.csv")
 
     return hdf5_file_path, matrix_info_path, summary_path
