@@ -36,7 +36,7 @@ def hdf5_file(testing_dir: str) -> str:
     fives = np.arange(0, 101, 5)
     test_locs = np.array([fives[0:-1], fives[1:]]).T
     twenty = np.arange(0, 20, 1)
-    test_vals = np.concat(
+    test_vals = np.concatenate(
         [
             twenty,  # One step
             twenty[::2],  # Two steps
