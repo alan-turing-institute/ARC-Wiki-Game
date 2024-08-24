@@ -17,12 +17,14 @@ def parse_args():
         "--agent",
         required=True,
         type=str,
+        default="GreedyEmbeddingAgent",
         help="The name of the agent (class) to use",
     )
     parser.add_argument(
         "-m",
         "--model",
         type=str,
+        default="all-distilroberta-v1",
         help="The name of the model (if required) to use. For current implementation,\
             this will need to be a valid name for a model in the 'sentence-transformer'\
             HuggingFace library",

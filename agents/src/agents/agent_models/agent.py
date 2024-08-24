@@ -119,7 +119,7 @@ class Agent(ABC):
 
         for i in range(len(source_ids)):
             self.play_game(source_ids[i], target_ids[i])
-            if (i + 1) % 10 == 0:
+            if (i + 1) % 1 == 0:
                 self.save_games(output_folder, output_file_name)
         self.save_games(output_folder, output_file_name)
 
@@ -428,19 +428,23 @@ class GreedyEmbeddingAgent(Agent):
             The ID of the page to navigate to next
         """
         forward_summaries = self._tools.get_forward_summaries(current_page_id)
-        page_ids = [
-            summary_info[0]
-            for summary_info in forward_summaries
-            if summary_info[0] not in route
-        ]
-        summaries = [
-            summary_info[1]
-            for summary_info in forward_summaries
-            if summary_info[0] not in route
-        ]
-        embeddings = self._model.encode(summaries)
+        if len(forward_summaries) > 0:
+            page_ids = [
+                summary_info[0]
+                for summary_info in forward_summaries
+                if (summary_info[0] not in route) and (summary_info[1] is not None)
+            ]
+            summaries = [
+                summary_info[1]
+                for summary_info in forward_summaries
+                if (summary_info[0] not in route) and (summary_info[1] is not None)
+            ]
+            if len(summaries) > 0:
+                embeddings = self._model.encode(summaries)
 
-        similarities = self._model.similarity(embeddings, target_summary)
-        np_similarities = similarities.numpy()
-        max_id = np.argmax(np_similarities)
-        return page_ids[max_id]
+                similarities = self._model.similarity(embeddings, target_summary)
+                np_similarities = similarities.numpy()
+                max_id = np.argmax(np_similarities)
+                return page_ids[max_id]
+            return -1
+        return -1
