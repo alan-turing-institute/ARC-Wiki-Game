@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 
+# import time
 import yaml
 from numpy import loadtxt
 
@@ -77,9 +78,13 @@ def main():
                         ],
                         model_name=model,
                     )
+                    # start_time = time.time()
                     agent.play_games(
                         source_ids, target_ids, experiment_output_path, output_filename
                     )
+                    # end_time = time.time()
+                    # interval = end_time - start_time
+                    # print("Finished games with " + model + ". Time:%.2f" % (interval))
 
 
 if __name__ == "__main__":
