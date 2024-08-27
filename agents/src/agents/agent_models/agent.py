@@ -119,7 +119,7 @@ class Agent(ABC):
 
         for i in range(len(source_ids)):
             self.play_game(source_ids[i], target_ids[i])
-            if (i + 1) % 1 == 0:
+            if (i + 1) % 10 == 0:
                 self.save_games(output_folder, output_file_name)
         self.save_games(output_folder, output_file_name)
 
