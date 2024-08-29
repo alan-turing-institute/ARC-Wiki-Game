@@ -22,6 +22,8 @@ experiments:
       - wikigame-gpt-4o
     params:
       max_rounds: 50
+      temperature: 0
+      seed: 42
 
   prompt_test_100:
     agent_class: PromptAgent

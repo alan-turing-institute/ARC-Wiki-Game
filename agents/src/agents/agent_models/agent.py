@@ -425,7 +425,12 @@ class GreedyEmbeddingAgent(Agent):
 
 class PromptAgent(Agent):
     def __init__(
-        self, agent_tools: AgentTools, max_rounds: int, model_name: str
+        self,
+        agent_tools: AgentTools,
+        max_rounds: int,
+        model_name: str,
+        temperature: float,
+        manual_seed: int = 42,
     ) -> None:
         """
         Class inherits from Agent and plays the wikipedia game by giving a
@@ -440,6 +445,14 @@ class PromptAgent(Agent):
             The maximum number of rounds that the game can be played for
         model_name: str
             The name of the deployed model to be used for prompting
+        temperature: float
+            The temperature of the GPT model, should be between 0 and 1 with a
+            value of 0 being the most deterministic and a value of 1 being most
+            random or creative
+        manual_seed: int
+            A seed to give the GPT model - at the time of writing, this feature
+            is in beta mode according to OpenAI so might not result in the model
+            behaving 100% deterministically.
         """
         super().__init__(agent_tools, max_rounds)
 
@@ -450,6 +463,16 @@ class PromptAgent(Agent):
             api_version="2024-02-01",
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         )
+
+        assert (
+            temperature <= 1
+        ), "Temperature is not a valid value, must be less than one."
+        assert (
+            temperature >= 0
+        ), "Temperature is not a valid value, must be greater than zero."
+        self._temp = temperature
+
+        self._seed = manual_seed
 
         self._system_content = (
             "You are a helpful assistant that helps me to play the Wikipedia Game! "
@@ -559,7 +582,10 @@ class PromptAgent(Agent):
         message2 = {"role": "user", "content": content}
 
         completion = self._client.chat.completions.create(
-            model=self._deployment_name, messages=[message1, message2]
+            model=self._deployment_name,
+            messages=[message1, message2],
+            temperature=self._temp,
+            seed=self._seed,
         )
 
         response = completion.choices[0].message.content
@@ -615,7 +641,10 @@ class PromptAgent(Agent):
             messages.append(message)
 
             completion = self._client.chat.completions.create(
-                model=self._deployment_name, messages=messages
+                model=self._deployment_name,
+                messages=messages,
+                temperature=self._temp,
+                seed=self._seed,
             )
 
             response = completion.choices[0].message.content
@@ -661,7 +690,10 @@ class PromptAgent(Agent):
             message_retry = {"role": "user", "content": content_retry}
             messages.append(message_retry)
             completion = self._client.chat.completions.create(
-                model=self._deployment_name, messages=messages
+                model=self._deployment_name,
+                messages=messages,
+                temperature=self._temp,
+                seed=self._seed,
             )
 
             response = completion.choices[0].message.content

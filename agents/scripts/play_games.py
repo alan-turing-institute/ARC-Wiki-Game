@@ -93,6 +93,12 @@ def main():
                                 "max_rounds"
                             ],
                             model_name=model,
+                            temperature=config["experiments"][experiment]["params"][
+                                "temperature"
+                            ],
+                            manual_seed=config["experiments"][experiment]["params"][
+                                "seed"
+                            ],
                         )
                     agent.play_games(
                         source_ids, target_ids, experiment_output_path, output_filename
