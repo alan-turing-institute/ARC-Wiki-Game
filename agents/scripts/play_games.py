@@ -6,7 +6,7 @@ import os
 import yaml
 from numpy import loadtxt
 
-from agents.agent_models.agent import GreedyEmbeddingAgent
+from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
 from agents.agent_models.tools import AgentTools
 from agents.utils.paths import get_game_dir, get_output_dir, get_wiki_data_paths
 
@@ -64,19 +64,36 @@ def main():
         os.makedirs(experiment_output_path, exist_ok=True)
         for game_dataset in config["experiments"][experiment]["game_datasets"]:
             source_ids, target_ids = load_test_dataset(input_dataset_name, game_dataset)
+            source_ids = source_ids[:10]
+            target_ids = target_ids[:10]
             for model in config["experiments"][experiment]["models"]:
                 output_filename = game_dataset + "_" + model
                 # We only run this combination if an output file doesn't already exist
                 if not os.path.exists(
                     os.path.join(experiment_output_path, output_filename + ".csv")
                 ):
-                    agent = GreedyEmbeddingAgent(
-                        tools,
-                        max_rounds=config["experiments"][experiment]["params"][
-                            "max_rounds"
-                        ],
-                        model_name=model,
-                    )
+                    if (
+                        config["experiments"][experiment]["agent_class"]
+                        == "GreedyEmbeddingAgent"
+                    ):
+                        agent = GreedyEmbeddingAgent(
+                            tools,
+                            max_rounds=config["experiments"][experiment]["params"][
+                                "max_rounds"
+                            ],
+                            model_name=model,
+                        )
+                    elif (
+                        config["experiments"][experiment]["agent_class"]
+                        == "PromptAgent"
+                    ):
+                        agent = PromptAgent(
+                            tools,
+                            max_rounds=config["experiments"][experiment]["params"][
+                                "max_rounds"
+                            ],
+                            model_name=model,
+                        )
                     agent.play_games(
                         source_ids, target_ids, experiment_output_path, output_filename
                     )

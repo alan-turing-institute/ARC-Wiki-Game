@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from agents.agent_models.agent import GreedyEmbeddingAgent
+from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
 from agents.agent_models.tools import AgentTools
 from agents.utils.paths import get_wiki_data_paths
 
@@ -87,17 +87,20 @@ def main():
         agent = GreedyEmbeddingAgent(
             tools, max_rounds=max_rounds, model_name=model_name
         )
-        agent.play_game(source, target, verbose=verbose)
-        if args.folder_name is not None and args.file_name is not None:
-            folder_name = args.folder_name
-            file_name = args.file_name
-            agent.save_games(folder_name=folder_name, file_name=file_name)
+    elif args.agent == "PromptAgent":
+        agent = PromptAgent(tools, max_rounds=max_rounds, model_name=model_name)
     else:
         raise ValueError(
             "Invalid name for agent provided: "
             + args.agent
-            + "\nCurrently the only valid values are: `GreedyEmbeddingAgent`"
+            + "\nCurrently the only valid values are: `GreedyEmbeddingAgent` or \
+                `PromptAgent`"
         )
+    agent.play_game(source, target, verbose=verbose)
+    if args.folder_name is not None and args.file_name is not None:
+        folder_name = args.folder_name
+        file_name = args.file_name
+        agent.save_games(folder_name=folder_name, file_name=file_name)
 
 
 if __name__ == "__main__":

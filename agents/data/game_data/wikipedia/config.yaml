@@ -14,6 +14,24 @@ experiments:
     params:
       max_rounds: 50
 
+  prompt_test_10:
+    agent_class: PromptAgent
+    game_datasets:
+      - wikipedia_test_10
+    models:
+      - wikigame-gpt-4o
+    params:
+      max_rounds: 50
+
+  prompt_test_100:
+    agent_class: PromptAgent
+    game_datasets:
+      - wikipedia_test_100
+    models:
+      - wikigame-gpt-4o
+    params:
+      max_rounds: 50
+
   initial_test_1000:
     agent_class: GreedyEmbeddingAgent
     game_datasets:

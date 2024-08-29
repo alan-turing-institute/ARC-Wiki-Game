@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
+from openai import AzureOpenAI
 from torch import backends, cuda, device
 
 from agents.agent_models.tools import AgentTools
@@ -60,34 +61,6 @@ class Agent(ABC):
         tuple[bool, list[int]]
             Returns a boolean that indicates whether a route was found, and a list of
             the route that was taken - the items in the list will be the page IDs
-        """
-
-    @abstractmethod
-    def play_round(
-        self,
-        current_page_id: int,
-        target_summary: str | np.ndarray,
-        route: list[int],
-    ) -> int:
-        """
-        Given a current page id, this method gets all the links that exist on the
-        page. It compares the links to the target summary and returns the ID of the
-        page to navigate to next. The exact implementation will depend on the child
-        class.
-
-        Parameters
-        ----------
-        current_page_id: int
-            The ID of the current page
-        target_summary: str | array
-            Either a string summary or embedding of the summary of the target page.
-        route: list[int]
-            The rotue taken so far in the current game.
-
-        Returns
-        -------
-        int
-            The ID of the page to navigate to next
         """
 
     def play_games(
@@ -380,7 +353,7 @@ class GreedyEmbeddingAgent(Agent):
         route = [source_id]
         found_target = current_id == target_id
         while (len(route) <= self._max_rounds) and not found_target:
-            next_page_id = self.play_round(current_id, target_embedding, route)
+            next_page_id = self._play_round(current_id, route, target_embedding)
             if next_page_id == -1:
                 break
             found_target = next_page_id == target_id
@@ -402,8 +375,8 @@ class GreedyEmbeddingAgent(Agent):
 
         return found_target, route
 
-    def play_round(
-        self, current_page_id: int, target_summary: str | np.ndarray, route: list[int]
+    def _play_round(
+        self, current_page_id: int, route: list[int], target_summary: np.ndarray
     ) -> int:
         """
         Given a current page id, this method gets all the links that exist on the
@@ -417,10 +390,10 @@ class GreedyEmbeddingAgent(Agent):
         ----------
         current_page_id: int
             The ID of the current page
-        target_summary: str | array
-            Either a string summary or embedding of the summary of the target page.
         route: list[int]
             The rotue taken so far in the current game.
+        target_summary: array
+            An embedding of the summary of the target page.
 
         Returns
         -------
@@ -446,5 +419,259 @@ class GreedyEmbeddingAgent(Agent):
                 np_similarities = similarities.numpy()
                 max_id = np.argmax(np_similarities)
                 return page_ids[max_id]
+            return -1
+        return -1
+
+
+class PromptAgent(Agent):
+    def __init__(
+        self, agent_tools: AgentTools, max_rounds: int, model_name: str
+    ) -> None:
+        """
+        Class inherits from Agent and plays the wikipedia game by giving a
+        prompt to an OpenAI GPT model with the
+
+        Parameters
+        ----------
+        agent_tools: AgentTools
+            An instance of AgentTools that will have been pre-loaded with the data
+            with which the game will be played
+        max_rounds: int
+            The maximum number of rounds that the game can be played for
+        model_name: str
+            The name of the deployed model to be used for prompting
+        """
+        super().__init__(agent_tools, max_rounds)
+
+        self._deployment_name = model_name
+
+        self._client = AzureOpenAI(
+            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            api_version="2024-02-01",
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        )
+
+        self._system_content = (
+            "You are a helpful assistant that helps me to play the Wikipedia Game! "
+        )
+        self._query1_content = (
+            "You will be given the title and a summary of the target \
+            page that I am trying to navigate to, both the title and summary will be \
+                delimited by ```. Can you summarise what the target page is about? "
+        )
+
+    def play_game(
+        self, source_page: int | str, target_page: int | str, verbose: bool = False
+    ) -> tuple[bool, list[int]]:
+        """
+        This method takes the source and target page IDs or titles and implements a
+        prompting approach to find a route between the two pages. The approach presents
+        a LLM model with a summary of the target page and a list of the links on the
+        current page and asks the model to pick a link.
+
+        If a route is found then the method returns True and a list of the route found
+        (composed of page IDs). If a route is not found then the method returns False
+        and a list of the route taken without reaching the target page. A route may not
+        be found for serveral reasons including:
+        - Needing to take more than the maximum number of rounds the object has
+          been set
+        - Reaching a page where there are either no links, or no links to which
+          the agent has not yet navigated.
+
+        Parameters
+        ----------
+        source_page: int | str
+            Either the source page ID or title
+        target_page: int | str
+            Either the target page ID or title
+        verbose: bool
+            If set to True, then the route is printed out
+
+        Returns
+        -------
+        tuple[bool, list[int]]
+            Returns a boolean that indicates whether a route was found, and a list of
+            the route that was taken - the items in the list will be the page IDs
+        """
+        (
+            source_id,
+            source_title,
+            source_summary,
+            target_id,
+            target_title,
+            target_summary,
+        ) = self._initialise_game(source_page, target_page)
+
+        game_messages = self._set_messages(target_title, target_summary)
+
+        current_id = source_id
+        route = [source_id]
+        found_target = current_id == target_id
+        while (len(route) <= self._max_rounds) and not found_target:
+            next_page_id = self._play_round(current_id, route, game_messages)
+            if next_page_id == -1:
+                break
+            found_target = next_page_id == target_id
+            route.append(next_page_id)
+            current_id = next_page_id
+
+        if verbose:
+            self._print_route(source_title, target_title, found_target, route)
+
+        self.record_game(
+            source_id,
+            source_title,
+            target_id,
+            target_title,
+            found_target,
+            route,
+        )
+
+        return found_target, route
+
+    def _set_messages(self, target_title: str, target_summary: str) -> list[dict]:
+        """
+        I know, I know, this seems like an unecessary method as it is just asking
+        the LLM to summarise the existing summary. However, the summary prompting
+        approach worked better when I first asked the LLM to summarise the summary
+        of the target page and then show it the list of links.
+
+        Parameters
+        ----------
+        target_title: str
+            The title of the target page
+        target_summary: str
+            The summary of the target page
+
+        Returns
+        -------
+        list[dict]
+            A list of dictionaries containing the role and content to be used
+            at the start of the prompt for the given game.
+        """
+
+        message1 = {"role": "system", "content": self._system_content}
+
+        content = self._query1_content
+        content += "Target title: ```" + target_title + "``` "
+        content += "Target summary: ```" + target_summary + "``` "
+
+        message2 = {"role": "user", "content": content}
+
+        completion = self._client.chat.completions.create(
+            model=self._deployment_name, messages=[message1, message2]
+        )
+
+        response = completion.choices[0].message.content
+
+        message3 = {"role": "assistant", "content": response}
+
+        return [message1, message2, message3]
+
+    def _play_round(
+        self, current_page_id: int, route: list[int], game_messages: list[dict]
+    ) -> int:
+        """
+        Given a current page id, this method gets all the titles of the links that exist
+        on the page. It presentes the link titles to the LLM along with a summary of
+        the target page and asks the LLM to select a link.
+        It then returns the ID of the selected link.
+
+        Parameters
+        ----------
+        current_page_id: int
+            The ID of the current page
+        route: list[int]
+            The rotue taken so far in the current game.
+        messages: list[dict]
+            A list of dictionaries containing the messages to be used at the start of
+            the prompt - these are the same for all rounds in the game.
+
+        Returns
+        -------
+        int
+            The ID of the page to navigate to next
+        """
+        forward_titles = self._tools.get_forward_titles(current_page_id)
+        titles: list[str] = [
+            str(forward_title[1])
+            for forward_title in forward_titles
+            if (forward_title[1] is not None) and (forward_title[0] not in route)
+        ]
+        if len(titles) > 0:
+            content = "You will now be given a list of links on current page. Each \
+                link name is contained in curly brackets. Which link should I pick in \
+                    order to navigate closer to the target page? Please respond with \
+                        the link name in curly brackets, followed by a new line and \
+                            then give a justification for the choice. The link you \
+                                select must come from the given list."
+
+            for title in titles:
+                content += "{" + title + "}, "
+
+            message = {"role": "user", "content": content}
+
+            messages = game_messages.copy()
+            messages.append(message)
+
+            completion = self._client.chat.completions.create(
+                model=self._deployment_name, messages=messages
+            )
+
+            response = completion.choices[0].message.content
+
+            next_link = response[response.find("{") + 1 : response.find("}")]
+
+            if next_link in titles:
+                # Excellent - no hallucinations!
+                next_link_id = self._tools.get_article_id(next_link)
+                if next_link_id is None:
+                    return -1
+                return next_link_id
+
+            # Urgh. Either it's made up a link or it hasn't provided the link in
+            # curly brackets. Try once more. Firstly, add the response to the
+            # list of messages (GPT won't remember it's last response so have
+            # to send the list of messages again).
+            message_response = {"role": "assistant", "content": response}
+            messages.append(message_response)
+
+            if (
+                (response.find("{") == -1)
+                or (response.find("}") == -1)
+                or (response.find("{") > response.find("}"))
+            ):
+                # The response is not in the expected format
+                content_retry = (
+                    "You did not provide the name of the selected link in curly \
+                    brackets. Please try again and provide the link name in curly \
+                        brackets, followed by a new line and then give a justification \
+                            for the choice. "
+                )
+            else:
+                # The response is a hallucination
+                content_retry = (
+                    "But "
+                    + next_link
+                    + " isn't in the list that was proivded! You must select a link \
+                        from the given list of links. Please try again and provide the \
+                            link name in curly brackets, followed by a new line and \
+                                then give a justification for the choice. "
+                )
+            message_retry = {"role": "user", "content": content_retry}
+            messages.append(message_retry)
+            completion = self._client.chat.completions.create(
+                model=self._deployment_name, messages=messages
+            )
+
+            response = completion.choices[0].message.content
+
+            next_link = response[response.find("{") + 1 : response.find("}")]
+
+            if next_link in titles:
+                next_link_id = self._tools.get_article_id(next_link)
+                if next_link_id is None:
+                    return -1
+                return next_link_id
             return -1
         return -1
