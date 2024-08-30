@@ -73,7 +73,7 @@ class Agent(ABC):
         """
         This method takes a list of source page IDs, target page IDs, an output
         folder and file name. It plays the game for each pair of source ID and
-        target ID and saves the output every 10 games.
+        target ID and saves the output at the end of every game.
 
         Parameters
         ----------
@@ -92,8 +92,7 @@ class Agent(ABC):
 
         for i in range(len(source_ids)):
             self.play_game(source_ids[i], target_ids[i])
-            if (i + 1) % 10 == 0:
-                self.save_games(output_folder, output_file_name)
+            self.save_games(output_folder, output_file_name)
         self.save_games(output_folder, output_file_name)
 
     def _get_id_title_summary(self, page: int | str) -> tuple[int, str, str]:
@@ -478,9 +477,9 @@ class PromptAgent(Agent):
             "You are a helpful assistant that helps me to play the Wikipedia Game! "
         )
         self._query1_content = (
-            "You will be given the title and a summary of the target \
-            page that I am trying to navigate to, both the title and summary will be \
-                delimited by ```. Can you summarise what the target page is about? "
+            "You will be given the title and a summary of the target page that I am "
+            "trying to navigate to, both the title and summary will be delimited by "
+            "```. Can you summarise what the target page is about? "
         )
 
     def play_game(
@@ -625,12 +624,14 @@ class PromptAgent(Agent):
             if (forward_title[1] is not None) and (forward_title[0] not in route)
         ]
         if len(titles) > 0:
-            content = "You will now be given a list of links on current page. Each \
-                link name is contained in curly brackets. Which link should I pick in \
-                    order to navigate closer to the target page? Please respond with \
-                        the link name in curly brackets, followed by a new line and \
-                            then give a justification for the choice. The link you \
-                                select must come from the given list."
+            content = (
+                "You will now be given a list of links on current page. Each "
+                "link name is contained in curly brackets. Which link should I pick in "
+                "order to navigate closer to the target page? Please respond with "
+                "the link name in curly brackets, followed by a new line and then give "
+                "a justification for the choice. The link you select must come from "
+                "the given list."
+            )
 
             for title in titles:
                 content += "{" + title + "}, "
@@ -639,6 +640,9 @@ class PromptAgent(Agent):
 
             messages = game_messages.copy()
             messages.append(message)
+            for m in messages:
+                if m["content"] is None:
+                    return -1
 
             completion = self._client.chat.completions.create(
                 model=self._deployment_name,
@@ -648,6 +652,9 @@ class PromptAgent(Agent):
             )
 
             response = completion.choices[0].message.content
+            if response is None:
+                # Will be 'None' if the content filter interferes
+                return -1
 
             next_link = response[response.find("{") + 1 : response.find("}")]
 
@@ -672,20 +679,20 @@ class PromptAgent(Agent):
             ):
                 # The response is not in the expected format
                 content_retry = (
-                    "You did not provide the name of the selected link in curly \
-                    brackets. Please try again and provide the link name in curly \
-                        brackets, followed by a new line and then give a justification \
-                            for the choice. "
+                    "You did not provide the name of the selected link in curly "
+                    "brackets. Please try again and provide the link name in curly "
+                    "brackets, followed by a new line and then give a justification "
+                    "for the choice. "
                 )
             else:
                 # The response is a hallucination
                 content_retry = (
                     "But "
                     + next_link
-                    + " isn't in the list that was proivded! You must select a link \
-                        from the given list of links. Please try again and provide the \
-                            link name in curly brackets, followed by a new line and \
-                                then give a justification for the choice. "
+                    + " isn't in the list that was proivded! You must select a link "
+                    "from the given list of links. Please try again and provide the "
+                    "link name in curly brackets, followed by a new line and then "
+                    "give a justification for the choice. "
                 )
             message_retry = {"role": "user", "content": content_retry}
             messages.append(message_retry)
@@ -697,6 +704,9 @@ class PromptAgent(Agent):
             )
 
             response = completion.choices[0].message.content
+            if response is None:
+                # Will be 'None' if the content filter interferes
+                return -1
 
             next_link = response[response.find("{") + 1 : response.find("}")]
 

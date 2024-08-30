@@ -64,8 +64,8 @@ def main():
         os.makedirs(experiment_output_path, exist_ok=True)
         for game_dataset in config["experiments"][experiment]["game_datasets"]:
             source_ids, target_ids = load_test_dataset(input_dataset_name, game_dataset)
-            source_ids = source_ids[:10]
-            target_ids = target_ids[:10]
+            source_ids = source_ids[:5]
+            target_ids = target_ids[:5]
             for model in config["experiments"][experiment]["models"]:
                 output_filename = game_dataset + "_" + model
                 # We only run this combination if an output file doesn't already exist
