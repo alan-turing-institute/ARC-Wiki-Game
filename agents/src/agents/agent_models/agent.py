@@ -100,7 +100,7 @@ class Agent(ABC):
         """
         This method takes a list of source page IDs, target page IDs, an output
         folder and file name. It plays the game for each pair of source ID and
-        target ID and saves the output every 10 games.
+        target ID and saves the output every game.
 
         Parameters
         ----------
@@ -119,9 +119,7 @@ class Agent(ABC):
 
         for i in range(len(source_ids)):
             self.play_game(source_ids[i], target_ids[i])
-            if (i + 1) % 10 == 0:
-                self.save_games(output_folder, output_file_name)
-        self.save_games(output_folder, output_file_name)
+            self.save_games(output_folder, output_file_name)
 
     def _get_id_title_summary(self, page: int | str) -> tuple[int, str, str]:
         """
