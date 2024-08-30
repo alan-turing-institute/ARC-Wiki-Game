@@ -3,7 +3,10 @@ from __future__ import annotations
 import os
 
 # This file contains paths relative to the project root that can be imported.
-# If this file moves relative to the project root, find_repo_root() must be changed.
+# The 'find_project_root' function might need to be updated if the package is
+# run on a location other than Baskerville or in the repo
+
+BASK_ROOT_DIR = "/bask/projects/v/vjgo8416-wikigame/ARC-Wiki-Game"
 
 
 def find_project_root(file_path: str) -> str:
@@ -27,6 +30,8 @@ def find_project_root(file_path: str) -> str:
         os.path.split(temp_dir)[1] != "agents"
         or os.path.split(os.path.dirname(temp_dir))[1] == "site-packages"
     ) and len(temp_dir) > 1:
+        if os.path.split(temp_dir)[1] == "bask":
+            return os.path.join(BASK_ROOT_DIR, "agents")
         temp_dir = os.path.dirname(temp_dir)
 
     if len(temp_dir) > 1:
