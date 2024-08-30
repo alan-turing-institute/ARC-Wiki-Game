@@ -22,11 +22,16 @@ def find_project_root(file_path: str) -> str:
     """
 
     temp_dir = os.path.dirname(file_path)
-    while os.path.split(temp_dir)[1] != "ARC-Wiki-Game" and len(temp_dir) > 0:
+    # while os.path.split(temp_dir)[1] != "ARC-Wiki-Game" and len(temp_dir) > 1:
+    while (
+        os.path.split(temp_dir)[1] != "agents"
+        or os.path.split(os.path.dirname(temp_dir))[1] == "site-packages"
+    ) and len(temp_dir) > 1:
         temp_dir = os.path.dirname(temp_dir)
 
-    if len(temp_dir) > 0:
-        return os.path.join(temp_dir, "agents")
+    if len(temp_dir) > 1:
+        # return os.path.join(temp_dir, "agents")
+        return temp_dir
     raise ValueError("Cannot find root directory for file path " + file_path)
 
 
