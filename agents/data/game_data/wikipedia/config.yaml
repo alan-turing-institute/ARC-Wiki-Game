@@ -19,7 +19,21 @@ experiments:
     game_datasets:
       - wikipedia_test_1000
     models:
+      - all-distilroberta-v1
       - average_word_embeddings_glove.6B.300d
       - all-MiniLM-L6-v2
+      - all-mpnet-base-v2
+    params:
+      max_rounds: 50
+
+  initial_test_10000:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - wikipedia_test_10000
+    models:
+      - all-distilroberta-v1
+      - average_word_embeddings_glove.6B.300d
+      - all-MiniLM-L6-v2
+      - all-mpnet-base-v2
     params:
       max_rounds: 50
