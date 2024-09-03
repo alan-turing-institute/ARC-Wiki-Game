@@ -236,15 +236,44 @@ class AgentToolsRAM(AgentToolsBase):
         self,
         hdf5_file_path: str,
         summary_data_path: str,
+        old_title_format: bool = False,
+        sort_data: bool = False,
     ):
+        """Initialize the AgentTools object.
+
+        AgentTools is a class that provides the accessible ids, titles, and summaries
+        for the articles in the Wikipedia dump. It can be open as a context manager
+        to ensure that the Summary file is closed properly. For example:
+        `with AgentTools(hdf5_file_path, matidx_info_path, summary_data) as agent:`
+
+        Args:
+            hdf5_file_path (str): The file path to the HDF5 file. This HDF5 file
+                contains the forward links sorted in the order of the Matrix Index.
+                It also contains a lookup table that maps the Matrix Index to the
+                forward link locations.
+            summary_data_path (str): The file path to the Summary data table. This table
+                contains the summaries of the articles extracted from the dump along
+                with the Matrix Index and title.
+            old_title_format (bool, optional): If the title is stored under the "Title"
+                column as opposed to "PageTitle". Defaults to False.
+            sort_data (bool, optional): If the Summary data table needs to be sorted.
+                Defaults to False.
+
+        Raises:
+            ValueError: If the Matrix Index is not sorted.
+        """
         print("Loading the Summary Data Table")
         summary_df = pd.read_csv(
             summary_data_path, sep="\t", header=0, quoting=csv.QUOTE_NONE
         )
+        if sort_data:
+            print("Sorting the Summary Data Table")
+            summary_df.sort_values("MatrixIndex", inplace=True)
+            summary_df.reset_index(drop=True, inplace=True)
 
         self.summary_ser = summary_df["Summary"]
 
-        super().__init__(hdf5_file_path, summary_df)
+        super().__init__(hdf5_file_path, summary_df, old_title_format=old_title_format)
 
     def get_article_summary(self, article_id) -> str | None:
         """Get the summary of the article for the given article ID.
