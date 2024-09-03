@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from agents.agent_tools import AgentTools
+from agents.agent_models.agent_tools import AgentTools
 
 lormum_ipsum = (
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam vitae "
