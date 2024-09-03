@@ -172,6 +172,7 @@ class AgentToolsDisk(AgentToolsBase):
 
         if isinstance(summary_data, str):
             self._summary_path = summary_data
+            self.summary_file = None
         elif isinstance(summary_data, BufferedReader):
             self.summary_file = summary_data
         else:
@@ -201,6 +202,13 @@ class AgentToolsDisk(AgentToolsBase):
         Returns:
             str: The summary of the article, from the Summary file.
         """
+        if self.summary_file is None:
+            msg = (
+                "Summary file is not open, use with statement "
+                "`with AgentToolsDisk(...)` to open the file or provide a file object."
+            )
+            raise ValueError(msg)
+
         idx = np.searchsorted(self.matidx_ary, article_id)
         if idx < len(self.matidx_ary) and self.matidx_ary[idx] == article_id:
             offset = self.sum_offset_ary[idx]
