@@ -35,6 +35,6 @@ def load_tools(load_data_to_ram: bool, old_title_format: bool) -> AgentToolsBase
         return AgentToolsDisk(
             hdf5_file_path,
             matrix_info_path,
-            f.read(),
+            f,
             old_title_format=old_title_format,
         )
