@@ -100,7 +100,7 @@ def main():
             tools = AgentToolsDisk(
                 hdf5_file_path,
                 matrix_info_path,
-                f.read(),
+                f,
                 old_title_format=True,
             )
 
