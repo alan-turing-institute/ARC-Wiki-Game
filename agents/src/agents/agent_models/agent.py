@@ -7,20 +7,20 @@ import numpy as np
 import pandas as pd
 from torch import backends, cuda, device
 
-from agents.agent_models.tools import AgentTools
+from agents.agent_models.tools import AgentToolsBase
 from agents.utils.models import get_model_from_name
 from agents.utils.paths import get_output_dir
 
 
 class Agent(ABC):
-    def __init__(self, agent_tools: AgentTools, max_rounds: int) -> None:
+    def __init__(self, agent_tools: AgentToolsBase, max_rounds: int) -> None:
         """
         Abstract class representing an Agent capable of playing the wikipedia game.
 
         Parameters
         ----------
-        agent_tools: AgentTools
-            An instance of AgentTools that will have been pre-loaded with the data
+        agent_tools: AgentToolsBase
+            An instance of AgentToolsBase that will have been pre-loaded with the data
             with which the game will be played
         max_rounds: int
             The maximum number of rounds that the game can be played for
@@ -300,7 +300,7 @@ class Agent(ABC):
 
 class GreedyEmbeddingAgent(Agent):
     def __init__(
-        self, agent_tools: AgentTools, max_rounds: int, model_name: str
+        self, agent_tools: AgentToolsBase, max_rounds: int, model_name: str
     ) -> None:
         """
         Class inherits from Agent and plays the wikipedia game by comparing the
@@ -310,8 +310,8 @@ class GreedyEmbeddingAgent(Agent):
 
         Parameters
         ----------
-        agent_tools: AgentTools
-            An instance of AgentTools that will have been pre-loaded with the data
+        agent_tools: AgentToolsBase
+            An instance of AgentToolsBase that will have been pre-loaded with the data
             with which the game will be played
         max_rounds: int
             The maximum number of rounds that the game can be played for
