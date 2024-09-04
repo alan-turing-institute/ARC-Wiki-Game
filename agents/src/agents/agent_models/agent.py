@@ -118,8 +118,10 @@ class Agent(ABC):
         ), "The number of source and target IDs is different"
 
         for i in range(len(source_ids)):
-            self.play_game(source_ids[i], target_ids[i])
-            self.save_games(output_folder, output_file_name)
+            if i % 100 == 0:
+                self.play_game(source_ids[i], target_ids[i])
+                self.save_games(output_folder, output_file_name)
+        self.save_games(output_folder, output_file_name)
 
     def _get_id_title_summary(self, page: int | str) -> tuple[int, str, str]:
         """
