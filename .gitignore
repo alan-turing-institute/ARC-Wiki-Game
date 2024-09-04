@@ -13,6 +13,15 @@ agents/scripts/scratch.py
 agents/data/output_data/*
 !agents/data/output_data/wikipedia/initial_test_100/*
 
+# Graph Preperation
+
+graph-prep/data/raw/*
+graph-prep/data/inter/*
+graph-prep/data/output/*
+!graph-prep/data/raw/README-data-raw.md
+!graph-prep/data/inter/README-data-inter.md
+!graph-prep/data/output/README-data-output.md
+
 .vscode/
 
 ### ~~~~ FROM PYTHON TEMPLATE ~~~~ ###
