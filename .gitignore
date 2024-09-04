@@ -7,7 +7,9 @@ sentance-poc/notebook/lightning_logs/
 # Agents
 
 agents/training_data/*
-!agents/training_data/README-training-data.md
+agents/data/input_data/*
+agents/scripts/scratch.py
+!agents/data/input_data/README-input-data.md
 
 # Graph Preperation
 
@@ -17,6 +19,8 @@ graph-prep/data/output/*
 !graph-prep/data/raw/README-data-raw.md
 !graph-prep/data/inter/README-data-inter.md
 !graph-prep/data/output/README-data-output.md
+
+.vscode/
 
 ### ~~~~ FROM PYTHON TEMPLATE ~~~~ ###
 
