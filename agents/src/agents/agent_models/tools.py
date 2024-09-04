@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+from abc import abstractmethod
 from io import BufferedReader
 from warnings import warn
 
@@ -82,6 +83,18 @@ class AgentToolsBase:
         )
         return None
 
+    @abstractmethod
+    def get_article_summary(self, article_id) -> str | None:
+        """Get the summary of the article for the given article ID.
+        This method will be overridden by derived classes.
+
+        Args:
+            article_id (int): The article ID for which the summary is to be fetched.
+
+        Returns:
+            str: The summary of the article, from the Summary file.
+        """
+
     def get_forward_titles(self, article_id: int) -> list[list[int | str | None]]:
         """Get the titles of the articles linked to the given article ID.
 
@@ -97,6 +110,19 @@ class AgentToolsBase:
         for link in forward_links:
             titles.append([int(link), self.get_article_title(link)])
         return titles
+
+    @abstractmethod
+    def get_forward_summaries(self, article_id: int) -> list[list[int | str | None]]:
+        """Get the summaries of the articles linked to the given article ID.
+        This method will be overridden by derived classes.
+
+        Args:
+            article_id (int): The article ID for which the summaries are to be fetched.
+
+        Returns:
+            List[List[int, str]]: A list of lists containing the article ID and the
+                summary of the articles linked to the given article ID.
+        """
 
     def get_article_id(self, title: str) -> int | None:
         """Get the article ID for the given article title.
