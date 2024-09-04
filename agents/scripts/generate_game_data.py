@@ -6,8 +6,8 @@ import os
 from numpy import savetxt
 from numpy.random import choice
 
-from agents.agent_models.agent_tools import AgentTools
-from agents.utils.paths import get_game_dir, get_wiki_data_paths
+from agents.utils.data import load_tools
+from agents.utils.paths import get_game_dir
 
 
 def parse_args():
@@ -34,6 +34,12 @@ def parse_args():
         required=True,
         help="The name of the input dataset to be used",
     )
+    parser.add_argument(
+        "-l",
+        "--load_data_to_ram",
+        type=bool,
+        help="True if data is to be loaded to RAM, False if it remains on hard drive",
+    )
 
     return parser.parse_args()
 
@@ -44,6 +50,7 @@ def main():
     num_records = args.num_records
     dataset_name = args.dataset_name
     input_dataset_name = args.input_dataset
+    load_data_to_ram = args.load_data_to_ram
 
     assert input_dataset_name in [
         "wikipedia"
@@ -59,9 +66,9 @@ def main():
             "The file for the test data already exists: \n" + game_data_path
         )
 
-    hdf5_file_path, matrix_info_path, summary_path = get_wiki_data_paths(__file__)
-
-    tools = AgentTools(hdf5_file_path, matrix_info_path, summary_path)
+    # old_title_format currently hard-coded here to True, will need to update
+    # how this is set when we come to work with multiple datasets.
+    tools = load_tools(load_data_to_ram, old_title_format=True)
 
     source_target_ids = choice(tools.matidx_ary.max(), (num_records, 2), replace=False)
 
