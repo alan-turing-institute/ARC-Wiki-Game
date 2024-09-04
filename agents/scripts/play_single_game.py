@@ -3,8 +3,7 @@ from __future__ import annotations
 import argparse
 
 from agents.agent_models.agent import GreedyEmbeddingAgent
-from agents.agent_models.tools import AgentToolsDisk, AgentToolsRAM
-from agents.utils.paths import get_wiki_data_paths
+from agents.utils.data import load_tools
 
 
 def parse_args():
@@ -86,23 +85,9 @@ def main():
     verbose = args.verbose if args.verbose is not None else False
     load_data_to_ram = args.load_data_to_ram
 
-    # If or when we introduce more datasets, we will need to make the input dataset
-    # an argument that will determine which one is loaded.
-    hdf5_file_path, matrix_info_path, summary_path = get_wiki_data_paths(__file__)
-    # Will also need to update this code for future datasets to make the
-    # 'old_title_format' set depending on the dataset
-    if load_data_to_ram:
-        tools = AgentToolsRAM(
-            hdf5_file_path, summary_path, sort_data=True, old_title_format=True
-        )
-    else:
-        with open(summary_path, "rb") as f:
-            tools = AgentToolsDisk(
-                hdf5_file_path,
-                matrix_info_path,
-                f.read(),
-                old_title_format=True,
-            )
+    # old_title_format currently hard-coded here to True, will need to update
+    # how this is set when we come to work with multiple datasets.
+    tools = load_tools(load_data_to_ram, old_title_format=True)
 
     if args.agent == "GreedyEmbeddingAgent":
         agent = GreedyEmbeddingAgent(
