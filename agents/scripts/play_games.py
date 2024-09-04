@@ -7,8 +7,8 @@ import yaml
 from numpy import loadtxt
 
 from agents.agent_models.agent import GreedyEmbeddingAgent
-from agents.agent_models.tools import AgentTools
-from agents.utils.paths import get_game_dir, get_output_dir, get_wiki_data_paths
+from agents.utils.data import load_tools
+from agents.utils.paths import get_game_dir, get_output_dir
 
 
 def parse_args():
@@ -35,6 +35,14 @@ def parse_args():
         help="The name of the model to run for the given experiment (optional). If not \
             provided, all models in the config file will run for the given experiment.",
     )
+    parser.add_argument(
+        "-l",
+        "--load_data_to_ram",
+        required=False,
+        type=bool,
+        default=True,
+        help="True if data is to be loaded to RAM, False if it remains on hard drive",
+    )
     return parser.parse_args()
 
 
@@ -55,6 +63,8 @@ def load_test_dataset(
 def main():
     args = parse_args()
     input_dataset_name = args.input_dataset
+    load_data_to_ram = args.load_data_to_ram
+
     config_path = os.path.join(
         get_game_dir(__file__), input_dataset_name, "config.yaml"
     )
@@ -86,10 +96,9 @@ def main():
     output_path = os.path.join(get_output_dir(__file__), input_dataset_name)
     os.makedirs(output_path, exist_ok=True)
 
-    # If or when we introduce more datasets, we will need to make the input dataset
-    # an argument that will determine which one is loaded.
-    hdf5_file_path, matrix_info_path, summary_path = get_wiki_data_paths(__file__)
-    tools = AgentTools(hdf5_file_path, matrix_info_path, summary_path)
+    # old_title_format currently hard-coded here to True, will need to update
+    # how this is set when we come to work with multiple datasets.
+    tools = load_tools(load_data_to_ram, old_title_format=True)
 
     for experiment in experiments:
         experiment_name = experiment
