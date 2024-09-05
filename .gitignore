@@ -11,7 +11,6 @@ agents/data/input_data/*
 agents/scripts/scratch.py
 !agents/data/input_data/README-input-data.md
 agents/data/output_data/*
-!agents/data/output_data/wikipedia/initial_test_100/*
 
 # Graph Preperation
 
