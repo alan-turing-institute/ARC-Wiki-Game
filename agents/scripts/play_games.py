@@ -43,6 +43,14 @@ def parse_args():
         default=True,
         help="True if data is to be loaded to RAM, False if it remains on hard drive",
     )
+    parser.add_argument(
+        "-n",
+        "--save_n_games",
+        required=False,
+        type=int,
+        default=100,
+        help="An integer that represents how often the output will be saved",
+    )
     return parser.parse_args()
 
 
@@ -64,7 +72,9 @@ def main():
     args = parse_args()
     input_dataset_name = args.input_dataset
     load_data_to_ram = args.load_data_to_ram
+    save_n_games = args.save_n_games
 
+    # Load config file
     config_path = os.path.join(
         get_game_dir(__file__), input_dataset_name, "config.yaml"
     )
@@ -72,27 +82,27 @@ def main():
     with open(config_path) as stream:
         config = yaml.safe_load(stream)
 
+    # Set list of experiments to be run
     if args.experiment_name is not None:
+        # Check the given experiment name exists in the config file
         assert (
             args.experiment_name in config["experiments"]
         ), f"Experiment does not exist: {args.experiment_name}"
         experiments = [args.experiment_name]
-        if args.model_name is not None:
-            assert (
-                args.model_name in config["experiments"][args.experiment_name]["models"]
-            ), f"Model name does not exist in experiment {args.experiment_name}: \
-                {args.model_name}"
-            # set the models list later as it will change by experiment if not set as
-            # an arg
     else:
+        # Running all experiments in config file
         experiments = config["experiments"].keys()
-        if args.model_name is not None:
-            for experiment in config["experiments"]:
-                assert (
-                    args.model_name in config["experiments"][experiment]["models"]
-                ), f"Model name does not exist in experiment {experiment}: \
-                    {args.model_name}"
 
+    # If running for one specific model check that it exists in all experiments
+    # that are to be run
+    if args.model_name is not None:
+        for experiment in experiments:
+            assert (
+                args.model_name in config["experiments"][experiment]["models"]
+            ), f"Model name does not exist in experiment {experiment}: \
+                {args.model_name}"
+
+    # Create output path if it doesn't already exist
     output_path = os.path.join(get_output_dir(__file__), input_dataset_name)
     os.makedirs(output_path, exist_ok=True)
 
@@ -106,9 +116,12 @@ def main():
         os.makedirs(experiment_output_path, exist_ok=True)
         for game_dataset in config["experiments"][experiment]["game_datasets"]:
             source_ids, target_ids = load_test_dataset(input_dataset_name, game_dataset)
+            # Create a list of model names to be run
             if args.model_name is not None:
+                # One model name was specified in the config file
                 models = [args.model_name]
             else:
+                # No model specified in config, so run them all
                 models = config["experiments"][experiment]["models"]
             for model in models:
                 output_filename = game_dataset + "_" + model
@@ -116,6 +129,7 @@ def main():
                 if not os.path.exists(
                     os.path.join(experiment_output_path, output_filename + ".csv")
                 ):
+                    # This logic will be updated when we have more than one agent type
                     agent = GreedyEmbeddingAgent(
                         tools,
                         max_rounds=config["experiments"][experiment]["params"][
@@ -124,7 +138,11 @@ def main():
                         model_name=model,
                     )
                     agent.play_games(
-                        source_ids, target_ids, experiment_output_path, output_filename
+                        source_ids,
+                        target_ids,
+                        experiment_output_path,
+                        output_filename,
+                        save_n_games,
                     )
 
 
