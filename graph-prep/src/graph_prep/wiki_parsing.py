@@ -20,7 +20,7 @@ class WikiInfoParser:
         self.re_title_clean = re.compile(r"^\s+|\n|\t|\||\s+$")
         self.re_link_match = re.compile(r"\[\[(.*?)[\||\]]")
         self.re_section_cut = re.compile(r"\#.*")
-        self.re_file_cat_match = re.compile(r"[File:|Category:]")
+        self.re_file_cat_match = re.compile(r"File:|Category:")
 
     def make_summary(self, text: str, cut_off: int = 1000) -> str:
         """Generate a summary of the given text.
@@ -86,5 +86,4 @@ class WikiInfoParser:
         if link_loc == "" or self.re_file_cat_match.match(link_loc):
             return None
         # Capitalize the first letter
-        return link_loc[0].upper() + link_loc[1:]
         return link_loc[0].upper() + link_loc[1:]
