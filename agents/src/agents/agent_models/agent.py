@@ -8,20 +8,20 @@ import pandas as pd
 from openai import AzureOpenAI
 from torch import backends, cuda, device
 
-from agents.agent_models.tools import AgentTools
+from agents.agent_models.tools import AgentToolsBase
 from agents.utils.models import get_model_from_name
 from agents.utils.paths import get_output_dir
 
 
 class Agent(ABC):
-    def __init__(self, agent_tools: AgentTools, max_rounds: int) -> None:
+    def __init__(self, agent_tools: AgentToolsBase, max_rounds: int) -> None:
         """
         Abstract class representing an Agent capable of playing the wikipedia game.
 
         Parameters
         ----------
-        agent_tools: AgentTools
-            An instance of AgentTools that will have been pre-loaded with the data
+        agent_tools: AgentToolsBase
+            An instance of AgentToolsBase that will have been pre-loaded with the data
             with which the game will be played
         max_rounds: int
             The maximum number of rounds that the game can be played for
@@ -69,11 +69,12 @@ class Agent(ABC):
         target_ids: list[int],
         output_folder: str,
         output_file_name: str,
+        save_n_games: int = 100,
     ) -> None:
         """
         This method takes a list of source page IDs, target page IDs, an output
         folder and file name. It plays the game for each pair of source ID and
-        target ID and saves the output at the end of every game.
+        target ID and saves the output every save_n_games.
 
         Parameters
         ----------
@@ -85,6 +86,8 @@ class Agent(ABC):
             The folder to save the results in
         output_file_name: str
             The name of the file to save the results in
+        save_n_games: int
+            The output will be saved every save_n_games
         """
         assert len(source_ids) == len(
             target_ids
@@ -92,7 +95,12 @@ class Agent(ABC):
 
         for i in range(len(source_ids)):
             self.play_game(source_ids[i], target_ids[i])
-            self.save_games(output_folder, output_file_name)
+            if i % save_n_games == 0:
+                # Note that this will save the first record (when i = 0)
+                # and then save every save_n_games - saving the first
+                # record is deliberate as this is sometimes useful to see
+                # that the code has started to run.
+                self.save_games(output_folder, output_file_name)
         self.save_games(output_folder, output_file_name)
 
     def _get_id_title_summary(self, page: int | str) -> tuple[int, str, str]:
@@ -272,7 +280,7 @@ class Agent(ABC):
 
 class GreedyEmbeddingAgent(Agent):
     def __init__(
-        self, agent_tools: AgentTools, max_rounds: int, model_name: str
+        self, agent_tools: AgentToolsBase, max_rounds: int, model_name: str
     ) -> None:
         """
         Class inherits from Agent and plays the wikipedia game by comparing the
@@ -282,8 +290,8 @@ class GreedyEmbeddingAgent(Agent):
 
         Parameters
         ----------
-        agent_tools: AgentTools
-            An instance of AgentTools that will have been pre-loaded with the data
+        agent_tools: AgentToolsBase
+            An instance of AgentToolsBase that will have been pre-loaded with the data
             with which the game will be played
         max_rounds: int
             The maximum number of rounds that the game can be played for
@@ -425,7 +433,7 @@ class GreedyEmbeddingAgent(Agent):
 class PromptAgent(Agent):
     def __init__(
         self,
-        agent_tools: AgentTools,
+        agent_tools: AgentToolsBase,
         max_rounds: int,
         model_name: str,
         temperature: float,
@@ -437,8 +445,8 @@ class PromptAgent(Agent):
 
         Parameters
         ----------
-        agent_tools: AgentTools
-            An instance of AgentTools that will have been pre-loaded with the data
+        agent_tools: AgentToolsBase
+            An instance of AgentToolsBase that will have been pre-loaded with the data
             with which the game will be played
         max_rounds: int
             The maximum number of rounds that the game can be played for
