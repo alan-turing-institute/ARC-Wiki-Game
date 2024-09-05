@@ -18,8 +18,8 @@ def build_link_pairs(forward_locs: np.ndarray, forward_vals: np.ndarray) -> np.n
     """
     forward_start = np.zeros_like(forward_vals)
 
-    for x in forward_locs[:, 1:]:
-        forward_start[x, 0] += 1
+    for x in forward_locs[1:, 0]:
+        forward_start[x] += 1
 
     forward_start = np.cumsum(forward_start)
 
@@ -46,7 +46,7 @@ def swap_graph_direction(
     """
     forward_start = np.zeros_like(forward_vals)
 
-    for x in tqdm(forward_locs[:, 1:], desc="Read Links", disable=not verbose):
+    for x in tqdm(forward_locs[0, 1:], desc="Read Links", disable=not verbose):
         forward_start[x] += 1
 
     forward_start = np.cumsum(forward_start)
