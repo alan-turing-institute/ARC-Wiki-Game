@@ -96,11 +96,12 @@ class Agent(ABC):
         target_ids: list[int],
         output_folder: str,
         output_file_name: str,
+        save_n_games: int = 100,
     ) -> None:
         """
         This method takes a list of source page IDs, target page IDs, an output
         folder and file name. It plays the game for each pair of source ID and
-        target ID and saves the output every game.
+        target ID and saves the output every save_n_games.
 
         Parameters
         ----------
@@ -112,6 +113,8 @@ class Agent(ABC):
             The folder to save the results in
         output_file_name: str
             The name of the file to save the results in
+        save_n_games: int
+            The output will be saved every save_n_games
         """
         assert len(source_ids) == len(
             target_ids
@@ -119,7 +122,11 @@ class Agent(ABC):
 
         for i in range(len(source_ids)):
             self.play_game(source_ids[i], target_ids[i])
-            if i % 100 == 0:
+            if i % save_n_games == 0:
+                # Note that this will save the first record (when i = 0)
+                # and then save every save_n_games - saving the first
+                # record is deliberate as this is sometimes useful to see
+                # that the code has started to run.
                 self.save_games(output_folder, output_file_name)
         self.save_games(output_folder, output_file_name)
 
