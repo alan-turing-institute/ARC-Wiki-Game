@@ -155,7 +155,7 @@ class AgentToolsDisk(AgentToolsBase):
         self,
         hdf5_file_path: str,
         matidx_info_path: str,
-        summary_data: str | BufferedReader,
+        summary_data: str | BufferedReader | bytes,
         old_title_format: bool = False,
     ):
         """Initialize the AgentTools object.

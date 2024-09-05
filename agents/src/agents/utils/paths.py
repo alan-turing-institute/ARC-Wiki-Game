@@ -3,7 +3,10 @@ from __future__ import annotations
 import os
 
 # This file contains paths relative to the project root that can be imported.
-# If this file moves relative to the project root, find_repo_root() must be changed.
+# The 'find_project_root' function might need to be updated if the package is
+# run on a location other than Baskerville or in the repo
+
+BASK_ROOT_DIR = "/bask/projects/v/vjgo8416-wikigame/ARC-Wiki-Game"
 
 
 def find_project_root(file_path: str) -> str:
@@ -22,11 +25,17 @@ def find_project_root(file_path: str) -> str:
     """
 
     temp_dir = os.path.dirname(file_path)
-    while os.path.split(temp_dir)[1] != "ARC-Wiki-Game" and len(temp_dir) > 0:
+    while (
+        os.path.split(temp_dir)[1] != "agents"
+        or os.path.split(os.path.dirname(temp_dir))[1] == "site-packages"
+        or os.path.split(os.path.dirname(temp_dir))[1] == "src"
+    ) and len(temp_dir) > 1:
+        if os.path.split(temp_dir)[1] == "bask":
+            return os.path.join(BASK_ROOT_DIR, "agents")
         temp_dir = os.path.dirname(temp_dir)
 
-    if len(temp_dir) > 0:
-        return os.path.join(temp_dir, "agents")
+    if len(temp_dir) > 1:
+        return temp_dir
     raise ValueError("Cannot find root directory for file path " + file_path)
 
 
@@ -49,7 +58,7 @@ def get_data_dir(file_path: str) -> str:
 
 def get_output_dir(file_path: str):
     """
-    Given a file path, returns the `output` directory
+    Given a file path, returns the `output_data` directory
 
     Parameters
     ----------
@@ -66,7 +75,7 @@ def get_output_dir(file_path: str):
 
 def get_input_dir(file_path: str):
     """
-    Given a file path, returns the `output` directory
+    Given a file path, returns the `input_data` directory
 
     Parameters
     ----------
@@ -79,6 +88,23 @@ def get_input_dir(file_path: str):
         The file path of the output directory
     """
     return os.path.join(get_data_dir(file_path), "input_data")
+
+
+def get_game_dir(file_path: str):
+    """
+    Given a file path, returns the `game_data` directory
+
+    Parameters
+    ----------
+    file_path: str
+        The file path from where the function is called
+
+    Returns
+    -------
+    str
+        The file path of the output directory
+    """
+    return os.path.join(get_data_dir(file_path), "game_data")
 
 
 def get_wiki_data_paths(file_path: str):
