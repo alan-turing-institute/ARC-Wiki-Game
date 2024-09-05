@@ -31,10 +31,9 @@ def load_tools(load_data_to_ram: bool, old_title_format: bool) -> AgentToolsBase
             sort_data=True,
             old_title_format=old_title_format,
         )
-    with open(summary_path, "rb") as f:
-        return AgentToolsDisk(
-            hdf5_file_path,
-            matrix_info_path,
-            f,
-            old_title_format=old_title_format,
-        )
+    return AgentToolsDisk(
+        hdf5_file_path,
+        matrix_info_path,
+        open(summary_path, "rb"),  # noqa: SIM115
+        old_title_format=old_title_format,
+    )
