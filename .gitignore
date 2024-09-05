@@ -10,6 +10,7 @@ agents/training_data/*
 agents/data/input_data/*
 agents/scripts/scratch.py
 !agents/data/input_data/README-input-data.md
+agents/data/output_data/*
 
 # Graph Preperation
 

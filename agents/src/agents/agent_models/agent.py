@@ -96,11 +96,12 @@ class Agent(ABC):
         target_ids: list[int],
         output_folder: str,
         output_file_name: str,
+        save_n_games: int = 100,
     ) -> None:
         """
         This method takes a list of source page IDs, target page IDs, an output
         folder and file name. It plays the game for each pair of source ID and
-        target ID and saves the output every 10 games.
+        target ID and saves the output every save_n_games.
 
         Parameters
         ----------
@@ -112,6 +113,8 @@ class Agent(ABC):
             The folder to save the results in
         output_file_name: str
             The name of the file to save the results in
+        save_n_games: int
+            The output will be saved every save_n_games
         """
         assert len(source_ids) == len(
             target_ids
@@ -119,7 +122,11 @@ class Agent(ABC):
 
         for i in range(len(source_ids)):
             self.play_game(source_ids[i], target_ids[i])
-            if (i + 1) % 10 == 0:
+            if i % save_n_games == 0:
+                # Note that this will save the first record (when i = 0)
+                # and then save every save_n_games - saving the first
+                # record is deliberate as this is sometimes useful to see
+                # that the code has started to run.
                 self.save_games(output_folder, output_file_name)
         self.save_games(output_folder, output_file_name)
 
@@ -428,19 +435,23 @@ class GreedyEmbeddingAgent(Agent):
             The ID of the page to navigate to next
         """
         forward_summaries = self._tools.get_forward_summaries(current_page_id)
-        page_ids = [
-            summary_info[0]
-            for summary_info in forward_summaries
-            if summary_info[0] not in route
-        ]
-        summaries = [
-            summary_info[1]
-            for summary_info in forward_summaries
-            if summary_info[0] not in route
-        ]
-        embeddings = self._model.encode(summaries)
+        if len(forward_summaries) > 0:
+            page_ids = [
+                summary_info[0]
+                for summary_info in forward_summaries
+                if (summary_info[0] not in route) and (summary_info[1] is not None)
+            ]
+            summaries = [
+                summary_info[1]
+                for summary_info in forward_summaries
+                if (summary_info[0] not in route) and (summary_info[1] is not None)
+            ]
+            if len(summaries) > 0:
+                embeddings = self._model.encode(summaries)
 
-        similarities = self._model.similarity(embeddings, target_summary)
-        np_similarities = similarities.numpy()
-        max_id = np.argmax(np_similarities)
-        return page_ids[max_id]
+                similarities = self._model.similarity(embeddings, target_summary)
+                np_similarities = similarities.numpy()
+                max_id = np.argmax(np_similarities)
+                return page_ids[max_id]
+            return -1
+        return -1
