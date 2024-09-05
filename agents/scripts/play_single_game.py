@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from agents.agent_models.agent import GreedyEmbeddingAgent
+from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
 from agents.utils.data import load_tools
 
 
