@@ -109,7 +109,7 @@ class Agent(ABC):
         target_ids: list[int]
             A list of page IDs that will act as the end (target) page in each game
         output_folder: str
-            The folder to save the results in
+            The path of the folder to save the results in
         output_file_name: str
             The name of the file to save the results in
         save_n_games: int

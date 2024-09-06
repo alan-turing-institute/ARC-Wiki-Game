@@ -72,22 +72,44 @@ def parse_args():
         type=bool,
         help="True if data is to be loaded to RAM, False if it remains on hard drive",
     )
-
+    parser.add_argument(
+        "-p",
+        "--data_path",
+        required=True,
+        help="The path that the data are stored in, e.g. '/home/wiki-game/data/, \
+            must include the 'data' folder",
+    )
+    parser.add_argument(
+        "--old_title",
+        required=False,
+        default=False,
+        type=bool,
+        help="When loading the wiki data, this can be used if the old title format is\
+            to be used",
+    )
+    parser.add_argument(
+        "-d",
+        "--input_dataset",
+        required=True,
+        help="The name of the input dataset\
+            which the experiments are to be run",
+    )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+    data_path = args.data_path
+    input_dataset_name = args.input_dataset
     model_name = args.model
     max_rounds = args.max_rounds
     source = args.source if not args.source.isdigit() else int(args.source)
     target = args.target if not args.target.isdigit() else int(args.target)
     verbose = args.verbose if args.verbose is not None else False
     load_data_to_ram = args.load_data_to_ram
+    use_old_title = args.old_title
 
-    # old_title_format currently hard-coded here to True, will need to update
-    # how this is set when we come to work with multiple datasets.
-    tools = load_tools(load_data_to_ram, old_title_format=True)
+    tools = load_tools(data_path, input_dataset_name, load_data_to_ram, use_old_title)
 
     if args.agent == "GreedyEmbeddingAgent":
         agent = GreedyEmbeddingAgent(

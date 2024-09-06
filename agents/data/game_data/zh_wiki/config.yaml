@@ -1,14 +1,10 @@
-
 experiments:
   initial_test_10:
     agent_class: GreedyEmbeddingAgent
     game_datasets:
-      - fr_wiki_test_10
+      - zh_wiki_test_10
     models:
       - distiluse-base-multilingual-cased-v1
       - stsb-xlm-r-multilingual
-      - paraphrase-multilingual-mpnet-base-v2
-      - paraphrase-multilingual-MiniLM-L12-v2
-      - distiluse-base-multilingual-cased-v2
     params:
       max_rounds: 50

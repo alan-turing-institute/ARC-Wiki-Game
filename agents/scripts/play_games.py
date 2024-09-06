@@ -7,7 +7,7 @@ import yaml
 from numpy import loadtxt
 
 from agents.agent_models.agent import GreedyEmbeddingAgent
-from agents.utils.data import load_tools, get_data_folders
+from agents.utils.data import get_data_folders, load_tools
 
 
 def parse_args():
@@ -91,9 +91,7 @@ def main():
 
     game_data_dir, _, output_data_dir = get_data_folders(data_path)
     # Load config file
-    config_path = os.path.join(
-        game_data_dir, input_dataset_name, "config.yaml"
-    )
+    config_path = os.path.join(game_data_dir, input_dataset_name, "config.yaml")
     assert os.path.exists(config_path), f"Config file does not exist: {config_path}"
     with open(config_path) as stream:
         config = yaml.safe_load(stream)
@@ -122,8 +120,6 @@ def main():
     output_path = os.path.join(output_data_dir, input_dataset_name)
     os.makedirs(output_path, exist_ok=True)
 
-    # old_title_format currently hard-coded here to True, will need to update
-    # how this is set when we come to work with multiple datasets.
     tools = load_tools(data_path, input_dataset_name, load_data_to_ram, use_old_title)
 
     for experiment in experiments:
@@ -131,7 +127,9 @@ def main():
         experiment_output_path = os.path.join(output_path, experiment_name)
         os.makedirs(experiment_output_path, exist_ok=True)
         for game_dataset in config["experiments"][experiment]["game_datasets"]:
-            source_ids, target_ids = load_test_dataset(input_dataset_name, game_data_dir, game_dataset)
+            source_ids, target_ids = load_test_dataset(
+                input_dataset_name, game_data_dir, game_dataset
+            )
             # Create a list of model names to be run
             if args.model_name is not None:
                 # One model name was specified in the config file
