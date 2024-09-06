@@ -152,7 +152,7 @@ def main():
                 # One model name was specified in the config file
                 models = [args.model_name]
             elif args.model_id is not None:
-                [models] = config["experiments"][experiment]["models"][args.model_id]
+                models = [config["experiments"][experiment]["models"][args.model_id]]
             else:
                 # No model specified in config, so run them all
                 models = config["experiments"][experiment]["models"]
