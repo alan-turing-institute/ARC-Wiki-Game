@@ -32,7 +32,18 @@ def parse_args():
         "--model_name",
         required=False,
         help="The name of the model to run for the given experiment (optional). If not \
-            provided, all models in the config file will run for the given experiment.",
+            provided, then the code will check to see if a model id has been provided. \
+            If neither are provided then all models in the config file will run for \
+            the given experiment.",
+    )
+    parser.add_argument(
+        "--model_id",
+        required=False,
+        type=int,
+        help="The id of the model to run for the given experiment (optional). This \
+            will only be used if the model name has not been provided. \
+            If neither are provided then all models in the config file will run for \
+            the given experiment.",
     )
     parser.add_argument(
         "-l",
@@ -115,6 +126,12 @@ def main():
                 args.model_name in config["experiments"][experiment]["models"]
             ), f"Model name does not exist in experiment {experiment}: \
                 {args.model_name}"
+    elif args.model_id is not None:
+        for experiment in experiments:
+            assert args.model_id < len(
+                config["experiments"][experiment]["models"]
+            ), f"There are more models than the model id provided for experiment \
+                {experiment}"
 
     # Create output path if it doesn't already exist
     output_path = os.path.join(output_data_dir, input_dataset_name)
@@ -134,6 +151,8 @@ def main():
             if args.model_name is not None:
                 # One model name was specified in the config file
                 models = [args.model_name]
+            elif args.model_id is not None:
+                models = config["experiments"][experiment]["models"][args.model_id]
             else:
                 # No model specified in config, so run them all
                 models = config["experiments"][experiment]["models"]
