@@ -90,31 +90,31 @@ def get_input_dir(file_path: str):
     return os.path.join(get_data_dir(file_path), "input_data")
 
 
-def get_game_dir(file_path: str):
+def get_game_dir(data_path: str):
     """
-    Given a file path, returns the `game_data` directory
+    Given a path, returns the `game_data` directory
 
     Parameters
     ----------
-    file_path: str
-        The file path from where the function is called
+    data_path: str
+        The path of the data folder
 
     Returns
     -------
     str
         The file path of the output directory
     """
-    return os.path.join(get_data_dir(file_path), "game_data")
+    return os.path.join(data_path, "game_data")
 
 
-def get_wiki_data_paths(file_path: str):
+def get_wiki_data_paths(data_path: str):
     """
     Given a file path, returns the `output` directory
 
     Parameters
     ----------
-    file_path: str
-        The file path from where the function is called
+    data_path: str
+        The path of the data folder
 
     Returns
     -------
@@ -122,7 +122,7 @@ def get_wiki_data_paths(file_path: str):
         The file path of the three wikipedia data files
     """
 
-    data_dir = get_input_dir(file_path)
+    data_dir = get_input_dir(data_path)
 
     hdf5_file_path = os.path.join(data_dir, "wikipedia", "wiki_forward.hdf5")
     matrix_info_path = os.path.join(data_dir, "wikipedia", "matidx_sum_table.csv")

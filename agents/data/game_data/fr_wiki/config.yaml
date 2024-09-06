@@ -1,0 +1,10 @@
+
+experiments:
+  initial_test_10:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - fr_wiki_test_10
+    models:
+      - average_word_embeddings_glove.6B.300d
+    params:
+      max_rounds: 50

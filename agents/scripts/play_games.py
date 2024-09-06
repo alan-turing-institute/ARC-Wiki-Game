@@ -7,8 +7,7 @@ import yaml
 from numpy import loadtxt
 
 from agents.agent_models.agent import GreedyEmbeddingAgent
-from agents.utils.data import load_tools
-from agents.utils.paths import get_game_dir, get_output_dir
+from agents.utils.data import load_tools, get_data_folders
 
 
 def parse_args():
@@ -51,13 +50,27 @@ def parse_args():
         default=100,
         help="An integer that represents how often the output will be saved",
     )
+    parser.add_argument(
+        "-p",
+        "--data_path",
+        required=True,
+        help="The path that the data are stored in, e.g. '/home/wiki-game/data/, \
+            must include the 'data' folder",
+    )
+    parser.add_argument(
+        "--old_title",
+        required=False,
+        default=False,
+        type=bool,
+        help="When loading the wiki data, this can be used if the old title format is\
+            to be used",
+    )
     return parser.parse_args()
 
 
 def load_test_dataset(
-    input_dataset_name, game_dataset_name
+    input_dataset_name, game_data_dir, game_dataset_name
 ) -> tuple[list[int], list[int]]:
-    game_data_dir = get_game_dir(__file__)
     game_data_path = os.path.join(
         game_data_dir, input_dataset_name, game_dataset_name + ".txt"
     )
@@ -70,13 +83,16 @@ def load_test_dataset(
 
 def main():
     args = parse_args()
+    data_path = args.data_path
     input_dataset_name = args.input_dataset
     load_data_to_ram = args.load_data_to_ram
     save_n_games = args.save_n_games
+    use_old_title = args.old_title
 
+    game_data_dir, _, output_data_dir = get_data_folders(data_path)
     # Load config file
     config_path = os.path.join(
-        get_game_dir(__file__), input_dataset_name, "config.yaml"
+        game_data_dir, input_dataset_name, "config.yaml"
     )
     assert os.path.exists(config_path), f"Config file does not exist: {config_path}"
     with open(config_path) as stream:
@@ -103,19 +119,19 @@ def main():
                 {args.model_name}"
 
     # Create output path if it doesn't already exist
-    output_path = os.path.join(get_output_dir(__file__), input_dataset_name)
+    output_path = os.path.join(output_data_dir, input_dataset_name)
     os.makedirs(output_path, exist_ok=True)
 
     # old_title_format currently hard-coded here to True, will need to update
     # how this is set when we come to work with multiple datasets.
-    tools = load_tools(load_data_to_ram, old_title_format=True)
+    tools = load_tools(data_path, input_dataset_name, load_data_to_ram, use_old_title)
 
     for experiment in experiments:
         experiment_name = experiment
         experiment_output_path = os.path.join(output_path, experiment_name)
         os.makedirs(experiment_output_path, exist_ok=True)
         for game_dataset in config["experiments"][experiment]["game_datasets"]:
-            source_ids, target_ids = load_test_dataset(input_dataset_name, game_dataset)
+            source_ids, target_ids = load_test_dataset(input_dataset_name, game_data_dir, game_dataset)
             # Create a list of model names to be run
             if args.model_name is not None:
                 # One model name was specified in the config file

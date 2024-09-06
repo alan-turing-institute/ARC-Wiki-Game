@@ -9,7 +9,6 @@ from torch import backends, cuda, device
 
 from agents.agent_models.tools import AgentToolsBase
 from agents.utils.models import get_model_from_name
-from agents.utils.paths import get_output_dir
 
 
 class Agent(ABC):
@@ -285,7 +284,7 @@ class Agent(ABC):
 
         self._games_played.append(game_summary)
 
-    def save_games(self, folder_name: str, file_name: str) -> None:
+    def save_games(self, folder_path: str, file_name: str) -> None:
         """
         This method saves all the games recorded in the instance.
 
@@ -296,9 +295,8 @@ class Agent(ABC):
         file_name: str
             The name of the file to save the results
         """
-        output_dir = get_output_dir(__file__)
-        output_file_path = os.path.join(output_dir, folder_name, file_name + ".csv")
-        os.makedirs(os.path.join(output_dir, folder_name), exist_ok=True)
+        output_file_path = os.path.join(folder_path, file_name + ".csv")
+        os.makedirs(os.path.join(folder_path), exist_ok=True)
 
         df = pd.DataFrame(self._games_played)
 
