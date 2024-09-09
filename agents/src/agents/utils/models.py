@@ -30,7 +30,9 @@ def get_model_from_name(model_name: str) -> SentenceTransformer:
     # Get all sentence-transformer models
     models = hf_api.list_models(library="sentence-transformers")
     model_ids = [model.id for model in list(models)]
-    if "sentence-transformers/" + model_name in model_ids or model_name in model_ids:
+    if "sentence-transformers/" + model_name in model_ids:
+        model_name = "sentence-transformers/" + model_name
+    if model_name in model_ids:
         return SentenceTransformer(
             "sentence-transformers/" + model_name,
             similarity_fn_name=SimilarityFunction.COSINE,
