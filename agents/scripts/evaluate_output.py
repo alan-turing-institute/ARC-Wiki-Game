@@ -65,7 +65,12 @@ def main():
                     # name out of the file name.
                     model_name = output_file[:-4]
                     model_name = model_name[len(dataset) + len(output_folder) + 2 :]
-                    evaluation = {"input_dataset": dataset, "test_dataset": output_folder, "model": model_name, "found_target_percentage": perc_found_target}
+                    evaluation = {
+                        "input_dataset": dataset,
+                        "test_dataset": output_folder,
+                        "model": model_name,
+                        "found_target_percentage": perc_found_target,
+                    }
                     evaluations.append(evaluation)
 
     df_evaluations = pd.DataFrame(evaluations)
