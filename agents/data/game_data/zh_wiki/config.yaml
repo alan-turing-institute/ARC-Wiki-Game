@@ -34,5 +34,3 @@ experiments:
       - paraphrase-multilingual-MiniLM-L12-v2
     params:
       max_rounds: 50
-
-

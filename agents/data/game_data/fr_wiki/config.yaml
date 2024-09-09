@@ -41,5 +41,3 @@ experiments:
       - all-MiniLM-L6-v2
     params:
       max_rounds: 50
-
-

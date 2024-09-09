@@ -56,5 +56,3 @@ experiments:
       - distiluse-base-multilingual-cased-v2
     params:
       max_rounds: 50
-
-
