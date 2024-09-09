@@ -11,6 +11,8 @@ experiments:
       - paraphrase-multilingual-MiniLM-L12-v2
       - distiluse-base-multilingual-cased-v2
       - all-MiniLM-L6-v2
+      - Lajavaness/bilingual-embedding-large
+      - intfloat/multilingual-e5-large
     params:
       max_rounds: 50
 
