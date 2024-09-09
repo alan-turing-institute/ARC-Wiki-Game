@@ -7,8 +7,7 @@ import yaml
 from numpy import loadtxt
 
 from agents.agent_models.agent import GreedyEmbeddingAgent
-from agents.utils.data import load_tools
-from agents.utils.paths import get_game_dir, get_output_dir
+from agents.utils.data import get_data_folders, load_tools
 
 
 def parse_args():
@@ -33,7 +32,18 @@ def parse_args():
         "--model_name",
         required=False,
         help="The name of the model to run for the given experiment (optional). If not \
-            provided, all models in the config file will run for the given experiment.",
+            provided, then the code will check to see if a model id has been provided. \
+            If neither are provided then all models in the config file will run for \
+            the given experiment.",
+    )
+    parser.add_argument(
+        "--model_id",
+        required=False,
+        type=int,
+        help="The id of the model to run for the given experiment (optional). This \
+            will only be used if the model name has not been provided. \
+            If neither are provided then all models in the config file will run for \
+            the given experiment.",
     )
     parser.add_argument(
         "-l",
@@ -51,13 +61,27 @@ def parse_args():
         default=100,
         help="An integer that represents how often the output will be saved",
     )
+    parser.add_argument(
+        "-p",
+        "--data_path",
+        required=True,
+        help="The path that the data are stored in, e.g. '/home/wiki-game/data/, \
+            must include the 'data' folder",
+    )
+    parser.add_argument(
+        "--old_title",
+        required=False,
+        default=False,
+        type=bool,
+        help="When loading the wiki data, this can be used if the old title format is\
+            to be used",
+    )
     return parser.parse_args()
 
 
 def load_test_dataset(
-    input_dataset_name, game_dataset_name
+    input_dataset_name, game_data_dir, game_dataset_name
 ) -> tuple[list[int], list[int]]:
-    game_data_dir = get_game_dir(__file__)
     game_data_path = os.path.join(
         game_data_dir, input_dataset_name, game_dataset_name + ".txt"
     )
@@ -70,24 +94,27 @@ def load_test_dataset(
 
 def main():
     args = parse_args()
+    data_path = args.data_path
     input_dataset_name = args.input_dataset
     load_data_to_ram = args.load_data_to_ram
     save_n_games = args.save_n_games
+    use_old_title = args.old_title
 
+    game_data_dir, _, output_data_dir = get_data_folders(data_path)
     # Load config file
-    config_path = os.path.join(
-        get_game_dir(__file__), input_dataset_name, "config.yaml"
-    )
-    assert os.path.exists(config_path), f"Config file does not exist: {config_path}"
+    config_path = os.path.join(game_data_dir, input_dataset_name, "config.yaml")
+    if not os.path.exists(config_path):
+        err_msg = f"Config file does not exist: {config_path}"
+        raise ValueError(err_msg)
     with open(config_path) as stream:
         config = yaml.safe_load(stream)
 
     # Set list of experiments to be run
     if args.experiment_name is not None:
         # Check the given experiment name exists in the config file
-        assert (
-            args.experiment_name in config["experiments"]
-        ), f"Experiment does not exist: {args.experiment_name}"
+        if args.experiment_name not in config["experiments"]:
+            err_msg = f"Experiment does not exist: {args.experiment_name}"
+            raise ValueError(err_msg)
         experiments = [args.experiment_name]
     else:
         # Running all experiments in config file
@@ -97,29 +124,37 @@ def main():
     # that are to be run
     if args.model_name is not None:
         for experiment in experiments:
-            assert (
-                args.model_name in config["experiments"][experiment]["models"]
-            ), f"Model name does not exist in experiment {experiment}: \
-                {args.model_name}"
+            if args.model_name not in config["experiments"][experiment]["models"]:
+                err_msg = f"Model name does not exist in experiment {experiment}: \
+                    {args.model_name}"
+                raise ValueError(err_msg)
+    elif args.model_id is not None:
+        for experiment in experiments:
+            if not args.model_id < len(config["experiments"][experiment]["models"]):
+                err_msg = f"There are fewer models than the model id provided for \
+                    experiment {experiment}"
+                raise ValueError(err_msg)
 
     # Create output path if it doesn't already exist
-    output_path = os.path.join(get_output_dir(__file__), input_dataset_name)
+    output_path = os.path.join(output_data_dir, input_dataset_name)
     os.makedirs(output_path, exist_ok=True)
 
-    # old_title_format currently hard-coded here to True, will need to update
-    # how this is set when we come to work with multiple datasets.
-    tools = load_tools(load_data_to_ram, old_title_format=True)
+    tools = load_tools(data_path, input_dataset_name, load_data_to_ram, use_old_title)
 
     for experiment in experiments:
         experiment_name = experiment
         experiment_output_path = os.path.join(output_path, experiment_name)
         os.makedirs(experiment_output_path, exist_ok=True)
         for game_dataset in config["experiments"][experiment]["game_datasets"]:
-            source_ids, target_ids = load_test_dataset(input_dataset_name, game_dataset)
+            source_ids, target_ids = load_test_dataset(
+                input_dataset_name, game_data_dir, game_dataset
+            )
             # Create a list of model names to be run
             if args.model_name is not None:
                 # One model name was specified in the config file
                 models = [args.model_name]
+            elif args.model_id is not None:
+                models = [config["experiments"][experiment]["models"][args.model_id]]
             else:
                 # No model specified in config, so run them all
                 models = config["experiments"][experiment]["models"]
