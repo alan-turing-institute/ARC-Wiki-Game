@@ -34,6 +34,8 @@ def main():
 
     datasets = os.listdir(output_data_dir)
 
+    evaluations = []
+
     for dataset in datasets:
         dataset_path = os.path.join(output_data_dir, dataset)
         if not os.path.isfile(dataset_path):
@@ -63,15 +65,11 @@ def main():
                     # name out of the file name.
                     model_name = output_file[:-4]
                     model_name = model_name[len(dataset) + len(output_folder) + 2 :]
-                    print(
-                        dataset
-                        + "\t"
-                        + output_folder
-                        + "\t"
-                        + model_name
-                        + "\t"
-                        + str(perc_found_target)
-                    )
+                    evaluation = {"input_dataset": dataset, "test_dataset": output_folder, "model": model_name, "found_target_percentage": perc_found_target}
+                    evaluations.append(evaluation)
+
+    df_evaluations = pd.DataFrame(evaluations)
+    print(df_evaluations)
 
 
 if __name__ == "__main__":
