@@ -34,7 +34,7 @@ def get_model_from_name(model_name: str) -> SentenceTransformer:
         model_name = "sentence-transformers/" + model_name
     if model_name in model_ids:
         return SentenceTransformer(
-            "sentence-transformers/" + model_name,
+            model_name,
             similarity_fn_name=SimilarityFunction.COSINE,
         )
     raise ValueError("The model name " + model_name + " is not a valid model name.")
