@@ -160,6 +160,7 @@ def main():
                 models = config["experiments"][experiment]["models"]
             for model in models:
                 output_filename = game_dataset + "_" + model
+                output_filename = output_filename.replace("/", "_")
                 # We only run this combination if an output file doesn't already exist
                 if not os.path.exists(
                     os.path.join(experiment_output_path, output_filename + ".csv")
