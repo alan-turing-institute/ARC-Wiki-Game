@@ -103,16 +103,18 @@ def main():
     game_data_dir, _, output_data_dir = get_data_folders(data_path)
     # Load config file
     config_path = os.path.join(game_data_dir, input_dataset_name, "config.yaml")
-    assert os.path.exists(config_path), f"Config file does not exist: {config_path}"
+    if not os.path.exists(config_path):
+        err_msg = f"Config file does not exist: {config_path}"
+        raise ValueError(err_msg)
     with open(config_path) as stream:
         config = yaml.safe_load(stream)
 
     # Set list of experiments to be run
     if args.experiment_name is not None:
         # Check the given experiment name exists in the config file
-        assert (
-            args.experiment_name in config["experiments"]
-        ), f"Experiment does not exist: {args.experiment_name}"
+        if args.experiment_name not in config["experiments"]:
+            err_msg = f"Experiment does not exist: {args.experiment_name}"
+            raise ValueError(err_msg)
         experiments = [args.experiment_name]
     else:
         # Running all experiments in config file
@@ -122,16 +124,16 @@ def main():
     # that are to be run
     if args.model_name is not None:
         for experiment in experiments:
-            assert (
-                args.model_name in config["experiments"][experiment]["models"]
-            ), f"Model name does not exist in experiment {experiment}: \
-                {args.model_name}"
+            if args.model_name not in config["experiments"][experiment]["models"]:
+                err_msg = f"Model name does not exist in experiment {experiment}: \
+                    {args.model_name}"
+                raise ValueError(err_msg)
     elif args.model_id is not None:
         for experiment in experiments:
-            assert args.model_id < len(
-                config["experiments"][experiment]["models"]
-            ), f"There are more models than the model id provided for experiment \
-                {experiment}"
+            if not args.model_id < len(config["experiments"][experiment]["models"]):
+                err_msg = f"There are fewer models than the model id provided for \
+                    experiment {experiment}"
+                raise ValueError(err_msg)
 
     # Create output path if it doesn't already exist
     output_path = os.path.join(output_data_dir, input_dataset_name)
