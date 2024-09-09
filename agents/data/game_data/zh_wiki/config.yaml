@@ -1,5 +1,5 @@
 experiments:
-  initial_test_100:
+  test_100:
     agent_class: GreedyEmbeddingAgent
     game_datasets:
       - zh_wiki_test_100
