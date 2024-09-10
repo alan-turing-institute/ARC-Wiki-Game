@@ -18,7 +18,6 @@ experiments:
       - distiluse-base-multilingual-cased-v2
       - jinaai/jina-embeddings-v2-base-zh
       - intfloat/multilingual-e5-large
-      - dangvantuan/sentence-camembert-large
     params:
       max_rounds: 50
 
@@ -40,7 +39,6 @@ experiments:
       - distiluse-base-multilingual-cased-v2
       - jinaai/jina-embeddings-v2-base-zh
       - intfloat/multilingual-e5-large
-      - dangvantuan/sentence-camembert-large
     params:
       max_rounds: 50
 
@@ -62,6 +60,5 @@ experiments:
       - distiluse-base-multilingual-cased-v2
       - jinaai/jina-embeddings-v2-base-zh
       - intfloat/multilingual-e5-large
-      - dangvantuan/sentence-camembert-large
     params:
       max_rounds: 50
