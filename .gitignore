@@ -16,9 +16,11 @@ agents/scripts/scratch.py
 graph-prep/data/raw/*
 graph-prep/data/inter/*
 graph-prep/data/output/*
+graph-prep/data/metadata/*
 !graph-prep/data/raw/README-data-raw.md
 !graph-prep/data/inter/README-data-inter.md
 !graph-prep/data/output/README-data-output.md
+!graph-prep/data/metadata/README-data-metadata.md
 
 .vscode/
 

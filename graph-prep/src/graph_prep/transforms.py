@@ -16,12 +16,12 @@ def build_link_pairs(forward_locs: np.ndarray, forward_vals: np.ndarray) -> np.n
             start node and the second column being the end node.
 
     """
-    forward_start = np.zeros_like(forward_vals)
+    forward_start = np.zeros(forward_vals.size + 1, dtype=int)
 
     for x in forward_locs[1:, 0]:
         forward_start[x] += 1
 
-    forward_start = np.cumsum(forward_start)
+    forward_start = np.cumsum(forward_start[:-1])
 
     return np.concatenate([forward_start[:, None], forward_vals[:, None]], axis=1)
 
@@ -44,12 +44,12 @@ def swap_graph_direction(
         tuple: A tuple containing the backward locations and values.
 
     """
-    forward_start = np.zeros_like(forward_vals)
+    forward_start = np.zeros(forward_vals.size + 1, dtype=int)
 
     for x in tqdm(forward_locs[1:, 0], desc="Read Links", disable=not verbose):
         forward_start[x] += 1
 
-    forward_start = np.cumsum(forward_start)
+    forward_start = np.cumsum(forward_start[:-1])
 
     if verbose:
         print("Sorting Forward Links")
