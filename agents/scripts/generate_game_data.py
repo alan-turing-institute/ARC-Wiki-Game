@@ -3,11 +3,10 @@ from __future__ import annotations
 import argparse
 import os
 
-from numpy import savetxt
+from numpy import arange, savetxt
 from numpy.random import choice
 
-from agents.utils.data import load_tools
-from agents.utils.paths import get_game_dir
+from agents.utils.data import get_data_folders, load_tools
 
 
 def parse_args():
@@ -40,6 +39,21 @@ def parse_args():
         type=bool,
         help="True if data is to be loaded to RAM, False if it remains on hard drive",
     )
+    parser.add_argument(
+        "-p",
+        "--data_path",
+        required=True,
+        help="The path that the data are stored in, e.g. '/home/wiki-game/data/, \
+            must include the 'data' folder",
+    )
+    parser.add_argument(
+        "--old_title",
+        required=False,
+        default=False,
+        type=bool,
+        help="When loading the wiki data, this can be used if the old title format is\
+            to be used",
+    )
 
     return parser.parse_args()
 
@@ -47,16 +61,14 @@ def parse_args():
 def main():
     args = parse_args()
 
+    data_path = args.data_path
     num_records = args.num_records
     dataset_name = args.dataset_name
     input_dataset_name = args.input_dataset
     load_data_to_ram = args.load_data_to_ram
+    use_old_title = args.old_title
 
-    assert input_dataset_name in [
-        "wikipedia"
-    ], "Invalid dataset name, currently only `wikipedia` is valid."
-
-    game_data_dir = get_game_dir(__file__)
+    game_data_dir, _, _ = get_data_folders(data_path)
     os.makedirs(os.path.join(game_data_dir, input_dataset_name), exist_ok=True)
     game_data_path = os.path.join(
         game_data_dir, input_dataset_name, dataset_name + ".txt"
@@ -66,11 +78,11 @@ def main():
             "The file for the test data already exists: \n" + game_data_path
         )
 
-    # old_title_format currently hard-coded here to True, will need to update
-    # how this is set when we come to work with multiple datasets.
-    tools = load_tools(load_data_to_ram, old_title_format=True)
+    tools = load_tools(data_path, input_dataset_name, load_data_to_ram, use_old_title)
 
-    source_target_ids = choice(tools.matidx_ary.max(), (num_records, 2), replace=False)
+    source_target_ids = choice(
+        arange(1, tools.matidx_ary.max() + 1), (num_records, 2), replace=False
+    )
 
     savetxt(game_data_path, source_target_ids, delimiter="\t", fmt="%i")
 

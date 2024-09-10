@@ -1,0 +1,58 @@
+
+experiments:
+  test_100:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - en_wiki_test_100
+    models:
+      - all-distilroberta-v1
+      - average_word_embeddings_glove.6B.300d
+      - all-MiniLM-L6-v2
+      - paraphrase-albert-small-v2
+      - all-mpnet-base-v2
+      - all-roberta-large-v1
+      - distiluse-base-multilingual-cased-v1
+      - stsb-xlm-r-multilingual
+      - paraphrase-multilingual-mpnet-base-v2
+      - paraphrase-multilingual-MiniLM-L12-v2
+      - distiluse-base-multilingual-cased-v2
+    params:
+      max_rounds: 50
+
+  test_1000:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - en_wiki_test_1000
+    models:
+      - all-distilroberta-v1
+      - average_word_embeddings_glove.6B.300d
+      - all-MiniLM-L6-v2
+      - paraphrase-albert-small-v2
+      - all-mpnet-base-v2
+      - all-roberta-large-v1
+      - distiluse-base-multilingual-cased-v1
+      - stsb-xlm-r-multilingual
+      - paraphrase-multilingual-mpnet-base-v2
+      - paraphrase-multilingual-MiniLM-L12-v2
+      - distiluse-base-multilingual-cased-v2
+    params:
+      max_rounds: 50
+
+  test_10000:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - en_wiki_test_10000
+    models:
+      - all-distilroberta-v1
+      - average_word_embeddings_glove.6B.300d
+      - all-MiniLM-L6-v2
+      - paraphrase-albert-small-v2
+      - all-mpnet-base-v2
+      - all-roberta-large-v1
+      - distiluse-base-multilingual-cased-v1
+      - stsb-xlm-r-multilingual
+      - paraphrase-multilingual-mpnet-base-v2
+      - paraphrase-multilingual-MiniLM-L12-v2
+      - distiluse-base-multilingual-cased-v2
+    params:
+      max_rounds: 50
