@@ -21,6 +21,7 @@ dependencies = [
     "colorcet",
     "tqdm",
     "huggingface_hub",
+    "openai",
 ]
 
 
