@@ -36,5 +36,6 @@ def get_model_from_name(model_name: str) -> SentenceTransformer:
         return SentenceTransformer(
             model_name,
             similarity_fn_name=SimilarityFunction.COSINE,
+            trust_remote_code=True,
         )
     raise ValueError("The model name " + model_name + " is not a valid model name.")
