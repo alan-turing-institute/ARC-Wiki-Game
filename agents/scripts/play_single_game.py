@@ -14,7 +14,7 @@ def parse_args():
     parser.add_argument(
         "-a",
         "--agent",
-        required=True,
+        required=False,
         type=str,
         default="GreedyEmbeddingAgent",
         help="The name of the agent (class) to use",
@@ -22,6 +22,7 @@ def parse_args():
     parser.add_argument(
         "-m",
         "--model",
+        required=False,
         type=str,
         default="average_word_embeddings_glove.6B.300d",
         help="The name of the model (if required) to use. For current implementation,\
@@ -31,7 +32,7 @@ def parse_args():
     parser.add_argument(
         "-r",
         "--max_rounds",
-        required=True,
+        required=False,
         type=int,
         default=20,
         help="The maximum number of rounds of the game that will be played",
@@ -51,33 +52,38 @@ def parse_args():
     parser.add_argument(
         "-v",
         "--verbose",
+        required=False,
         type=bool,
+        default=True,
         help="If True, then the result of the game will be printed out",
     )
     parser.add_argument(
-        "-f",
         "--folder-name",
+        required=False,
         type=str,
         help="The name of the folder to save the output of the game (if required)",
     )
     parser.add_argument(
-        "-n",
         "--file_name",
+        required=False,
         type=str,
         help="The name of the file to save the output of the game (if required)",
     )
     parser.add_argument(
-        "-d",
         "--load_data_to_ram",
+        required=False,
         type=bool,
+        default=False,  # More likely to run a single game locally than on HPC
         help="True if data is to be loaded to RAM, False if it remains on hard drive",
     )
     parser.add_argument(
         "-p",
         "--data_path",
         required=True,
-        help="The path that the data are stored in, e.g. '/home/wiki-game/data/, \
-            must include the 'data' folder",
+        help="The path that the data are stored in, e.g. \
+            '/home/ARC-WIKI-GAME/agents/data/, this must include the 'data' folder.\
+             The 'data' folder is assumed to have three subfolders: 'game_data',\
+             'input_data' and 'output_data'",
     )
     parser.add_argument(
         "--old_title",
@@ -88,11 +94,10 @@ def parse_args():
             to be used",
     )
     parser.add_argument(
-        "-i",
         "--input_dataset",
         required=True,
-        help="The name of the input dataset\
-            which the experiments are to be run",
+        help="The name of the input dataset which the experiments are to be run.\
+             This is expected to match the name of a folder in the `input_data` folder",
     )
     return parser.parse_args()
 

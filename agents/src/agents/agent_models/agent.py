@@ -114,10 +114,15 @@ class Agent(ABC):
             The name of the file to save the results in
         save_n_games: int
             The output will be saved every save_n_games
+
+        Raises
+        ------
+        ValueError
+            If the number of source and target IDs is different
         """
-        assert len(source_ids) == len(
-            target_ids
-        ), "The number of source and target IDs is different"
+        if len(source_ids) != len(target_ids):
+            err_msg = "The number of source and target IDs is different."
+            raise ValueError(err_msg)
 
         for i in range(len(source_ids)):
             self.play_game(source_ids[i], target_ids[i])

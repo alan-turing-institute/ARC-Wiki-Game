@@ -9,9 +9,10 @@ def get_model_from_name(model_name: str) -> SentenceTransformer:
     Parameters
     ----------
     model_name: str
-        The name of the model in the 'sentence-transformer' HuggingFace library
-        Can either be in the form 'sentence-transformers/model-name' or just
-        'model-name' without the prefix.
+        The name of the model in the 'sentence-transformers' HuggingFace library.
+        If the model is not authored by 'sentence-transformers', then the name
+        must be provided in the format 'author-name/model-name'. However, if the
+        author is 'sentence-transformers', then just 'model-name' can be provided.
 
     Returns
     -------
@@ -26,15 +27,14 @@ def get_model_from_name(model_name: str) -> SentenceTransformer:
     """
     # Check if the model_name is one that exists in the sentence transformers library
     hf_api = HfApi()
-    # Might want to remove the restriction on author - this will restrict the
-    # list of valid models to only the original sentence transformer models
-    models = hf_api.list_models(
-        library="sentence-transformers", author="sentence-transformers"
-    )
+    # Get all sentence-transformer models
+    models = hf_api.list_models(library="sentence-transformers")
     model_ids = [model.id for model in list(models)]
-    if "sentence-transformers/" + model_name in model_ids or model_name in model_ids:
+    if "sentence-transformers/" + model_name in model_ids:
+        model_name = "sentence-transformers/" + model_name
+    if model_name in model_ids:
         return SentenceTransformer(
-            "sentence-transformers/" + model_name,
+            model_name,
             similarity_fn_name=SimilarityFunction.COSINE,
         )
     raise ValueError("The model name " + model_name + " is not a valid model name.")
