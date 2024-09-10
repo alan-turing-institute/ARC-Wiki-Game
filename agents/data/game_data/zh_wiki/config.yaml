@@ -23,6 +23,9 @@ experiments:
       - stsb-xlm-r-multilingual
       - paraphrase-multilingual-mpnet-base-v2
       - paraphrase-multilingual-MiniLM-L12-v2
+      - all-MiniLM-L6-v2 # Not trained on Chinese, so might not work!
+      - jinaai/jina-embeddings-v2-base-zh
+      - intfloat/multilingual-e5-large
     params:
       max_rounds: 50
 
@@ -35,5 +38,8 @@ experiments:
       - stsb-xlm-r-multilingual
       - paraphrase-multilingual-mpnet-base-v2
       - paraphrase-multilingual-MiniLM-L12-v2
+      - all-MiniLM-L6-v2 # Not trained on Chinese, so might not work!
+      - jinaai/jina-embeddings-v2-base-zh
+      - intfloat/multilingual-e5-large
     params:
       max_rounds: 50
