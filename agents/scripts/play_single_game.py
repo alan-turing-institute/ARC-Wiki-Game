@@ -88,7 +88,7 @@ def parse_args():
             to be used",
     )
     parser.add_argument(
-        "-d",
+        "-i",
         "--input_dataset",
         required=True,
         help="The name of the input dataset\
