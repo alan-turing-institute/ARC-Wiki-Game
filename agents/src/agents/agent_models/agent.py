@@ -722,6 +722,7 @@ class PromptAgent(Agent):
                     messages=messages,
                     temperature=self._temp,
                     seed=self._seed,
+                    response_format={"type": "json_object"},
                 )
 
                 response = completion.choices[0].message.content
