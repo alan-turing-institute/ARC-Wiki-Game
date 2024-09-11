@@ -113,6 +113,62 @@ def steps_two_way(
     return steps
 
 
+def steps_check_deadend(
+    start_link: int,
+    end_link: int,
+    forward_locs: np.ndarray,
+    forward_vals: np.ndarray,
+    backward_locs: np.ndarray,
+    backward_vals: np.ndarray,
+    max_steps: int = 10,
+) -> int:
+    """Calculate the number of steps required to traverse from start_link to end_link.
+
+    Args:
+        start_link (int): Index of the starting link.
+        end_link (int): Index of the ending link.
+        forward_locs (np.ndarray): Array of start and end indices for each forward step.
+        forward_vals (np.ndarray): Array of destinations of all the steps going forward.
+        backward_locs (np.ndarray): Array of start and end indices for each backward
+            step.
+        backward_vals (np.ndarray): Array of destinations of all the steps going
+            backwards.
+        max_steps (int, optional): Maximum number of steps allowed. Defaults to 10.
+
+    Returns:
+        int: Number of steps taken to reach the end link.
+    """
+    reached_f_vec = np.zeros(forward_locs.shape[0], dtype=bool)
+    reached_f_vec[start_link] = True
+    reached_b_vec = np.zeros(backward_locs.shape[0], dtype=bool)
+    reached_b_vec[end_link] = True
+
+    steps = 0
+
+    count_f = [1, 1]
+    count_b = [1, 1]
+
+    while not np.any(reached_f_vec & reached_b_vec) and steps < max_steps:
+        if steps % 2 == 0:
+            # Go Forwards
+            _make_step(reached_f_vec, forward_locs, forward_vals)
+            count_f[1] = np.sum(reached_f_vec)
+            if count_f[0] == count_f[1]:
+                return max_steps
+            count_f[0] = count_f[1]
+        else:
+            # Go Backwards
+            _make_step(reached_b_vec, backward_locs, backward_vals)
+            count_b[1] = np.sum(reached_b_vec)
+            if count_b[0] == count_b[1]:
+                return max_steps
+            count_b[0] = count_b[1]
+
+        steps += 1
+
+    return steps
+
+
 def path_one_way(
     start_link: int,
     end_link: int,
