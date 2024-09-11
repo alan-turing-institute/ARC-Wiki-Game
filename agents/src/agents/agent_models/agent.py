@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from abc import ABC, abstractmethod
 
@@ -463,6 +464,11 @@ class PromptAgent(Agent):
             A seed to give the GPT model - at the time of writing, this feature
             is in beta mode according to OpenAI so might not result in the model
             behaving 100% deterministically.
+
+        Raises
+        ------
+        ValueError
+            If the temperature is not a valid value, must be between 0 and 1.
         """
         super().__init__(agent_tools, max_rounds)
 
@@ -474,12 +480,10 @@ class PromptAgent(Agent):
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         )
 
-        assert (
-            temperature <= 1
-        ), "Temperature is not a valid value, must be less than one."
-        assert (
-            temperature >= 0
-        ), "Temperature is not a valid value, must be greater than zero."
+        if temperature > 1 or temperature < 0:
+            err_msg = "The temperature is not a valid value."
+            raise ValueError(err_msg)
+
         self._temp = temperature
 
         self._seed = manual_seed
@@ -488,9 +492,19 @@ class PromptAgent(Agent):
             "You are a helpful assistant that helps me to play the Wikipedia Game! "
         )
         self._query1_content = (
-            "You will be given the title and a summary of the target page that I am "
-            "trying to navigate to, both the title and summary will be delimited by "
-            "```. Can you summarise what the target page is about? "
+            "If I give you the title and a summary of the target page that I am "
+            "trying to navigate to, can you help me navigate to the target page? "
+        )
+        self._response1_content = "Of course! What is your target page?"
+        self._response2_content = (
+            "Sure! I can help you navigate to that page, what links are there on "
+            "your current page?"
+        )
+        self._play_round_content = (
+            "Here is a list of links, which one should I pick? Please provide your "
+            'answer in JSON format with the selected link given with key "link" and '
+            'a justification given with key "reason". The selected link must be from '
+            "the following list: "
         )
 
     def play_game(
@@ -564,10 +578,7 @@ class PromptAgent(Agent):
 
     def _set_messages(self, target_title: str, target_summary: str) -> list[dict]:
         """
-        I know, I know, this seems like an unecessary method as it is just asking
-        the LLM to summarise the existing summary. However, the summary prompting
-        approach worked better when I first asked the LLM to summarise the summary
-        of the target page and then show it the list of links.
+        Set the initial messages to send at the start of each round
 
         Parameters
         ----------
@@ -585,24 +596,18 @@ class PromptAgent(Agent):
 
         message1 = {"role": "system", "content": self._system_content}
 
-        content = self._query1_content
-        content += "Target title: ```" + target_title + "``` "
-        content += "Target summary: ```" + target_summary + "``` "
+        message2 = {"role": "user", "content": self._query1_content}
 
-        message2 = {"role": "user", "content": content}
+        message3 = {"role": "assistant", "content": self._response1_content}
 
-        completion = self._client.chat.completions.create(
-            model=self._deployment_name,
-            messages=[message1, message2],
-            temperature=self._temp,
-            seed=self._seed,
-        )
+        content = '{"title": "' + target_title + '", '
+        content += '"summary": "' + target_summary + '"}'
 
-        response = completion.choices[0].message.content
+        message4 = {"role": "user", "content": content}
 
-        message3 = {"role": "assistant", "content": response}
+        message5 = {"role": "assistant", "content": self._response2_content}
 
-        return [message1, message2, message3]
+        return [message1, message2, message3, message4, message5]
 
     def _play_round(
         self, current_page_id: int, route: list[int], game_messages: list[dict]
@@ -635,19 +640,12 @@ class PromptAgent(Agent):
             if (forward_title[1] is not None) and (forward_title[0] not in route)
         ]
         if len(titles) > 0:
-            content = (
-                "You will now be given a list of links on current page. Each "
-                "link name is contained in curly brackets. Which link should I pick in "
-                "order to navigate closer to the target page? Please respond with "
-                "the link name in curly brackets, followed by a new line and then give "
-                "a justification for the choice. The link you select must come from "
-                "the given list."
-            )
-
+            content = " "
             for title in titles:
-                content += "{" + title + "}, "
+                content += '"' + title + '", '
+            content = "[" + content[:-2] + "]"
 
-            message = {"role": "user", "content": content}
+            message = {"role": "user", "content": self._play_round_content + content}
 
             messages = game_messages.copy()
             messages.append(message)
@@ -660,71 +658,74 @@ class PromptAgent(Agent):
                 messages=messages,
                 temperature=self._temp,
                 seed=self._seed,
+                response_format={"type": "json_object"},
             )
 
             response = completion.choices[0].message.content
-            if response is None:
-                # Will be 'None' if the content filter interferes
-                return -1
 
-            next_link = response[response.find("{") + 1 : response.find("}")]
+            retry = 0
 
-            if next_link in titles:
-                # Excellent - no hallucinations!
-                next_link_id = self._tools.get_article_id(next_link)
-                if next_link_id is None:
-                    return -1
-                return next_link_id
+            while (
+                retry < 2
+            ):  # allow 1 retry - might want to make this value configurable?
+                if response is None:
+                    # Will be 'None' if the content filter interferes, simulate a
+                    # response and retry
+                    retry += 1
+                    response = (
+                        '{\n  "link": "Unknown link",\n "reason":'
+                        'I did not know which link to select."\n}'
+                    )
+                    content_retry = (
+                        'But "Unknown link" is not in the list '
+                        "that was provided! You must select a link from the "
+                        "list of links. Please try again and provide your "
+                        "answer in JSON format with the selected link given "
+                        'with key "link" and a justification given with key "reason".'
+                    )
+                else:
+                    # There is a response
+                    try:
+                        json_response = json.loads(response)
+                        if "link" in json_response:
+                            next_link = json_response["link"]
+                            if next_link in titles:
+                                # Excellent - no hallucinations!
+                                next_link_id = self._tools.get_article_id(next_link)
+                                if next_link_id is None:
+                                    return -1
+                                return next_link_id
+                            # *sigh* - hallucination
+                            retry += 1
+                            content_retry = (
+                                f'But "{next_link}" is not in the list '
+                                "that was provided! You must select a link from the "
+                                "list of links. Please try again and provide your "
+                                "answer in JSON format with the selected link given "
+                                'with key "link" and a justification given with key '
+                                '"reason".'
+                            )
 
-            # Urgh. Either it's made up a link or it hasn't provided the link in
-            # curly brackets. Try once more. Firstly, add the response to the
-            # list of messages (GPT won't remember it's last response so have
-            # to send the list of messages again).
-            message_response = {"role": "assistant", "content": response}
-            messages.append(message_response)
-
-            if (
-                (response.find("{") == -1)
-                or (response.find("}") == -1)
-                or (response.find("{") > response.find("}"))
-            ):
-                # The response is not in the expected format
-                content_retry = (
-                    "You did not provide the name of the selected link in curly "
-                    "brackets. Please try again and provide the link name in curly "
-                    "brackets, followed by a new line and then give a justification "
-                    "for the choice. "
+                    except json.decoder.JSONDecodeError:
+                        # Some error when loading the response to JSON
+                        retry += 1
+                        content_retry = (
+                            "You did not provide your response in JSON "
+                            "format - please try again!"
+                        )
+                message_response = {"role": "assistant", "content": response}
+                messages.append(message_response)
+                message_retry = {"role": "user", "content": content_retry}
+                messages.append(message_retry)
+                completion = self._client.chat.completions.create(
+                    model=self._deployment_name,
+                    messages=messages,
+                    temperature=self._temp,
+                    seed=self._seed,
                 )
-            else:
-                # The response is a hallucination
-                content_retry = (
-                    "But "
-                    + next_link
-                    + " isn't in the list that was proivded! You must select a link "
-                    "from the given list of links. Please try again and provide the "
-                    "link name in curly brackets, followed by a new line and then "
-                    "give a justification for the choice. "
-                )
-            message_retry = {"role": "user", "content": content_retry}
-            messages.append(message_retry)
-            completion = self._client.chat.completions.create(
-                model=self._deployment_name,
-                messages=messages,
-                temperature=self._temp,
-                seed=self._seed,
-            )
 
-            response = completion.choices[0].message.content
-            if response is None:
-                # Will be 'None' if the content filter interferes
-                return -1
-
-            next_link = response[response.find("{") + 1 : response.find("}")]
-
-            if next_link in titles:
-                next_link_id = self._tools.get_article_id(next_link)
-                if next_link_id is None:
-                    return -1
-                return next_link_id
+                response = completion.choices[0].message.content
+            # The agent was not able to select a link
             return -1
+        # There are no links from the current page
         return -1

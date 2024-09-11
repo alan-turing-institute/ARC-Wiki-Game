@@ -99,6 +99,14 @@ def parse_args():
         help="The name of the input dataset which the experiments are to be run.\
              This is expected to match the name of a folder in the `input_data` folder",
     )
+    parser.add_argument(
+        "--temperature",
+        required=False,
+        default=0,
+        type=float,
+        help="Only an option for the PromptAgent, default set to 0 but can be a value\
+              between 0 and 1.",
+    )
     return parser.parse_args()
 
 
@@ -121,7 +129,10 @@ def main():
             tools, max_rounds=max_rounds, model_name=model_name
         )
     elif args.agent == "PromptAgent":
-        agent = PromptAgent(tools, max_rounds=max_rounds, model_name=model_name)
+        temperature = args.temperature
+        agent = PromptAgent(
+            tools, max_rounds=max_rounds, model_name=model_name, temperature=temperature
+        )
     else:
         raise ValueError(
             "Invalid name for agent provided: "
