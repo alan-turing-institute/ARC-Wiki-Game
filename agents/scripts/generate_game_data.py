@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 
-from numpy import savetxt
+from numpy import arange, savetxt
 from numpy.random import choice
 
 from agents.utils.data import get_data_folders, load_tools
@@ -78,11 +78,11 @@ def main():
             "The file for the test data already exists: \n" + game_data_path
         )
 
-    # old_title_format currently hard-coded here to True, will need to update
-    # how this is set when we come to work with multiple datasets.
     tools = load_tools(data_path, input_dataset_name, load_data_to_ram, use_old_title)
 
-    source_target_ids = choice(tools.matidx_ary.max(), (num_records, 2), replace=False)
+    source_target_ids = choice(
+        arange(1, tools.matidx_ary.max() + 1), (num_records, 2), replace=False
+    )
 
     savetxt(game_data_path, source_target_ids, delimiter="\t", fmt="%i")
 

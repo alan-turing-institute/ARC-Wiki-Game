@@ -14,11 +14,10 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Get config file to run")
 
     parser.add_argument(
-        "-d",
         "--input_dataset",
         required=True,
-        help="The name of the input dataset\
-            which the experiments are to be run",
+        help="The name of the input dataset which the experiments are to be run.\
+             This is expected to match the name of a folder in the `input_data` folder",
     )
     parser.add_argument(
         "-e",
@@ -46,7 +45,6 @@ def parse_args():
             the given experiment.",
     )
     parser.add_argument(
-        "-l",
         "--load_data_to_ram",
         required=False,
         type=bool,
@@ -54,7 +52,6 @@ def parse_args():
         help="True if data is to be loaded to RAM, False if it remains on hard drive",
     )
     parser.add_argument(
-        "-n",
         "--save_n_games",
         required=False,
         type=int,
@@ -65,8 +62,10 @@ def parse_args():
         "-p",
         "--data_path",
         required=True,
-        help="The path that the data are stored in, e.g. '/home/wiki-game/data/, \
-            must include the 'data' folder",
+        help="The path that the data are stored in, e.g. \
+            '/home/ARC-WIKI-GAME/agents/data/, this must include the 'data' folder.\
+             The 'data' folder is assumed to have three subfolders: 'game_data',\
+             'input_data' and 'output_data'",
     )
     parser.add_argument(
         "--old_title",
@@ -160,6 +159,7 @@ def main():
                 models = config["experiments"][experiment]["models"]
             for model in models:
                 output_filename = game_dataset + "_" + model
+                output_filename = output_filename.replace("/", "_")
                 # We only run this combination if an output file doesn't already exist
                 if not os.path.exists(
                     os.path.join(experiment_output_path, output_filename + ".csv")
