@@ -13,7 +13,7 @@ The `play_games` method will save the output of the games at regular intervals, 
 
 The script `play_single_game.py` can be run to play an instance of the Wikipedia game. Both `GreedyEmbeddingAgent` objects and `PromptAgent` objects can be used in this script.
 
-A script `play_games.py` sets up an agent to play a pre-determined list of games (defined by source and target IDs). Only the `GreedyEmbeddingAgent` is currently able to play multiple games. 
+A script `play_games.py` sets up an agent to play a pre-determined list of games (defined by source and target IDs). Only the `GreedyEmbeddingAgent` is currently able to play multiple games.
 
 ### GreedyEmbeddingAgent
 This implementation uses a pre-trained sentence transformer model to play the Wikipedia game. It uses the model to encode the summaries of all links on a page, and selects the one that is most similar to the encoded summary of the target page. This agent is not allowed to navigate back to a page it has already visited, as this approach will cause to enter a loop; therefore, this agent may also fail to complete a game if it reaches a page where there are no links available that it has not already visited.
@@ -22,7 +22,7 @@ Arguments that are specific to use this agent to play a game are the `model_name
 
 
 ### PromptAgent
-This agent uses a generative LLM to play the game. 
+This agent uses a generative LLM to play the game.
 
 Currently the LLM must be deployed using Azure's OpenAI service; however, this might be expanded in future to include other models. The following environment variables must be set:
 ```
@@ -31,7 +31,7 @@ export AZURE_OPENAI_ENDPOINT="REPLACE_WITH_YOUR_ENDPOINT_HERE"
 
 ```
 
-Currently this agent can only be run over a single game using the script `play_single_game.py`. 
+Currently this agent can only be run over a single game using the script `play_single_game.py`.
 
 Arguments that are specific to use this agent to play a game are:
 - `model_name`: this must match the name of a deployed model for the endpoint stored in the environment for Azure's OpenAI service
