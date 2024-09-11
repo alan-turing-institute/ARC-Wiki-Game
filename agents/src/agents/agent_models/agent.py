@@ -188,7 +188,12 @@ class Agent(ABC):
         )
 
     def _print_route(
-        self, source_title: str, target_title: str, found_route: bool, route: list[int]
+        self,
+        source_title: str,
+        target_title: str,
+        found_route: bool,
+        route: list[int],
+        reasons: list[str] | None = None,
     ) -> None:
         """
         This method takes a route as a list of page IDs and prints the title
@@ -205,6 +210,8 @@ class Agent(ABC):
             A boolean indicating whether a valid route was found
         route: list[int]
             A list of page IDs
+        reasons: list[str]
+            A list of reasons - optional
         """
         print("Game to travel from `" + source_title + "` to `" + target_title + "`")
         if found_route:
@@ -217,7 +224,10 @@ class Agent(ABC):
         print("Route taken:")
         for id, page in enumerate(route):
             page_title = self._tools.get_article_title(page)
-            print(id, ":", page_title)
+            if reasons is not None:
+                print(id, ":", page_title, reasons[id])
+            else:
+                print(id, ":", page_title)
 
     def record_game(
         self,
@@ -553,17 +563,19 @@ class PromptAgent(Agent):
 
         current_id = source_id
         route = [source_id]
+        reasons = [""]
         found_target = current_id == target_id
         while (len(route) <= self._max_rounds) and not found_target:
-            next_page_id = self._play_round(current_id, route, game_messages)
+            next_page_id, reason = self._play_round(current_id, route, game_messages)
             if next_page_id == -1:
                 break
             found_target = next_page_id == target_id
             route.append(next_page_id)
+            reasons.append(reason)
             current_id = next_page_id
 
         if verbose:
-            self._print_route(source_title, target_title, found_target, route)
+            self._print_route(source_title, target_title, found_target, route, reasons)
 
         self.record_game(
             source_id,
@@ -611,7 +623,7 @@ class PromptAgent(Agent):
 
     def _play_round(
         self, current_page_id: int, route: list[int], game_messages: list[dict]
-    ) -> int:
+    ) -> tuple[int, str]:
         """
         Given a current page id, this method gets all the titles of the links that exist
         on the page. It presentes the link titles to the LLM along with a summary of
@@ -651,7 +663,7 @@ class PromptAgent(Agent):
             messages.append(message)
             for m in messages:
                 if m["content"] is None:
-                    return -1
+                    return -1, ""
 
             completion = self._client.chat.completions.create(
                 model=self._deployment_name,
@@ -693,8 +705,8 @@ class PromptAgent(Agent):
                                 # Excellent - no hallucinations!
                                 next_link_id = self._tools.get_article_id(next_link)
                                 if next_link_id is None:
-                                    return -1
-                                return next_link_id
+                                    return -1, ""
+                                return next_link_id, json_response["reason"]
                             # *sigh* - hallucination
                             retry += 1
                             content_retry = (
@@ -727,6 +739,6 @@ class PromptAgent(Agent):
 
                 response = completion.choices[0].message.content
             # The agent was not able to select a link
-            return -1
+            return -1, ""
         # There are no links from the current page
-        return -1
+        return -1, ""
