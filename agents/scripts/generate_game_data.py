@@ -71,7 +71,7 @@ def main():
     game_data_dir, _, _ = get_data_folders(data_path)
     os.makedirs(os.path.join(game_data_dir, input_dataset_name), exist_ok=True)
     game_data_path = os.path.join(
-        game_data_dir, input_dataset_name, dataset_name + ".txt"
+        game_data_dir, input_dataset_name, dataset_name + ".csv"
     )
     if os.path.exists(game_data_path):  # To prevent accidently overriding results
         raise ValueError(
@@ -84,7 +84,7 @@ def main():
         arange(1, tools.matidx_ary.max() + 1), (num_records, 2), replace=False
     )
 
-    savetxt(game_data_path, source_target_ids, delimiter="\t", fmt="%i")
+    savetxt(game_data_path, source_target_ids, delimiter=",", fmt="%i")
 
 
 if __name__ == "__main__":

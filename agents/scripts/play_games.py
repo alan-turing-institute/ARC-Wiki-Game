@@ -4,7 +4,7 @@ import argparse
 import os
 
 import yaml
-from numpy import loadtxt
+from numpy import array, loadtxt
 
 from agents.agent_models.agent import GreedyEmbeddingAgent
 from agents.utils.data import get_data_folders, load_tools
@@ -82,13 +82,19 @@ def load_test_dataset(
     input_dataset_name, game_data_dir, game_dataset_name
 ) -> tuple[list[int], list[int]]:
     game_data_path = os.path.join(
-        game_data_dir, input_dataset_name, game_dataset_name + ".txt"
+        game_data_dir, input_dataset_name, game_dataset_name + ".csv"
     )
 
-    source_target_ids = loadtxt(game_data_path, dtype=int, delimiter="\t")
+    source_target_ids = loadtxt(game_data_path, dtype=int, delimiter=",", skiprows=1)
+    steps = None
+    if source_target_ids.shape[1] == 3:
+        # The file also contains the number of steps, only load the valid games
+        source_target_ids = array([row for row in source_target_ids if row[2] > 0])
+        steps = [int(i) for i in source_target_ids[:, 2]]
+
     source_ids = [int(i) for i in source_target_ids[:, 0]]
     target_ids = [int(i) for i in source_target_ids[:, 1]]
-    return source_ids, target_ids
+    return source_ids, target_ids, steps
 
 
 def main():
@@ -145,7 +151,7 @@ def main():
         experiment_output_path = os.path.join(output_path, experiment_name)
         os.makedirs(experiment_output_path, exist_ok=True)
         for game_dataset in config["experiments"][experiment]["game_datasets"]:
-            source_ids, target_ids = load_test_dataset(
+            source_ids, target_ids, steps = load_test_dataset(
                 input_dataset_name, game_data_dir, game_dataset
             )
             # Create a list of model names to be run
@@ -178,6 +184,7 @@ def main():
                         experiment_output_path,
                         output_filename,
                         save_n_games,
+                        optimal_steps=steps,
                     )
 
 

@@ -62,3 +62,12 @@ experiments:
       - intfloat/multilingual-e5-large
     params:
       max_rounds: 50
+
+  step_list:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - enwiki_step_list
+    models:
+      - all-MiniLM-L6-v2
+    params:
+      max_rounds: 50
