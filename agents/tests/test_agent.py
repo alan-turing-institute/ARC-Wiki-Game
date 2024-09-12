@@ -33,7 +33,7 @@ def test_GreedyEmbeddingAgent(
             model_name="sentence-transformers-testing/stsb-bert-tiny-safetensors",
         )
         source_ids = [1, 3, 8, 13]
-        target_ids = [12, 8, 3, 5]
+        target_ids = [12, 0, 3, 5]
         agent.play_games(
             source_ids, target_ids, testing_dir, "temp_games", save_n_games=1
         )
@@ -108,4 +108,3 @@ def test_PromptAgent(hdf5_file: str, matidx_info: str, summary_data: str):
         assert game["route"] == [0, 2, 11, -1]
         assert game["num_steps"] == 2
         assert game["error_message"] == "Response not in JSON format"
-    assert True
