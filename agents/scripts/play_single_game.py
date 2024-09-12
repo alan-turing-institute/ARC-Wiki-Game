@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 
 from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
+from agents.agent_models.generative_lm import OpenAIModel
 from agents.utils.data import load_tools
 
 
@@ -107,6 +108,23 @@ def parse_args():
         help="Only an option for the PromptAgent, default set to 0 but can be a value\
               between 0 and 1.",
     )
+    parser.add_argument(
+        "--top_p",
+        required=False,
+        default=0.1,
+        type=float,
+        help="Only an option for the PromptAgent, default set to 0.1 but can be a value\
+              between 0 and 1.",
+    )
+    parser.add_argument(
+        "--manual_seed",
+        required=False,
+        default=42,
+        type=int,
+        help="Only an option for the PromptAgent, the seed to use to set each \
+            response. Note that this does not guarantee that the model is \
+            deterministic (for OpenAI)",
+    )
     return parser.parse_args()
 
 
@@ -130,9 +148,10 @@ def main():
         )
     elif args.agent == "PromptAgent":
         temperature = args.temperature
-        agent = PromptAgent(
-            tools, max_rounds=max_rounds, model_name=model_name, temperature=temperature
-        )
+        top_p = args.top_p
+        manual_seed = args.manual_seed
+        gen_lm_model = OpenAIModel(model_name, temperature, top_p, manual_seed)
+        agent = PromptAgent(tools, max_rounds=max_rounds, model=gen_lm_model)
     else:
         raise ValueError(
             "Invalid name for agent provided: "

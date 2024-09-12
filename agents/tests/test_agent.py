@@ -44,3 +44,7 @@ def test_GreedyEmbeddingAgent(
                 successful_games += 1
         assert successful_games == 2
         assert len(games_played) == 4
+
+
+def test_PromptAgent():
+    pass
