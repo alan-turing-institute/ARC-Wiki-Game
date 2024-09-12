@@ -48,4 +48,4 @@ jobs:
           python -m uv pip install ${{ matrix.package }}/.
 
       - name: Test package
-        run: python -m pytest ${{ matrix.package }}/ -ra --cov=${{ matrix.package }}/src --cov-report=term --durations=20
+        run: python -m pytest ${{ matrix.package }}/ -ra --cov=${{ matrix.package }}/ --cov-report=term --durations=20
