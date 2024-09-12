@@ -291,6 +291,28 @@ class Agent(ABC):
 
         df.to_csv(output_file_path, sep="\t")
 
+    def get_games_played(self) -> list[dict]:
+        """
+        This method returns the list of dictionaries containing the games
+        played by the agent. Expected to use this for testing only.
+
+        Returns
+        -------
+        list[dict]
+            List of dictionaries, each dictionary contains details of a game:
+            "source_id" - the id of the source page
+            "source_title" - the title of the source page
+            "target_id" - the id of the target page
+            "target_title" - the title of the target page
+            "similarity" - the similarity of the source and target (may be 0 if the
+                    agent doesn't calculate a similarity)
+            "found_target" - True if reached target page, False otherwise
+            "num_steps" - the number of steps taken in the game (length of route - 1)
+            "route" - a list of page ids representing the route taken in the game, will
+                    include the source and target page ids
+        """
+        return self._games_played
+
 
 class GreedyEmbeddingAgent(Agent):
     def __init__(
