@@ -18,7 +18,7 @@ class GenLM(ABC):
         """
 
 
-class TestGenLM(GenLM):
+class MockGenLM(GenLM):
     def __init__(self, test_responses: list[dict]) -> None:
         self._test_responses = test_responses
 

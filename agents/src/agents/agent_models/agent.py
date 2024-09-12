@@ -261,7 +261,7 @@ class Agent(ABC):
             A value representing the similiarity of the source and target pages - this
             will not be provided for all types of agents
         """
-        num_steps = len(route) - 1 if found_target else len(route) - 2
+        num_steps = len(route) - 2 if route[-1] == -1 else len(route) - 1
         game_summary = {
             "source_id": source_id,
             "source_title": source_title,
@@ -576,6 +576,8 @@ class PromptAgent(Agent):
             found_target = next_page_id == target_id
             current_id = next_page_id
 
+        if len(route) > self._max_rounds and not found_target:
+            reasons[-1] = "Maximum number of steps reached"
         if verbose:
             self._print_route(source_title, target_title, found_target, route, reasons)
 
@@ -586,7 +588,7 @@ class PromptAgent(Agent):
             target_title,
             found_target,
             route,
-            err_msg=reasons[-1] if route[-1] == -1 else "",
+            err_msg=reasons[-1] if not found_target else "",
         )
 
         return found_target, route

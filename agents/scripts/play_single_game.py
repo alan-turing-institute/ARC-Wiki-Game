@@ -150,8 +150,8 @@ def main():
         temperature = args.temperature
         top_p = args.top_p
         manual_seed = args.manual_seed
-        gen_lm_model = OpenAIModel(model_name, temperature, top_p, manual_seed)
-        agent = PromptAgent(tools, max_rounds=max_rounds, model=gen_lm_model)
+        gen_model = OpenAIModel(model_name, temperature, top_p, manual_seed)
+        agent = PromptAgent(tools, max_rounds=max_rounds, model=gen_model)
     else:
         raise ValueError(
             "Invalid name for agent provided: "
