@@ -4,7 +4,7 @@ import argparse
 import os
 
 import yaml
-from numpy import array, loadtxt
+from numpy import array, loadtxt, savetxt
 
 from agents.agent_models.agent import GreedyEmbeddingAgent
 from agents.utils.data import get_data_folders, load_tools
@@ -75,6 +75,15 @@ def parse_args():
         help="When loading the wiki data, this can be used if the old title format is\
             to be used",
     )
+    parser.add_argument(
+        "--max_games",
+        required=False,
+        default=5000,
+        type=int,
+        help="The maximum number of games that can be run for any combination of \
+            agent, experiment and model. Might want to set to a low value, e.g. 10, \
+            when testing locally.",
+    )
     return parser.parse_args()
 
 
@@ -104,6 +113,7 @@ def main():
     load_data_to_ram = args.load_data_to_ram
     save_n_games = args.save_n_games
     use_old_title = args.old_title
+    max_games = args.max_games
 
     game_data_dir, _, output_data_dir = get_data_folders(data_path)
     # Load config file
@@ -164,28 +174,39 @@ def main():
                 # No model specified in config, so run them all
                 models = config["experiments"][experiment]["models"]
             for model in models:
-                output_filename = game_dataset + "_" + model
-                output_filename = output_filename.replace("/", "_")
-                # We only run this combination if an output file doesn't already exist
-                if not os.path.exists(
-                    os.path.join(experiment_output_path, output_filename + ".csv")
-                ):
-                    # This logic will be updated when we have more than one agent type
-                    agent = GreedyEmbeddingAgent(
-                        tools,
-                        max_rounds=config["experiments"][experiment]["params"][
-                            "max_rounds"
-                        ],
-                        model_name=model,
+                for start_index in range(0, len(source_ids), max_games):
+                    output_filename = (
+                        game_dataset + "_" + model + "_" + str(start_index)
                     )
-                    agent.play_games(
-                        source_ids,
-                        target_ids,
-                        experiment_output_path,
-                        output_filename,
-                        save_n_games,
-                        optimal_steps=steps,
+                    output_filename = output_filename.replace("/", "_")
+                    output_path = os.path.join(
+                        experiment_output_path, output_filename + ".csv"
                     )
+                    # We only run this combination if an output file doesn't already
+                    # exist
+                    if not os.path.exists(output_path):
+                        # Save a placeholder file in the output path - will prevent
+                        # another batch job running for these games
+                        os.makedirs(os.path.join(experiment_output_path), exist_ok=True)
+                        savetxt(output_path, source_ids)
+                        # This logic will be updated when we have more than one agent
+                        # type
+                        agent = GreedyEmbeddingAgent(
+                            tools,
+                            max_rounds=config["experiments"][experiment]["params"][
+                                "max_rounds"
+                            ],
+                            model_name=model,
+                        )
+                        agent.play_games(
+                            source_ids[start_index : start_index + max_games],
+                            target_ids[start_index : start_index + max_games],
+                            experiment_output_path,
+                            output_filename,
+                            save_n_games,
+                            optimal_steps=steps[start_index : start_index + max_games],
+                        )
+                        break
 
 
 if __name__ == "__main__":
