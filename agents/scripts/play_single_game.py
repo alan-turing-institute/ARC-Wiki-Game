@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 
 from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
+from agents.agent_models.generative_lm import OpenAIModel
 from agents.utils.data import load_tools
 
 
@@ -147,9 +148,10 @@ def main():
         )
     elif args.agent == "PromptAgent":
         temperature = args.temperature
-        agent = PromptAgent(
-            tools, max_rounds=max_rounds, model_name=model_name, temperature=temperature
-        )
+        top_p = args.top_p
+        manual_seed = args.manual_seed
+        gen_model = OpenAIModel(model_name, temperature, top_p, manual_seed)
+        agent = PromptAgent(tools, max_rounds=max_rounds, model=gen_model)
     else:
         raise ValueError(
             "Invalid name for agent provided: "

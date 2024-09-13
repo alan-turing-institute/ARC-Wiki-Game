@@ -6,9 +6,9 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
-from openai import AzureOpenAI
 from torch import backends, cuda, device
 
+from agents.agent_models.generative_lm import GenLM
 from agents.agent_models.tools import AgentToolsBase
 from agents.utils.models import get_model_from_name
 
@@ -241,9 +241,9 @@ class Agent(ABC):
                 print("Failed - other reason")
         print("Route taken:")
         for id, page in enumerate(route):
-            page_title = self._tools.get_article_title(page)
+            page_title = self._tools.get_article_title(page) if page > -1 else "FAILURE"
             if reasons is not None:
-                print(id, ":", page_title, reasons[id])
+                print(id, ":", page_title, "-", reasons[id])
             else:
                 print(id, ":", page_title)
 
@@ -257,6 +257,7 @@ class Agent(ABC):
         route: list,
         similarity: float | None = None,
         optimal_steps: int | None = None,
+        err_msg: str = "",
     ) -> None:
         """
         This method adds the game details provided to the list of played games
@@ -281,13 +282,16 @@ class Agent(ABC):
         optimal_steps: int | None
             If not none, then this is the optimal number of steps to solve the game
         """
+        num_steps = len(route) - 2 if route[-1] == -1 else len(route) - 1
         game_summary = {
             "source_id": source_id,
             "source_title": source_title,
             "target_id": target_id,
             "target_title": target_title,
             "found_target": found_target,
-            "num_steps": len(route) - 1,
+            "num_steps": num_steps,
+            "route": route,
+            "error_message": err_msg,
         }
         if similarity is not None:
             game_summary["similarity"] = similarity
@@ -314,6 +318,28 @@ class Agent(ABC):
         df = pd.DataFrame(self._games_played)
 
         df.to_csv(output_file_path, sep="\t")
+
+    def get_games_played(self) -> list[dict]:
+        """
+        This method returns the list of dictionaries containing the games
+        played by the agent. Expected to use this for testing only.
+
+        Returns
+        -------
+        list[dict]
+            List of dictionaries, each dictionary contains details of a game:
+            "source_id" - the id of the source page
+            "source_title" - the title of the source page
+            "target_id" - the id of the target page
+            "target_title" - the title of the target page
+            "similarity" - the similarity of the source and target (may be 0 if the
+                    agent doesn't calculate a similarity)
+            "found_target" - True if reached target page, False otherwise
+            "num_steps" - the number of steps taken in the game (length of route - 1)
+            "route" - a list of page ids representing the route taken in the game, will
+                    include the source and target page ids
+        """
+        return self._games_played
 
 
 class GreedyEmbeddingAgent(Agent):
@@ -480,9 +506,7 @@ class PromptAgent(Agent):
         self,
         agent_tools: AgentToolsBase,
         max_rounds: int,
-        model_name: str,
-        temperature: float,
-        manual_seed: int = 42,
+        model: GenLM,
     ) -> None:
         """
         Class inherits from Agent and plays the wikipedia game by giving a
@@ -495,16 +519,9 @@ class PromptAgent(Agent):
             with which the game will be played
         max_rounds: int
             The maximum number of rounds that the game can be played for
-        model_name: str
-            The name of the deployed model to be used for prompting
-        temperature: float
-            The temperature of the GPT model, should be between 0 and 1 with a
-            value of 0 being the most deterministic and a value of 1 being most
-            random or creative
-        manual_seed: int
-            A seed to give the GPT model - at the time of writing, this feature
-            is in beta mode according to OpenAI so might not result in the model
-            behaving 100% deterministically.
+        model: GenLM
+            An object derived from GenLM which has the functionality of a generative
+            LLM to select a link from a given list.
 
         Raises
         ------
@@ -513,21 +530,7 @@ class PromptAgent(Agent):
         """
         super().__init__(agent_tools, max_rounds)
 
-        self._deployment_name = model_name
-
-        self._client = AzureOpenAI(
-            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            api_version="2024-02-01",
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        )
-
-        if temperature > 1 or temperature < 0:
-            err_msg = "The temperature is not a valid value."
-            raise ValueError(err_msg)
-
-        self._temp = temperature
-
-        self._seed = manual_seed
+        self._model = model
 
         self._system_content = (
             "You are a helpful assistant that helps me to play the Wikipedia Game! "
@@ -600,17 +603,19 @@ class PromptAgent(Agent):
 
         current_id = source_id
         route = [source_id]
-        reasons = [""]
+        reasons = ["Start page"]
         found_target = current_id == target_id
         while (len(route) <= self._max_rounds) and not found_target:
             next_page_id, reason = self._play_round(current_id, route, game_messages)
+            route.append(next_page_id)
+            reasons.append(reason)
             if next_page_id == -1:
                 break
             found_target = next_page_id == target_id
-            route.append(next_page_id)
-            reasons.append(reason)
             current_id = next_page_id
 
+        if len(route) > self._max_rounds and not found_target:
+            reasons[-1] = "Maximum number of steps reached"
         if verbose:
             self._print_route(source_title, target_title, found_target, route, reasons)
 
@@ -622,6 +627,7 @@ class PromptAgent(Agent):
             found_target,
             route,
             optimal_steps=optimal_steps,
+            err_msg=reasons[-1] if not found_target else "",
         )
 
         return found_target, route
@@ -703,27 +709,17 @@ class PromptAgent(Agent):
                 if m["content"] is None:
                     return -1, ""
 
-            completion = self._client.chat.completions.create(
-                model=self._deployment_name,
-                messages=messages,
-                temperature=self._temp,
-                seed=self._seed,
-                response_format={"type": "json_object"},
-            )
-
-            response = completion.choices[0].message.content
+            response = self._model.get_response(messages)
 
             retry = 0
-
-            while (
-                retry < 2
-            ):  # allow 1 retry - might want to make this value configurable?
+            err_msg = ""
+            while retry < 2:  # allow 1 retry - might want to add this as config?
                 if response is None:
                     # Will be 'None' if the content filter interferes, simulate a
                     # response and retry
                     retry += 1
                     response = (
-                        '{\n  "link": "Unknown link",\n "reason":'
+                        '{\n  "link": "Unknown link",\n "reason": "'
                         'I did not know which link to select."\n}'
                     )
                     content_retry = (
@@ -743,10 +739,14 @@ class PromptAgent(Agent):
                                 # Excellent - no hallucinations!
                                 next_link_id = self._tools.get_article_id(next_link)
                                 if next_link_id is None:
-                                    return -1, ""
+                                    err_msg = (
+                                        "Couldn't find article ID for " + next_link
+                                    )
+                                    return -1, err_msg
                                 return next_link_id, json_response["reason"]
                             # *sigh* - hallucination
                             retry += 1
+                            err_msg = "Hallucination - link not in list"
                             content_retry = (
                                 f'But "{next_link}" is not in the list '
                                 "that was provided! You must select a link from the "
@@ -759,6 +759,7 @@ class PromptAgent(Agent):
                     except json.decoder.JSONDecodeError:
                         # Some error when loading the response to JSON
                         retry += 1
+                        err_msg = "Response not in JSON format"
                         content_retry = (
                             "You did not provide your response in JSON "
                             "format - please try again!"
@@ -767,16 +768,9 @@ class PromptAgent(Agent):
                 messages.append(message_response)
                 message_retry = {"role": "user", "content": content_retry}
                 messages.append(message_retry)
-                completion = self._client.chat.completions.create(
-                    model=self._deployment_name,
-                    messages=messages,
-                    temperature=self._temp,
-                    seed=self._seed,
-                    response_format={"type": "json_object"},
-                )
 
-                response = completion.choices[0].message.content
+                response = self._model.get_response(messages)
             # The agent was not able to select a link
-            return -1, ""
+            return -1, err_msg
         # There are no links from the current page
-        return -1, ""
+        return -1, "Ran out of links to pick"
