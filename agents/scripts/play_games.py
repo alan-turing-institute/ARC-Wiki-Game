@@ -6,7 +6,7 @@ import os
 import yaml
 from numpy import array, loadtxt, savetxt
 
-from agents.agent_models.agent import GreedyEmbeddingAgent
+from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
 from agents.utils.data import get_data_folders, load_tools
 
 
@@ -189,15 +189,18 @@ def main():
                         # another batch job running for these games
                         os.makedirs(os.path.join(experiment_output_path), exist_ok=True)
                         savetxt(output_path, source_ids)
-                        # This logic will be updated when we have more than one agent
-                        # type
-                        agent = GreedyEmbeddingAgent(
-                            tools,
-                            max_rounds=config["experiments"][experiment]["params"][
-                                "max_rounds"
-                            ],
-                            model_name=model,
-                        )
+                        max_rounds=config["experiments"][experiment]["params"]["max_rounds"]
+                        if args.agent == "GreedyEmbeddingAgent":
+                            agent = GreedyEmbeddingAgent(
+                                tools,
+                                max_rounds=max_rounds,
+                                model_name=model,
+                            )
+                        elif args.agent == "PromptAgent":
+                            temperature = args.temperature
+                            agent = PromptAgent(
+                                tools, max_rounds=max_rounds, model_name=model, temperature=temperature
+                            )
                         agent.play_games(
                             source_ids[start_index : start_index + max_games],
                             target_ids[start_index : start_index + max_games],

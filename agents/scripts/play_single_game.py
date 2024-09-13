@@ -107,6 +107,23 @@ def parse_args():
         help="Only an option for the PromptAgent, default set to 0 but can be a value\
               between 0 and 1.",
     )
+    parser.add_argument(
+        "--top_p",
+        required=False,
+        default=0.1,
+        type=float,
+        help="Only an option for the PromptAgent, default set to 0.1 but can be a value\
+              between 0 and 1.",
+    )
+    parser.add_argument(
+        "--manual_seed",
+        required=False,
+        default=42,
+        type=int,
+        help="Only an option for the PromptAgent, the seed to use to set each \
+            response. Note that this does not guarantee that the model is \
+            deterministic (for OpenAI)",
+    )
     return parser.parse_args()
 
 
