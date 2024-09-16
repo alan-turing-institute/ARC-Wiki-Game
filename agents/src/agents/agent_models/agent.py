@@ -729,6 +729,8 @@ class PromptAgent(Agent):
                         "answer in JSON format with the selected link given "
                         'with key "link" and a justification given with key "reason".'
                     )
+                elif response == "BadRequestError":
+                    return -1, response
                 else:
                     # There is a response
                     try:

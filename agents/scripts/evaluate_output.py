@@ -44,7 +44,7 @@ def main():
             # have been creating during debugging and early testing. Will probably
             # want to change this line or make the prefix name configurable.
             output_folders = [
-                folder for folder in os.listdir(dataset_path) if folder[:4] == "test"
+                folder for folder in os.listdir(dataset_path) if folder == "step_list"
             ]
             for output_folder in output_folders:
                 output_folder_path = os.path.join(dataset_path, output_folder)
@@ -55,25 +55,43 @@ def main():
                         os.path.join(dataset_path, output_folder, output_file)
                     )
                 ]
+                li_outputs = []
+                prev_model_name = ""
+                output_files.sort()
                 for output_file in output_files:
                     file_path = os.path.join(dataset_path, output_folder, output_file)
+                    model_name = output_file.rsplit("_", 1)[0]
+                    if model_name != prev_model_name and len(prev_model_name) > 0:
+                        df = pd.concat(li_outputs, axis=0)
+                        sum_found_target = df["found_target"].sum()
+                        count_found_target = df["found_target"].count()
+                        perc_found_target = sum_found_target / count_found_target
+                        evaluation = {
+                            "input_dataset": dataset,
+                            "test_dataset": output_folder,
+                            "model": prev_model_name,
+                            "found_target_percentage": perc_found_target,
+                        }
+                        evaluations.append(evaluation)
+                        li_outputs = []
+
                     df = pd.read_csv(file_path, sep="\t")
-                    sum_found_target = df["found_target"].sum()
-                    count_found_target = df["found_target"].count()
-                    perc_found_target = sum_found_target / count_found_target
-                    # I know this is ugly, just want a quick way of getting the model
-                    # name out of the file name.
-                    model_name = output_file[:-4]
-                    model_name = model_name[len(dataset) + len(output_folder) + 2 :]
-                    evaluation = {
-                        "input_dataset": dataset,
-                        "test_dataset": output_folder,
-                        "model": model_name,
-                        "found_target_percentage": perc_found_target,
-                    }
-                    evaluations.append(evaluation)
+                    li_outputs.append(df)
+                    prev_model_name = model_name
+                df = pd.concat(li_outputs, axis=0)
+                sum_found_target = df["found_target"].sum()
+                count_found_target = df["found_target"].count()
+                perc_found_target = sum_found_target / count_found_target
+                evaluation = {
+                    "input_dataset": dataset,
+                    "test_dataset": output_folder,
+                    "model": prev_model_name,
+                    "found_target_percentage": perc_found_target,
+                }
+                evaluations.append(evaluation)
 
     df_evaluations = pd.DataFrame(evaluations)
+    df_evaluations.to_csv("evaluations_100.csv")
     print(df_evaluations)
 
 

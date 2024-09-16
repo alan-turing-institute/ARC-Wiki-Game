@@ -7,6 +7,7 @@ import yaml
 from numpy import array, loadtxt, savetxt
 
 from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
+from agents.agent_models.generative_lm import OpenAIModel
 from agents.utils.data import get_data_folders, load_tools
 
 
@@ -189,17 +190,29 @@ def main():
                         # another batch job running for these games
                         os.makedirs(os.path.join(experiment_output_path), exist_ok=True)
                         savetxt(output_path, source_ids)
-                        max_rounds=config["experiments"][experiment]["params"]["max_rounds"]
-                        if args.agent == "GreedyEmbeddingAgent":
+                        max_rounds = config["experiments"][experiment]["params"][
+                            "max_rounds"
+                        ]
+                        agent_class = config["experiments"][experiment]["agent_class"]
+                        if agent_class == "GreedyEmbeddingAgent":
                             agent = GreedyEmbeddingAgent(
                                 tools,
                                 max_rounds=max_rounds,
                                 model_name=model,
                             )
-                        elif args.agent == "PromptAgent":
-                            temperature = args.temperature
+                        elif agent_class == "PromptAgent":
+                            temperature = config["experiments"][experiment]["params"][
+                                "temperature"
+                            ]
+                            top_p = config["experiments"][experiment]["params"]["top_p"]
+                            manual_seed = config["experiments"][experiment]["params"][
+                                "manual_seed"
+                            ]
+                            gen_model = OpenAIModel(
+                                model, temperature, top_p, manual_seed
+                            )
                             agent = PromptAgent(
-                                tools, max_rounds=max_rounds, model_name=model, temperature=temperature
+                                tools, max_rounds=max_rounds, model=gen_model
                             )
                         agent.play_games(
                             source_ids[start_index : start_index + max_games],

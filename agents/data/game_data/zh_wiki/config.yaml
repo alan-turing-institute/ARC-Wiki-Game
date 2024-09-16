@@ -58,3 +58,15 @@ experiments:
       - intfloat/multilingual-e5-large
     params:
       max_rounds: 50
+
+  step_list_prompt:
+    agent_class: PromptAgent
+    game_datasets:
+      - zh_wiki_step_list
+    models:
+      - wikigame-gpt-4o
+    params:
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
