@@ -59,7 +59,7 @@ experiments:
       - intfloat/multilingual-e5-small
       - distiluse-base-multilingual-cased-v2
     params:
-      max_rounds: 50
+      max_rounds: 100
 
   step_list_prompt:
     agent_class: PromptAgent

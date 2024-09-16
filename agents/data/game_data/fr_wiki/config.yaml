@@ -59,7 +59,7 @@ experiments:
       - intfloat/multilingual-e5-large
       - intfloat/multilingual-e5-small
     params:
-      max_rounds: 50
+      max_rounds: 100
 
   step_list_prompt:
     agent_class: PromptAgent
