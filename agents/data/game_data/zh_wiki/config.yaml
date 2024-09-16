@@ -56,6 +56,8 @@ experiments:
       - all-MiniLM-L6-v2 # Not trained on Chinese, so might not work!
       - jinaai/jina-embeddings-v2-base-zh
       - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
+      - distiluse-base-multilingual-cased-v2
     params:
       max_rounds: 50
 

@@ -81,6 +81,7 @@ experiments:
       - distiluse-base-multilingual-cased-v2
       - jinaai/jina-embeddings-v2-base-zh
       - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
     params:
       max_rounds: 50
 

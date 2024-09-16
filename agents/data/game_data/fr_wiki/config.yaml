@@ -57,6 +57,7 @@ experiments:
       - distiluse-base-multilingual-cased-v2
       - all-MiniLM-L6-v2
       - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
     params:
       max_rounds: 50
 
