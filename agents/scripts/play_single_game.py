@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import argparse
 
-from agents.agent_models.agent import GreedyEmbeddingAgent
+from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
+from agents.agent_models.generative_lm import OpenAIModel
 from agents.utils.data import load_tools
 
 
@@ -99,6 +100,31 @@ def parse_args():
         help="The name of the input dataset which the experiments are to be run.\
              This is expected to match the name of a folder in the `input_data` folder",
     )
+    parser.add_argument(
+        "--temperature",
+        required=False,
+        default=0,
+        type=float,
+        help="Only an option for the PromptAgent, default set to 0 but can be a value\
+              between 0 and 1.",
+    )
+    parser.add_argument(
+        "--top_p",
+        required=False,
+        default=0.1,
+        type=float,
+        help="Only an option for the PromptAgent, default set to 0.1 but can be a value\
+              between 0 and 1.",
+    )
+    parser.add_argument(
+        "--manual_seed",
+        required=False,
+        default=42,
+        type=int,
+        help="Only an option for the PromptAgent, the seed to use to set each \
+            response. Note that this does not guarantee that the model is \
+            deterministic (for OpenAI)",
+    )
     return parser.parse_args()
 
 
@@ -120,17 +146,24 @@ def main():
         agent = GreedyEmbeddingAgent(
             tools, max_rounds=max_rounds, model_name=model_name
         )
-        agent.play_game(source, target, verbose=verbose)
-        if args.folder_name is not None and args.file_name is not None:
-            folder_name = args.folder_name
-            file_name = args.file_name
-            agent.save_games(folder_name=folder_name, file_name=file_name)
+    elif args.agent == "PromptAgent":
+        temperature = args.temperature
+        top_p = args.top_p
+        manual_seed = args.manual_seed
+        gen_model = OpenAIModel(model_name, temperature, top_p, manual_seed)
+        agent = PromptAgent(tools, max_rounds=max_rounds, model=gen_model)
     else:
         raise ValueError(
             "Invalid name for agent provided: "
             + args.agent
-            + "\nCurrently the only valid values are: `GreedyEmbeddingAgent`"
+            + "\nCurrently the only valid values are: `GreedyEmbeddingAgent` or \
+                `PromptAgent`"
         )
+    agent.play_game(source, target, verbose=verbose)
+    if args.folder_name is not None and args.file_name is not None:
+        folder_name = args.folder_name
+        file_name = args.file_name
+        agent.save_games(folder_name=folder_name, file_name=file_name)
 
 
 if __name__ == "__main__":
