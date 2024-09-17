@@ -27,3 +27,20 @@ experiments:
       temperature: 0
       top_p: 0.1
       manual_seed: 42
+
+  step_list_titles:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - fr_wiki_step_list
+    models:
+      - distiluse-base-multilingual-cased-v1
+      - stsb-xlm-r-multilingual
+      - paraphrase-multilingual-mpnet-base-v2
+      - paraphrase-multilingual-MiniLM-L12-v2
+      - distiluse-base-multilingual-cased-v2
+      - all-MiniLM-L6-v2
+      - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
+    params:
+      max_rounds: 100
+      use_titles: True

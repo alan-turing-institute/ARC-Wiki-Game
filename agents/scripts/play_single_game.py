@@ -125,6 +125,14 @@ def parse_args():
             response. Note that this does not guarantee that the model is \
             deterministic (for OpenAI)",
     )
+    parser.add_argument(
+        "--titles_only",
+        required=False,
+        type=bool,
+        default=False,
+        help="If set to True, then page / link titles will be used instead of the page \
+            summaries",
+    )
     return parser.parse_args()
 
 
@@ -143,8 +151,9 @@ def main():
     tools = load_tools(data_path, input_dataset_name, load_data_to_ram, use_old_title)
 
     if args.agent == "GreedyEmbeddingAgent":
+        use_titles = args.titles_only
         agent = GreedyEmbeddingAgent(
-            tools, max_rounds=max_rounds, model_name=model_name, use_titles=True
+            tools, max_rounds=max_rounds, model_name=model_name, use_titles=use_titles
         )
     elif args.agent == "PromptAgent":
         temperature = args.temperature

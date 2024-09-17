@@ -195,10 +195,20 @@ def main():
                         ]
                         agent_class = config["experiments"][experiment]["agent_class"]
                         if agent_class == "GreedyEmbeddingAgent":
+                            if (
+                                "use_titles"
+                                in config["experiments"][experiment]["params"]
+                            ):
+                                use_titles = config["experiments"][experiment][
+                                    "params"
+                                ]["use_titles"]
+                            else:
+                                use_titles = False
                             agent = GreedyEmbeddingAgent(
                                 tools,
                                 max_rounds=max_rounds,
                                 model_name=model,
+                                use_titles=use_titles,
                             )
                         elif agent_class == "PromptAgent":
                             temperature = config["experiments"][experiment]["params"][
