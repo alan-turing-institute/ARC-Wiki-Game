@@ -144,7 +144,7 @@ def main():
 
     if args.agent == "GreedyEmbeddingAgent":
         agent = GreedyEmbeddingAgent(
-            tools, max_rounds=max_rounds, model_name=model_name
+            tools, max_rounds=max_rounds, model_name=model_name, use_titles=True
         )
     elif args.agent == "PromptAgent":
         temperature = args.temperature

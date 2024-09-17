@@ -344,7 +344,11 @@ class Agent(ABC):
 
 class GreedyEmbeddingAgent(Agent):
     def __init__(
-        self, agent_tools: AgentToolsBase, max_rounds: int, model_name: str
+        self,
+        agent_tools: AgentToolsBase,
+        max_rounds: int,
+        model_name: str,
+        use_titles: bool = False,
     ) -> None:
         """
         Class inherits from Agent and plays the wikipedia game by comparing the
@@ -361,6 +365,9 @@ class GreedyEmbeddingAgent(Agent):
             The maximum number of rounds that the game can be played for
         model_name: str
             The name of the sentence transformer model to be used for embeddings
+        use_titles: bool
+            If set to True, the page / link titles will be used instead of summaries.
+            The summaries will be used by default.
         """
         super().__init__(agent_tools, max_rounds)
 
@@ -373,6 +380,7 @@ class GreedyEmbeddingAgent(Agent):
             self.device = "cpu"
 
         self._model = get_model_from_name(model_name).to(self.device)
+        self._use_titles = use_titles
 
     def play_game(
         self,
@@ -430,7 +438,9 @@ class GreedyEmbeddingAgent(Agent):
         route = [source_id]
         found_target = current_id == target_id
         while (len(route) <= self._max_rounds) and not found_target:
-            next_page_id = self._play_round(current_id, route, target_embedding)
+            next_page_id = self._play_round(
+                current_id, route, target_embedding, self._use_titles
+            )
             if next_page_id == -1:
                 break
             found_target = next_page_id == target_id
@@ -454,7 +464,11 @@ class GreedyEmbeddingAgent(Agent):
         return found_target, route
 
     def _play_round(
-        self, current_page_id: int, route: list[int], target_summary: np.ndarray
+        self,
+        current_page_id: int,
+        route: list[int],
+        target_summary: np.ndarray,
+        use_titles: bool,
     ) -> int:
         """
         Given a current page id, this method gets all the links that exist on the
@@ -472,26 +486,32 @@ class GreedyEmbeddingAgent(Agent):
             The rotue taken so far in the current game.
         target_summary: array
             An embedding of the summary of the target page.
+        use_titles: bool
+            If set to True, then page / link titles will be used instead of the page
+            summaries
 
         Returns
         -------
         int
             The ID of the page to navigate to next
         """
-        forward_summaries = self._tools.get_forward_summaries(current_page_id)
-        if len(forward_summaries) > 0:
+        if use_titles:
+            forward_text = self._tools.get_forward_titles(current_page_id)
+        else:
+            forward_text = self._tools.get_forward_summaries(current_page_id)
+        if len(forward_text) > 0:
             page_ids = [
-                summary_info[0]
-                for summary_info in forward_summaries
-                if (summary_info[0] not in route) and (summary_info[1] is not None)
+                page_info[0]
+                for page_info in forward_text
+                if (page_info[0] not in route) and (page_info[1] is not None)
             ]
-            summaries = [
-                summary_info[1]
-                for summary_info in forward_summaries
-                if (summary_info[0] not in route) and (summary_info[1] is not None)
+            page_text = [
+                page_info[1]
+                for page_info in forward_text
+                if (page_info[0] not in route) and (page_info[1] is not None)
             ]
-            if len(summaries) > 0:
-                embeddings = self._model.encode(summaries)
+            if len(page_text) > 0:
+                embeddings = self._model.encode(page_text)
 
                 similarities = self._model.similarity(embeddings, target_summary)
                 np_similarities = similarities.numpy()
