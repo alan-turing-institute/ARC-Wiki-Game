@@ -1,50 +1,5 @@
 
 experiments:
-  test_100:
-    agent_class: GreedyEmbeddingAgent
-    game_datasets:
-      - fr_wiki_test_100
-    models:
-      - distiluse-base-multilingual-cased-v1
-      - stsb-xlm-r-multilingual
-      - paraphrase-multilingual-mpnet-base-v2
-      - paraphrase-multilingual-MiniLM-L12-v2
-      - distiluse-base-multilingual-cased-v2
-      - all-MiniLM-L6-v2
-      - intfloat/multilingual-e5-large
-    params:
-      max_rounds: 50
-
-  test_1000:
-    agent_class: GreedyEmbeddingAgent
-    game_datasets:
-      - fr_wiki_test_1000
-    models:
-      - distiluse-base-multilingual-cased-v1
-      - stsb-xlm-r-multilingual
-      - paraphrase-multilingual-mpnet-base-v2
-      - paraphrase-multilingual-MiniLM-L12-v2
-      - distiluse-base-multilingual-cased-v2
-      - all-MiniLM-L6-v2
-      - intfloat/multilingual-e5-large
-    params:
-      max_rounds: 50
-
-  test_10000:
-    agent_class: GreedyEmbeddingAgent
-    game_datasets:
-      - fr_wiki_test_10000
-    models:
-      - distiluse-base-multilingual-cased-v1
-      - stsb-xlm-r-multilingual
-      - paraphrase-multilingual-mpnet-base-v2
-      - paraphrase-multilingual-MiniLM-L12-v2
-      - distiluse-base-multilingual-cased-v2
-      - all-MiniLM-L6-v2
-      - intfloat/multilingual-e5-large
-    params:
-      max_rounds: 50
-
   step_list:
     agent_class: GreedyEmbeddingAgent
     game_datasets:
