@@ -50,4 +50,5 @@ jobs:
       - name: Test package
         run: |
           python -m pytest ${{ matrix.package }}/ -ra--durations=20
+          coverage run
           coverage report
