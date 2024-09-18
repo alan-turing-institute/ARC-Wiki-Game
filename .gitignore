@@ -11,6 +11,9 @@ agents/data/input_data/*
 agents/scripts/scratch.py
 !agents/data/input_data/README-input-data.md
 agents/data/output_data/*
+agents/data/game_data/en_wiki/en_wiki_step_list.csv
+agents/data/game_data/fr_wiki/fr_wiki_step_list.csv
+agents/data/game_data/zh_wiki/zh_wiki_step_list.csv
 
 # Graph Preperation
 

@@ -4,7 +4,7 @@ import os
 from abc import ABC, abstractmethod
 from typing import Any
 
-from openai import AzureOpenAI
+from openai import AzureOpenAI, BadRequestError
 
 
 class GenLM(ABC):
@@ -57,13 +57,16 @@ class OpenAIModel(GenLM):
         )
 
     def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
-        completion = self._client.chat.completions.create(
-            model=self._deployment_name,
-            messages=messages,
-            temperature=self._temperature,
-            top_p=self._top_p,
-            seed=self._seed,
-            response_format={"type": "json_object"},
-        )
+        try:
+            completion = self._client.chat.completions.create(
+                model=self._deployment_name,
+                messages=messages,
+                temperature=self._temperature,
+                top_p=self._top_p,
+                seed=self._seed,
+                response_format={"type": "json_object"},
+            )
 
-        return completion.choices[0].message.content
+            return completion.choices[0].message.content
+        except BadRequestError:
+            return "BadRequestError"

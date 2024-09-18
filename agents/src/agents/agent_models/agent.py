@@ -33,7 +33,11 @@ class Agent(ABC):
 
     @abstractmethod
     def play_game(
-        self, source_page: int | str, target_page: int | str, verbose: bool = False
+        self,
+        source_page: int | str,
+        target_page: int | str,
+        verbose: bool = False,
+        optimal_steps: int | None = None,
     ) -> tuple[bool, list[int]]:
         """
         This method will take the source and target page IDs or titles and will
@@ -55,6 +59,8 @@ class Agent(ABC):
             Either the target page ID or title
         verbose: bool
             If set to True, then the route is printed out
+        optimal_steps: int | None
+            If not none, then this is the optimal number of steps to solve the game
 
         Returns
         -------
@@ -70,6 +76,7 @@ class Agent(ABC):
         output_folder: str,
         output_file_name: str,
         save_n_games: int = 100,
+        optimal_steps: list[int] | None = None,
     ) -> None:
         """
         This method takes a list of source page IDs, target page IDs, an output
@@ -88,18 +95,29 @@ class Agent(ABC):
             The name of the file to save the results in
         save_n_games: int
             The output will be saved every save_n_games
+        optimal_steps: list[int]
+            A list of the optimal number of steps for playing each game, can be an
+            empty list. If not an empty list, then the optimal number of steps will
+            be saved with the output.
 
         Raises
         ------
         ValueError
-            If the number of source and target IDs is different
+            If the number of source and target IDs is different, and if the number
+            of steps doesn't match the number of source / target IDs (if the number
+            of optimal steps is greater than zero)
         """
         if len(source_ids) != len(target_ids):
             err_msg = "The number of source and target IDs is different."
             raise ValueError(err_msg)
 
+        if optimal_steps is not None and (len(optimal_steps) != len(source_ids)):
+            err_msg = "The number of steps doesn't match the number of games"
+            raise ValueError(err_msg)
+
         for i in range(len(source_ids)):
-            self.play_game(source_ids[i], target_ids[i])
+            num_steps = optimal_steps[i] if optimal_steps is not None else None
+            self.play_game(source_ids[i], target_ids[i], optimal_steps=num_steps)
             if i % save_n_games == 0:
                 # Note that this will save the first record (when i = 0)
                 # and then save every save_n_games - saving the first
@@ -237,7 +255,8 @@ class Agent(ABC):
         target_title: str,
         found_target: bool,
         route: list,
-        similarity: float = 0,
+        similarity: float | None = None,
+        optimal_steps: int | None = None,
         err_msg: str = "",
     ) -> None:
         """
@@ -257,9 +276,11 @@ class Agent(ABC):
             If the game was successful in finding the target page
         route: list
             A list of page IDs representing the route taken
-        similarity: float
+        similarity: float | None
             A value representing the similiarity of the source and target pages - this
             will not be provided for all types of agents
+        optimal_steps: int | None
+            If not none, then this is the optimal number of steps to solve the game
         """
         num_steps = len(route) - 2 if route[-1] == -1 else len(route) - 1
         game_summary = {
@@ -267,12 +288,16 @@ class Agent(ABC):
             "source_title": source_title,
             "target_id": target_id,
             "target_title": target_title,
-            "similarity": similarity,
             "found_target": found_target,
             "num_steps": num_steps,
             "route": route,
             "error_message": err_msg,
         }
+        if similarity is not None:
+            game_summary["similarity"] = similarity
+        if optimal_steps is not None:
+            game_summary["optimal_steps"] = optimal_steps
+        game_summary["route"] = route
 
         self._games_played.append(game_summary)
 
@@ -350,7 +375,11 @@ class GreedyEmbeddingAgent(Agent):
         self._model = get_model_from_name(model_name).to(self.device)
 
     def play_game(
-        self, source_page: int | str, target_page: int | str, verbose: bool = False
+        self,
+        source_page: int | str,
+        target_page: int | str,
+        verbose: bool = False,
+        optimal_steps: int | None = None,
     ) -> tuple[bool, list[int]]:
         """
         This method takes the source and target page IDs or titles and implements a
@@ -376,6 +405,8 @@ class GreedyEmbeddingAgent(Agent):
             Either the target page ID or title
         verbose: bool
             If set to True, then the route is printed out
+        optimal_steps: int | None
+            If not none, then this is the optimal number of steps to solve the game
 
         Returns
         -------
@@ -417,6 +448,7 @@ class GreedyEmbeddingAgent(Agent):
             found_target,
             route,
             similarity,
+            optimal_steps,
         )
 
         return found_target, route
@@ -520,7 +552,11 @@ class PromptAgent(Agent):
         )
 
     def play_game(
-        self, source_page: int | str, target_page: int | str, verbose: bool = False
+        self,
+        source_page: int | str,
+        target_page: int | str,
+        verbose: bool = False,
+        optimal_steps: int | None = None,
     ) -> tuple[bool, list[int]]:
         """
         This method takes the source and target page IDs or titles and implements a
@@ -545,6 +581,8 @@ class PromptAgent(Agent):
             Either the target page ID or title
         verbose: bool
             If set to True, then the route is printed out
+        optimal_steps: int | None
+            If not none, then this is the optimal number of steps to solve the game
 
         Returns
         -------
@@ -588,6 +626,7 @@ class PromptAgent(Agent):
             target_title,
             found_target,
             route,
+            optimal_steps=optimal_steps,
             err_msg=reasons[-1] if not found_target else "",
         )
 
@@ -690,6 +729,8 @@ class PromptAgent(Agent):
                         "answer in JSON format with the selected link given "
                         'with key "link" and a justification given with key "reason".'
                     )
+                elif response == "BadRequestError":
+                    return -1, response
                 else:
                     # There is a response
                     try:

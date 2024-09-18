@@ -4,9 +4,10 @@ import argparse
 import os
 
 import yaml
-from numpy import loadtxt
+from numpy import array, loadtxt, savetxt
 
-from agents.agent_models.agent import GreedyEmbeddingAgent
+from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
+from agents.agent_models.generative_lm import OpenAIModel
 from agents.utils.data import get_data_folders, load_tools
 
 
@@ -75,6 +76,15 @@ def parse_args():
         help="When loading the wiki data, this can be used if the old title format is\
             to be used",
     )
+    parser.add_argument(
+        "--max_games",
+        required=False,
+        default=5000,
+        type=int,
+        help="The maximum number of games that can be run for any combination of \
+            agent, experiment and model. Might want to set to a low value, e.g. 10, \
+            when testing locally.",
+    )
     return parser.parse_args()
 
 
@@ -82,13 +92,19 @@ def load_test_dataset(
     input_dataset_name, game_data_dir, game_dataset_name
 ) -> tuple[list[int], list[int]]:
     game_data_path = os.path.join(
-        game_data_dir, input_dataset_name, game_dataset_name + ".txt"
+        game_data_dir, input_dataset_name, game_dataset_name + ".csv"
     )
 
-    source_target_ids = loadtxt(game_data_path, dtype=int, delimiter="\t")
+    source_target_ids = loadtxt(game_data_path, dtype=int, delimiter=",", skiprows=1)
+    steps = None
+    if source_target_ids.shape[1] == 3:
+        # The file also contains the number of steps, only load the valid games
+        source_target_ids = array([row for row in source_target_ids if row[2] > 0])
+        steps = [int(i) for i in source_target_ids[:, 2]]
+
     source_ids = [int(i) for i in source_target_ids[:, 0]]
     target_ids = [int(i) for i in source_target_ids[:, 1]]
-    return source_ids, target_ids
+    return source_ids, target_ids, steps
 
 
 def main():
@@ -98,6 +114,7 @@ def main():
     load_data_to_ram = args.load_data_to_ram
     save_n_games = args.save_n_games
     use_old_title = args.old_title
+    max_games = args.max_games
 
     game_data_dir, _, output_data_dir = get_data_folders(data_path)
     # Load config file
@@ -145,7 +162,7 @@ def main():
         experiment_output_path = os.path.join(output_path, experiment_name)
         os.makedirs(experiment_output_path, exist_ok=True)
         for game_dataset in config["experiments"][experiment]["game_datasets"]:
-            source_ids, target_ids = load_test_dataset(
+            source_ids, target_ids, steps = load_test_dataset(
                 input_dataset_name, game_data_dir, game_dataset
             )
             # Create a list of model names to be run
@@ -158,27 +175,54 @@ def main():
                 # No model specified in config, so run them all
                 models = config["experiments"][experiment]["models"]
             for model in models:
-                output_filename = game_dataset + "_" + model
-                output_filename = output_filename.replace("/", "_")
-                # We only run this combination if an output file doesn't already exist
-                if not os.path.exists(
-                    os.path.join(experiment_output_path, output_filename + ".csv")
-                ):
-                    # This logic will be updated when we have more than one agent type
-                    agent = GreedyEmbeddingAgent(
-                        tools,
-                        max_rounds=config["experiments"][experiment]["params"][
+                for start_index in range(0, len(source_ids), max_games):
+                    output_filename = (
+                        game_dataset + "_" + model + "_" + str(start_index)
+                    )
+                    output_filename = output_filename.replace("/", "_")
+                    output_path = os.path.join(
+                        experiment_output_path, output_filename + ".csv"
+                    )
+                    # We only run this combination if an output file doesn't already
+                    # exist
+                    if not os.path.exists(output_path):
+                        # Save a placeholder file in the output path - will prevent
+                        # another batch job running for these games
+                        os.makedirs(os.path.join(experiment_output_path), exist_ok=True)
+                        savetxt(output_path, source_ids)
+                        max_rounds = config["experiments"][experiment]["params"][
                             "max_rounds"
-                        ],
-                        model_name=model,
-                    )
-                    agent.play_games(
-                        source_ids,
-                        target_ids,
-                        experiment_output_path,
-                        output_filename,
-                        save_n_games,
-                    )
+                        ]
+                        agent_class = config["experiments"][experiment]["agent_class"]
+                        if agent_class == "GreedyEmbeddingAgent":
+                            agent = GreedyEmbeddingAgent(
+                                tools,
+                                max_rounds=max_rounds,
+                                model_name=model,
+                            )
+                        elif agent_class == "PromptAgent":
+                            temperature = config["experiments"][experiment]["params"][
+                                "temperature"
+                            ]
+                            top_p = config["experiments"][experiment]["params"]["top_p"]
+                            manual_seed = config["experiments"][experiment]["params"][
+                                "manual_seed"
+                            ]
+                            gen_model = OpenAIModel(
+                                model, temperature, top_p, manual_seed
+                            )
+                            agent = PromptAgent(
+                                tools, max_rounds=max_rounds, model=gen_model
+                            )
+                        agent.play_games(
+                            source_ids[start_index : start_index + max_games],
+                            target_ids[start_index : start_index + max_games],
+                            experiment_output_path,
+                            output_filename,
+                            save_n_games,
+                            optimal_steps=steps[start_index : start_index + max_games],
+                        )
+                        break
 
 
 if __name__ == "__main__":
