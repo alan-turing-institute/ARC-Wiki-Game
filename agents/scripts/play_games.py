@@ -6,7 +6,7 @@ import os
 import yaml
 from numpy import array, loadtxt, savetxt
 
-from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
+from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent, TFIDFAgent
 from agents.agent_models.generative_lm import OpenAIModel
 from agents.utils.data import get_data_folders, load_tools
 
@@ -189,7 +189,7 @@ def main():
                         # Save a placeholder file in the output path - will prevent
                         # another batch job running for these games
                         os.makedirs(os.path.join(experiment_output_path), exist_ok=True)
-                        savetxt(output_path, source_ids)
+                        savetxt(output_path, [])
                         max_rounds = config["experiments"][experiment]["params"][
                             "max_rounds"
                         ]
@@ -209,6 +209,12 @@ def main():
                                 max_rounds=max_rounds,
                                 model_name=model,
                                 use_titles=use_titles,
+                            )
+                        elif agent_class == "TFIDFAgent":
+                            agent = TFIDFAgent(
+                                tools,
+                                max_rounds=max_rounds,
+                                dataset_name=model,
                             )
                         elif agent_class == "PromptAgent":
                             temperature = config["experiments"][experiment]["params"][

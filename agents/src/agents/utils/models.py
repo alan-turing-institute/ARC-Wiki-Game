@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import gensim.downloader as gensim_api
+from gensim.corpora import Dictionary
+from gensim.models import TfidfModel
 from huggingface_hub import HfApi
 from sentence_transformers import SentenceTransformer, SimilarityFunction
 
 
-def get_model_from_name(model_name: str) -> SentenceTransformer:
+def get_sentence_transformer(model_name: str) -> SentenceTransformer:
     """
     Parameters
     ----------
@@ -38,3 +41,17 @@ def get_model_from_name(model_name: str) -> SentenceTransformer:
             similarity_fn_name=SimilarityFunction.COSINE,
         )
     raise ValueError("The model name " + model_name + " is not a valid model name.")
+
+
+def get_tfidf_model(dataset_name: str) -> tuple[TfidfModel, list[str], Dictionary]:
+    corpora = list(gensim_api.info()["corpora"])
+    if dataset_name in corpora:
+        dataset = gensim_api.load(dataset_name)
+        dct = Dictionary(dataset)
+        corpus = [dct.doc2bow(line) for line in dataset]
+        vocab = [dct[i] for i in range(len(dct))]
+        model = TfidfModel(corpus)
+        return model, vocab, dct
+    raise ValueError(
+        "The dataset name " + dataset_name + " does not exist in the Gensim corpora."
+    )

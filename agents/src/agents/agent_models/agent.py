@@ -6,11 +6,12 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
 from torch import backends, cuda, device
 
 from agents.agent_models.generative_lm import GenLM
 from agents.agent_models.tools import AgentToolsBase
-from agents.utils.models import get_model_from_name
+from agents.utils.models import get_sentence_transformer, get_tfidf_model
 
 
 class Agent(ABC):
@@ -342,6 +343,176 @@ class Agent(ABC):
         return self._games_played
 
 
+class TFIDFAgent(Agent):
+    def __init__(
+        self,
+        agent_tools: AgentToolsBase,
+        max_rounds: int,
+        dataset_name: str,
+    ) -> None:
+        """
+        Class inherits from Agent and plays the wikipedia game by [TO DO]
+
+        Parameters
+        ----------
+        agent_tools: AgentToolsBase
+            An instance of AgentToolsBase that will have been pre-loaded with the data
+            with which the game will be played
+        max_rounds: int
+            The maximum number of rounds that the game can be played for
+        dataset_name: str
+            The name of the corpus to be downloaded to create the TFIDF model
+        """
+        super().__init__(agent_tools, max_rounds)
+
+        self._model, self._vocab, self._dictionary = get_tfidf_model(dataset_name)
+
+    def _vectorise(self, text: str) -> np.array:
+        list_words = text.split()
+        bow = self._dictionary.doc2bow(list_words)
+        tfidf_output = self._model[bow]
+        vector = np.zeros(len(self._vocab))
+        for id, freq in tfidf_output:
+            vector[id] = freq
+        return vector
+
+    def _similarity(
+        self, candidate_vectors: list[np.array], target_vector: np.array
+    ) -> np.array:
+        return cosine_similarity(candidate_vectors, [target_vector])
+
+    def play_game(
+        self,
+        source_page: int | str,
+        target_page: int | str,
+        verbose: bool = False,
+        optimal_steps: int | None = None,
+    ) -> tuple[bool, list[int]]:
+        """
+        This method takes the source and target page IDs or titles and implements a
+        greedy approach to find a route between the two pages. The approach considers
+        the embedding of each of the summaries on the current page, and choses the one
+        that is closest to the target page. The cosine distance is set by default
+        when creating the sentence transformer model.
+
+        If a route is found then the method returns True and a list of the route found
+        (composed of page IDs). If a route is not found then the method returns False
+        and a list of the route taken without reaching the target page. A route may not
+        be found for serveral reasons including:
+        - Needing to take more than the maximum number of rounds the object has
+          been set
+        - Reaching a page where there are either no links, or no links to which
+          the agent has not yet navigated.
+
+        Parameters
+        ----------
+        source_page: int | str
+            Either the source page ID or title
+        target_page: int | str
+            Either the target page ID or title
+        verbose: bool
+            If set to True, then the route is printed out
+        optimal_steps: int | None
+            If not none, then this is the optimal number of steps to solve the game
+
+        Returns
+        -------
+        tuple[bool, list[int]]
+            Returns a boolean that indicates whether a route was found, and a list of
+            the route that was taken - the items in the list will be the page IDs
+        """
+        (
+            source_id,
+            source_title,
+            source_summary,
+            target_id,
+            target_title,
+            target_summary,
+        ) = self._initialise_game(source_page, target_page)
+
+        source_embedding = self._vectorise(source_summary)
+        target_embedding = self._vectorise(target_summary)
+        similarity = self._similarity([source_embedding], target_embedding)[0]
+
+        current_id = source_id
+        route = [source_id]
+        found_target = current_id == target_id
+        while (len(route) <= self._max_rounds) and not found_target:
+            next_page_id = self._play_round(current_id, route, target_embedding)
+            if next_page_id == -1:
+                break
+            found_target = next_page_id == target_id
+            route.append(next_page_id)
+            current_id = next_page_id
+
+        if verbose:
+            self._print_route(source_title, target_title, found_target, route)
+
+        self.record_game(
+            source_id,
+            source_title,
+            target_id,
+            target_title,
+            found_target,
+            route,
+            similarity,
+            optimal_steps,
+        )
+
+        return found_target, route
+
+    def _play_round(
+        self,
+        current_page_id: int,
+        route: list[int],
+        target_summary: np.ndarray,
+    ) -> int:
+        """
+        Given a current page id, this method gets all the links that exist on the
+        page. It compares the links to the target summary and returns the ID of the
+        page to navigate to next. This implementation selects the next page by
+        calculating the similarity of the target summary embedding to the summary
+        of each possible link page - the link that has the most similar summary is
+        the one that is selected.
+
+        Parameters
+        ----------
+        current_page_id: int
+            The ID of the current page
+        route: list[int]
+            The rotue taken so far in the current game.
+        target_summary: array
+            An embedding of the summary of the target page.
+
+        Returns
+        -------
+        int
+            The ID of the page to navigate to next
+        """
+        forward_text = self._tools.get_forward_summaries(current_page_id)
+        if len(forward_text) > 0:
+            page_ids = [
+                page_info[0]
+                for page_info in forward_text
+                if (page_info[0] not in route) and (page_info[1] is not None)
+            ]
+            page_text = [
+                page_info[1]
+                for page_info in forward_text
+                if (page_info[0] not in route) and (page_info[1] is not None)
+            ]
+            if len(page_text) > 0:
+                embeddings = []
+                for text in page_text:
+                    embeddings.append(self._vectorise(str(text)))
+
+                similarities = self._similarity(embeddings, target_summary)
+                max_id = np.argmax(similarities)
+                return page_ids[max_id]
+            return -1
+        return -1
+
+
 class GreedyEmbeddingAgent(Agent):
     def __init__(
         self,
@@ -353,7 +524,7 @@ class GreedyEmbeddingAgent(Agent):
         """
         Class inherits from Agent and plays the wikipedia game by comparing the
         similarity of summary embeddings of links on the current page and the
-        target page. The algorithm selects the link that has a summary that
+        target page. The algorithm selects the link that has a summary or title that
         is scored as being most similar to the target page summary.
 
         Parameters
@@ -379,7 +550,7 @@ class GreedyEmbeddingAgent(Agent):
         else:
             self.device = "cpu"
 
-        self._model = get_model_from_name(model_name).to(self.device)
+        self._model = get_sentence_transformer(model_name).to(self.device)
         self._use_titles = use_titles
 
     def play_game(
