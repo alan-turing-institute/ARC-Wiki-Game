@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
+from gensim.parsing.preprocessing import preprocess_string
 from sklearn.metrics.pairwise import cosine_similarity
 from torch import backends, cuda, device
 
@@ -365,10 +366,12 @@ class TFIDFAgent(Agent):
         """
         super().__init__(agent_tools, max_rounds)
 
-        self._model, self._vocab, self._dictionary = get_tfidf_model(dataset_name)
+        self._model, self._vocab, self._dictionary = get_tfidf_model(
+            dataset_name, preprocess_string
+        )
 
     def _vectorise(self, text: str) -> np.array:
-        list_words = text.split()
+        list_words = preprocess_string(text)
         bow = self._dictionary.doc2bow(list_words)
         tfidf_output = self._model[bow]
         vector = np.zeros(len(self._vocab))

@@ -61,7 +61,6 @@ experiments:
     game_datasets:
       - en_wiki_step_list
     models:
-      - fake-news
       - wiki-english-20171001
     params:
       max_rounds: 100

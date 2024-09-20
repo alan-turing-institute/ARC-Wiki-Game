@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Callable
+
 import gensim.downloader as gensim_api
 from gensim.corpora import Dictionary
 from gensim.models import TfidfModel
@@ -43,12 +45,29 @@ def get_sentence_transformer(model_name: str) -> SentenceTransformer:
     raise ValueError("The model name " + model_name + " is not a valid model name.")
 
 
-def get_tfidf_model(dataset_name: str) -> tuple[TfidfModel, list[str], Dictionary]:
+def get_tfidf_model(
+    dataset_name: str, preprocess_func: Callable[[str], list[str]]
+) -> tuple[TfidfModel, list[str], Dictionary]:
     corpora = list(gensim_api.info()["corpora"])
-    if dataset_name in corpora:
+    if dataset_name in corpora and dataset_name == "wiki-english-20171001":
         dataset = gensim_api.load(dataset_name)
-        dct = Dictionary(dataset)
-        corpus = [dct.doc2bow(line) for line in dataset]
+        dct = Dictionary()
+        max_lines = 100000
+        for id, line in enumerate(dataset):
+            texts = line["section_texts"]
+            processed_texts = [preprocess_func(text) for text in texts]
+            dct.add_documents(processed_texts)
+            if id > max_lines:
+                break
+        corpus = []
+        for id, line in enumerate(dataset):
+            texts = line["section_texts"]
+            processed_texts = [preprocess_func(text) for text in texts]
+            all_words = [word for words in processed_texts for word in words]
+            corpus.append(dct.doc2bow(all_words))
+            if id > max_lines:
+                break
+        # corpus = [dct.doc2bow(line) for line in dataset]
         vocab = [dct[i] for i in range(len(dct))]
         model = TfidfModel(corpus)
         return model, vocab, dct
