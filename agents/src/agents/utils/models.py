@@ -52,7 +52,7 @@ def get_tfidf_model(
     if dataset_name in corpora and dataset_name == "wiki-english-20171001":
         dataset = gensim_api.load(dataset_name)
         dct = Dictionary()
-        max_lines = 100000
+        max_lines = 10000
         for id, line in enumerate(dataset):
             texts = line["section_texts"]
             processed_texts = [preprocess_func(text) for text in texts]
