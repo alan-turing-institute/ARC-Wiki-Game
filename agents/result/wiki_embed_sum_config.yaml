@@ -1,0 +1,133 @@
+# This file contains the list of results that will be used to generate the figures
+
+result_data_file: result/table/embed_model_wiki_summary_stats.csv
+result_figure_loc: result/figure/embed_model_wiki_summary
+data_set_list:
+  - language: English
+    data_loc: data/output_data/en_wiki/step_list
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: MiniLM-L6 v2
+        data_name: en_wiki_step_list_all-MiniLM-L6-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-MiniLM-L6-v2
+      - model_name: Distilroberta v1
+        data_name: en_wiki_step_list_all-distilroberta-v1_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-distilroberta-v1
+      - model_name: All-MPNet-Base v2
+        data_name: en_wiki_step_list_all-mpnet-base-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-mpnet-base-v2
+      - model_name: Roberta-Large v1
+        data_name: en_wiki_step_list_all-roberta-large-v1_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-roberta-large-v1
+      - model_name: Average Word Embeddings Glove 6B300d
+        data_name: en_wiki_step_list_average_word_embeddings_glove.6B.300d_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-average_word_embeddings_glove.6B.300d
+      - model_name: Distiluse-Base-Multilingual-Cased v1
+        data_name: en_wiki_step_list_distiluse-base-multilingual-cased-v1_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-distiluse-base-multilingual-cased-v1
+      - model_name: Distiluse-Base-Multilingual-Cased v2
+        data_name: en_wiki_step_list_distiluse-base-multilingual-cased-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-distiluse-base-multilingual-cased-v2
+      - model_name: Intfloat Multilingual-E5-Large
+        data_name: en_wiki_step_list_intfloat_multilingual-e5-large_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-intfloat_multilingual-e5-large
+      - model_name: Intfloat Multilingual-E5-Small
+        data_name: en_wiki_step_list_intfloat_multilingual-e5-small_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-intfloat_multilingual-e5-small
+      - model_name: Paraphrase-Albert-Small V2
+        data_name: en_wiki_step_list_paraphrase-albert-small-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-paraphrase-albert-small-v2
+      - model_name: Paraphrase Multilingual-MiniLM-L12 V2
+        data_name: en_wiki_step_list_paraphrase-multilingual-MiniLM-L12-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-paraphrase-multilingual-MiniLM-L12-v2
+      - model_name: Paraphrase Multilingual-Mpnet-Base V2
+        data_name: en_wiki_step_list_paraphrase-multilingual-mpnet-base-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-paraphrase-multilingual-mpnet-base-v2
+      - model_name: STSB-XML-R-Multilingual
+        data_name: en_wiki_step_list_stsb-xlm-r-multilingual_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_sum_all-stsb-xlm-r-multilingual
+  - language: French
+    data_loc: data/output_data/fr_wiki/step_list
+    figure_title: French Wiki Summary
+    model_list:
+      - model_name: MiniLM-L6 v2
+        data_name: fr_wiki_step_list_all-MiniLM-L6-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: fr_wiki_sum_all-MiniLM-L6-v2
+      - model_name: Distiluse-Base-Multilingual-Cased v1
+        data_name: fr_wiki_step_list_distiluse-base-multilingual-cased-v1_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: fr_wiki_sum_all-distiluse-base-multilingual-cased-v1
+      - model_name: Distiluse-Base-Multilingual-Cased v2
+        data_name: fr_wiki_step_list_distiluse-base-multilingual-cased-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: fr_wiki_sum_all-distiluse-base-multilingual-cased-v2
+      - model_name: Intfloat Multilingual-E5-Large
+        data_name: fr_wiki_step_list_intfloat_multilingual-e5-large_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: fr_wiki_sum_all-intfloat_multilingual-e5-large
+      - model_name: Intfloat Multilingual-E5-Small
+        data_name: fr_wiki_step_list_intfloat_multilingual-e5-small_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: fr_wiki_sum_all-intfloat_multilingual-e5-small
+      - model_name: Paraphrase Multilingual-MiniLM-L12 V2
+        data_name: fr_wiki_step_list_paraphrase-multilingual-MiniLM-L12-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: fr_wiki_sum_all-paraphrase-multilingual-MiniLM-L12-v2
+      - model_name: Paraphrase Multilingual-Mpnet-Base V2
+        data_name: fr_wiki_step_list_paraphrase-multilingual-mpnet-base-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: fr_wiki_sum_all-paraphrase-multilingual-mpnet-base-v2
+      - model_name: STSB-XML-R-Multilingual
+        data_name: fr_wiki_step_list_stsb-xlm-r-multilingual_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: fr_wiki_sum_all-stsb-xlm-r-multilingual
+  - language: Chinese
+    data_loc: data/output_data/zh_wiki/step_list
+    figure_title: Chinese Wiki Summary
+    model_list:
+      - model_name: MiniLM-L6 v2
+        data_name: zh_wiki_step_list_all-MiniLM-L6-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: zh_wiki_sum_all-MiniLM-L6-v2
+      - model_name: Distiluse-Base-Multilingual-Cased v1
+        data_name: zh_wiki_step_list_distiluse-base-multilingual-cased-v1_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: zh_wiki_sum_all-distiluse-base-multilingual-cased-v1
+      - model_name: Distiluse-Base-Multilingual-Cased v2
+        data_name: zh_wiki_step_list_distiluse-base-multilingual-cased-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: zh_wiki_sum_all-distiluse-base-multilingual-cased-v2
+      - model_name: Intfloat Multilingual-E5-Large
+        data_name: zh_wiki_step_list_intfloat_multilingual-e5-large_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: zh_wiki_sum_all-intfloat_multilingual-e5-large
+      - model_name: Intfloat Multilingual-E5-Small
+        data_name: zh_wiki_step_list_intfloat_multilingual-e5-small_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: zh_wiki_sum_all-intfloat_multilingual-e5-small
+      - model_name: Paraphrase Multilingual-MiniLM-L12 V2
+        data_name: zh_wiki_step_list_paraphrase-multilingual-MiniLM-L12-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: zh_wiki_sum_all-paraphrase-multilingual-MiniLM-L12-v2
+      - model_name: Paraphrase Multilingual-Mpnet-Base V2
+        data_name: zh_wiki_step_list_paraphrase-multilingual-mpnet-base-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: zh_wiki_sum_all-paraphrase-multilingual-mpnet-base-v2
+      - model_name: STSB-XML-R-Multilingual
+        data_name: zh_wiki_step_list_stsb-xlm-r-multilingual_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: zh_wiki_sum_all-stsb-xlm-r-multilingual
