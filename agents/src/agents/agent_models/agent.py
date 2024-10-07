@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from abc import ABC, abstractmethod
 
@@ -7,6 +8,7 @@ import numpy as np
 import pandas as pd
 from torch import backends, cuda, device
 
+from agents.agent_models.generative_lm import GenLM
 from agents.agent_models.tools import AgentToolsBase
 from agents.utils.models import get_model_from_name
 
@@ -31,7 +33,11 @@ class Agent(ABC):
 
     @abstractmethod
     def play_game(
-        self, source_page: int | str, target_page: int | str, verbose: bool = False
+        self,
+        source_page: int | str,
+        target_page: int | str,
+        verbose: bool = False,
+        optimal_steps: int | None = None,
     ) -> tuple[bool, list[int]]:
         """
         This method will take the source and target page IDs or titles and will
@@ -53,40 +59,14 @@ class Agent(ABC):
             Either the target page ID or title
         verbose: bool
             If set to True, then the route is printed out
+        optimal_steps: int | None
+            If not none, then this is the optimal number of steps to solve the game
 
         Returns
         -------
         tuple[bool, list[int]]
             Returns a boolean that indicates whether a route was found, and a list of
             the route that was taken - the items in the list will be the page IDs
-        """
-
-    @abstractmethod
-    def play_round(
-        self,
-        current_page_id: int,
-        target_summary: str | np.ndarray,
-        route: list[int],
-    ) -> int:
-        """
-        Given a current page id, this method gets all the links that exist on the
-        page. It compares the links to the target summary and returns the ID of the
-        page to navigate to next. The exact implementation will depend on the child
-        class.
-
-        Parameters
-        ----------
-        current_page_id: int
-            The ID of the current page
-        target_summary: str | array
-            Either a string summary or embedding of the summary of the target page.
-        route: list[int]
-            The rotue taken so far in the current game.
-
-        Returns
-        -------
-        int
-            The ID of the page to navigate to next
         """
 
     def play_games(
@@ -96,6 +76,7 @@ class Agent(ABC):
         output_folder: str,
         output_file_name: str,
         save_n_games: int = 100,
+        optimal_steps: list[int] | None = None,
     ) -> None:
         """
         This method takes a list of source page IDs, target page IDs, an output
@@ -114,18 +95,29 @@ class Agent(ABC):
             The name of the file to save the results in
         save_n_games: int
             The output will be saved every save_n_games
+        optimal_steps: list[int]
+            A list of the optimal number of steps for playing each game, can be an
+            empty list. If not an empty list, then the optimal number of steps will
+            be saved with the output.
 
         Raises
         ------
         ValueError
-            If the number of source and target IDs is different
+            If the number of source and target IDs is different, and if the number
+            of steps doesn't match the number of source / target IDs (if the number
+            of optimal steps is greater than zero)
         """
         if len(source_ids) != len(target_ids):
             err_msg = "The number of source and target IDs is different."
             raise ValueError(err_msg)
 
+        if optimal_steps is not None and (len(optimal_steps) != len(source_ids)):
+            err_msg = "The number of steps doesn't match the number of games"
+            raise ValueError(err_msg)
+
         for i in range(len(source_ids)):
-            self.play_game(source_ids[i], target_ids[i])
+            num_steps = optimal_steps[i] if optimal_steps is not None else None
+            self.play_game(source_ids[i], target_ids[i], optimal_steps=num_steps)
             if i % save_n_games == 0:
                 # Note that this will save the first record (when i = 0)
                 # and then save every save_n_games - saving the first
@@ -214,7 +206,12 @@ class Agent(ABC):
         )
 
     def _print_route(
-        self, source_title: str, target_title: str, found_route: bool, route: list[int]
+        self,
+        source_title: str,
+        target_title: str,
+        found_route: bool,
+        route: list[int],
+        reasons: list[str] | None = None,
     ) -> None:
         """
         This method takes a route as a list of page IDs and prints the title
@@ -231,6 +228,8 @@ class Agent(ABC):
             A boolean indicating whether a valid route was found
         route: list[int]
             A list of page IDs
+        reasons: list[str]
+            A list of reasons - optional
         """
         print("Game to travel from `" + source_title + "` to `" + target_title + "`")
         if found_route:
@@ -242,8 +241,11 @@ class Agent(ABC):
                 print("Failed - other reason")
         print("Route taken:")
         for id, page in enumerate(route):
-            page_title = self._tools.get_article_title(page)
-            print(id, ":", page_title)
+            page_title = self._tools.get_article_title(page) if page > -1 else "FAILURE"
+            if reasons is not None:
+                print(id, ":", page_title, "-", reasons[id])
+            else:
+                print(id, ":", page_title)
 
     def record_game(
         self,
@@ -253,7 +255,9 @@ class Agent(ABC):
         target_title: str,
         found_target: bool,
         route: list,
-        similarity: float = 0,
+        similarity: float | None = None,
+        optimal_steps: int | None = None,
+        err_msg: str = "",
     ) -> None:
         """
         This method adds the game details provided to the list of played games
@@ -272,20 +276,28 @@ class Agent(ABC):
             If the game was successful in finding the target page
         route: list
             A list of page IDs representing the route taken
-        similarity: float
+        similarity: float | None
             A value representing the similiarity of the source and target pages - this
             will not be provided for all types of agents
+        optimal_steps: int | None
+            If not none, then this is the optimal number of steps to solve the game
         """
+        num_steps = len(route) - 2 if route[-1] == -1 else len(route) - 1
         game_summary = {
             "source_id": source_id,
             "source_title": source_title,
             "target_id": target_id,
             "target_title": target_title,
-            "similarity": similarity,
             "found_target": found_target,
-            "num_steps": len(route) - 1,
+            "num_steps": num_steps,
             "route": route,
+            "error_message": err_msg,
         }
+        if similarity is not None:
+            game_summary["similarity"] = similarity
+        if optimal_steps is not None:
+            game_summary["optimal_steps"] = optimal_steps
+        game_summary["route"] = route
 
         self._games_played.append(game_summary)
 
@@ -363,7 +375,11 @@ class GreedyEmbeddingAgent(Agent):
         self._model = get_model_from_name(model_name).to(self.device)
 
     def play_game(
-        self, source_page: int | str, target_page: int | str, verbose: bool = False
+        self,
+        source_page: int | str,
+        target_page: int | str,
+        verbose: bool = False,
+        optimal_steps: int | None = None,
     ) -> tuple[bool, list[int]]:
         """
         This method takes the source and target page IDs or titles and implements a
@@ -389,6 +405,8 @@ class GreedyEmbeddingAgent(Agent):
             Either the target page ID or title
         verbose: bool
             If set to True, then the route is printed out
+        optimal_steps: int | None
+            If not none, then this is the optimal number of steps to solve the game
 
         Returns
         -------
@@ -412,7 +430,7 @@ class GreedyEmbeddingAgent(Agent):
         route = [source_id]
         found_target = current_id == target_id
         while (len(route) <= self._max_rounds) and not found_target:
-            next_page_id = self.play_round(current_id, target_embedding, route)
+            next_page_id = self._play_round(current_id, route, target_embedding)
             if next_page_id == -1:
                 break
             found_target = next_page_id == target_id
@@ -430,12 +448,13 @@ class GreedyEmbeddingAgent(Agent):
             found_target,
             route,
             similarity,
+            optimal_steps,
         )
 
         return found_target, route
 
-    def play_round(
-        self, current_page_id: int, target_summary: str | np.ndarray, route: list[int]
+    def _play_round(
+        self, current_page_id: int, route: list[int], target_summary: np.ndarray
     ) -> int:
         """
         Given a current page id, this method gets all the links that exist on the
@@ -449,10 +468,10 @@ class GreedyEmbeddingAgent(Agent):
         ----------
         current_page_id: int
             The ID of the current page
-        target_summary: str | array
-            Either a string summary or embedding of the summary of the target page.
         route: list[int]
             The rotue taken so far in the current game.
+        target_summary: array
+            An embedding of the summary of the target page.
 
         Returns
         -------
@@ -480,3 +499,280 @@ class GreedyEmbeddingAgent(Agent):
                 return page_ids[max_id]
             return -1
         return -1
+
+
+class PromptAgent(Agent):
+    def __init__(
+        self,
+        agent_tools: AgentToolsBase,
+        max_rounds: int,
+        model: GenLM,
+    ) -> None:
+        """
+        Class inherits from Agent and plays the wikipedia game by giving a
+        prompt to an OpenAI GPT model with the
+
+        Parameters
+        ----------
+        agent_tools: AgentToolsBase
+            An instance of AgentToolsBase that will have been pre-loaded with the data
+            with which the game will be played
+        max_rounds: int
+            The maximum number of rounds that the game can be played for
+        model: GenLM
+            An object derived from GenLM which has the functionality of a generative
+            LLM to select a link from a given list.
+
+        Raises
+        ------
+        ValueError
+            If the temperature is not a valid value, must be between 0 and 1.
+        """
+        super().__init__(agent_tools, max_rounds)
+
+        self._model = model
+
+        self._system_content = (
+            "You are a helpful assistant that helps me to play the Wikipedia Game! "
+        )
+        self._query1_content = (
+            "If I give you the title and a summary of the target page that I am "
+            "trying to navigate to, can you help me navigate to the target page? "
+        )
+        self._response1_content = "Of course! What is your target page?"
+        self._response2_content = (
+            "Sure! I can help you navigate to that page, what links are there on "
+            "your current page?"
+        )
+        self._play_round_content = (
+            "Here is a list of links, which one should I pick? Please provide your "
+            'answer in JSON format with the selected link given with key "link" and '
+            'a justification given with key "reason". The selected link must be from '
+            "the following list: "
+        )
+
+    def play_game(
+        self,
+        source_page: int | str,
+        target_page: int | str,
+        verbose: bool = False,
+        optimal_steps: int | None = None,
+    ) -> tuple[bool, list[int]]:
+        """
+        This method takes the source and target page IDs or titles and implements a
+        prompting approach to find a route between the two pages. The approach presents
+        a LLM model with a summary of the target page and a list of the links on the
+        current page and asks the model to pick a link.
+
+        If a route is found then the method returns True and a list of the route found
+        (composed of page IDs). If a route is not found then the method returns False
+        and a list of the route taken without reaching the target page. A route may not
+        be found for serveral reasons including:
+        - Needing to take more than the maximum number of rounds the object has
+          been set
+        - Reaching a page where there are either no links, or no links to which
+          the agent has not yet navigated.
+
+        Parameters
+        ----------
+        source_page: int | str
+            Either the source page ID or title
+        target_page: int | str
+            Either the target page ID or title
+        verbose: bool
+            If set to True, then the route is printed out
+        optimal_steps: int | None
+            If not none, then this is the optimal number of steps to solve the game
+
+        Returns
+        -------
+        tuple[bool, list[int]]
+            Returns a boolean that indicates whether a route was found, and a list of
+            the route that was taken - the items in the list will be the page IDs
+        """
+        (
+            source_id,
+            source_title,
+            source_summary,
+            target_id,
+            target_title,
+            target_summary,
+        ) = self._initialise_game(source_page, target_page)
+
+        game_messages = self._set_messages(target_title, target_summary)
+
+        current_id = source_id
+        route = [source_id]
+        reasons = ["Start page"]
+        found_target = current_id == target_id
+        while (len(route) <= self._max_rounds) and not found_target:
+            next_page_id, reason = self._play_round(current_id, route, game_messages)
+            route.append(next_page_id)
+            reasons.append(reason)
+            if next_page_id == -1:
+                break
+            found_target = next_page_id == target_id
+            current_id = next_page_id
+
+        if len(route) > self._max_rounds and not found_target:
+            reasons[-1] = "Maximum number of steps reached"
+        if verbose:
+            self._print_route(source_title, target_title, found_target, route, reasons)
+
+        self.record_game(
+            source_id,
+            source_title,
+            target_id,
+            target_title,
+            found_target,
+            route,
+            optimal_steps=optimal_steps,
+            err_msg=reasons[-1] if not found_target else "",
+        )
+
+        return found_target, route
+
+    def _set_messages(self, target_title: str, target_summary: str) -> list[dict]:
+        """
+        Set the initial messages to send at the start of each round
+
+        Parameters
+        ----------
+        target_title: str
+            The title of the target page
+        target_summary: str
+            The summary of the target page
+
+        Returns
+        -------
+        list[dict]
+            A list of dictionaries containing the role and content to be used
+            at the start of the prompt for the given game.
+        """
+
+        message1 = {"role": "system", "content": self._system_content}
+
+        message2 = {"role": "user", "content": self._query1_content}
+
+        message3 = {"role": "assistant", "content": self._response1_content}
+
+        content = '{"title": "' + target_title + '", '
+        content += '"summary": "' + target_summary + '"}'
+
+        message4 = {"role": "user", "content": content}
+
+        message5 = {"role": "assistant", "content": self._response2_content}
+
+        return [message1, message2, message3, message4, message5]
+
+    def _play_round(
+        self, current_page_id: int, route: list[int], game_messages: list[dict]
+    ) -> tuple[int, str]:
+        """
+        Given a current page id, this method gets all the titles of the links that exist
+        on the page. It presentes the link titles to the LLM along with a summary of
+        the target page and asks the LLM to select a link.
+        It then returns the ID of the selected link.
+
+        Parameters
+        ----------
+        current_page_id: int
+            The ID of the current page
+        route: list[int]
+            The rotue taken so far in the current game.
+        messages: list[dict]
+            A list of dictionaries containing the messages to be used at the start of
+            the prompt - these are the same for all rounds in the game.
+
+        Returns
+        -------
+        int
+            The ID of the page to navigate to next
+        """
+        forward_titles = self._tools.get_forward_titles(current_page_id)
+        titles: list[str] = [
+            str(forward_title[1])
+            for forward_title in forward_titles
+            if (forward_title[1] is not None) and (forward_title[0] not in route)
+        ]
+        if len(titles) > 0:
+            content = " "
+            for title in titles:
+                content += '"' + title + '", '
+            content = "[" + content[:-2] + "]"
+
+            message = {"role": "user", "content": self._play_round_content + content}
+
+            messages = game_messages.copy()
+            messages.append(message)
+            for m in messages:
+                if m["content"] is None:
+                    return -1, ""
+
+            response = self._model.get_response(messages)
+
+            retry = 0
+            err_msg = ""
+            while retry < 2:  # allow 1 retry - might want to add this as config?
+                if response is None:
+                    # Will be 'None' if the content filter interferes, simulate a
+                    # response and retry
+                    retry += 1
+                    response = (
+                        '{\n  "link": "Unknown link",\n "reason": "'
+                        'I did not know which link to select."\n}'
+                    )
+                    content_retry = (
+                        'But "Unknown link" is not in the list '
+                        "that was provided! You must select a link from the "
+                        "list of links. Please try again and provide your "
+                        "answer in JSON format with the selected link given "
+                        'with key "link" and a justification given with key "reason".'
+                    )
+                elif response == "BadRequestError":
+                    return -1, response
+                else:
+                    # There is a response
+                    try:
+                        json_response = json.loads(response)
+                        if "link" in json_response:
+                            next_link = json_response["link"]
+                            if next_link in titles:
+                                # Excellent - no hallucinations!
+                                next_link_id = self._tools.get_article_id(next_link)
+                                if next_link_id is None:
+                                    err_msg = (
+                                        "Couldn't find article ID for " + next_link
+                                    )
+                                    return -1, err_msg
+                                return next_link_id, json_response["reason"]
+                            # *sigh* - hallucination
+                            retry += 1
+                            err_msg = "Hallucination - link not in list"
+                            content_retry = (
+                                f'But "{next_link}" is not in the list '
+                                "that was provided! You must select a link from the "
+                                "list of links. Please try again and provide your "
+                                "answer in JSON format with the selected link given "
+                                'with key "link" and a justification given with key '
+                                '"reason".'
+                            )
+
+                    except json.decoder.JSONDecodeError:
+                        # Some error when loading the response to JSON
+                        retry += 1
+                        err_msg = "Response not in JSON format"
+                        content_retry = (
+                            "You did not provide your response in JSON "
+                            "format - please try again!"
+                        )
+                message_response = {"role": "assistant", "content": response}
+                messages.append(message_response)
+                message_retry = {"role": "user", "content": content_retry}
+                messages.append(message_retry)
+
+                response = self._model.get_response(messages)
+            # The agent was not able to select a link
+            return -1, err_msg
+        # There are no links from the current page
+        return -1, "Ran out of links to pick"

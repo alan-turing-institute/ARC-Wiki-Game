@@ -17,6 +17,7 @@ def generate_steps_list(
     verbose: bool = True,
     replacement: bool = False,
     seed: int | None = None,
+    include_index: bool = False,
 ) -> np.ndarray[int]:
     """Generate a list of steps for multiple paths in a graph.
 
@@ -42,24 +43,28 @@ def generate_steps_list(
     rng = np.random.default_rng(seed)
     steps_list = []
 
+    index_array = rng.choice(
+        np.arange(0, for_locs.shape[0]),
+        size=(number_paths, 2),
+        replace=replacement,
+    )
+
     for sp, tp in tqdm(
-        rng.choice(
-            np.arange(0, for_locs.shape[0]),
-            size=(number_paths, 2),
-            replace=replacement,
-        ),
+        index_array,
         desc="Generating Steps List",
         disable=not verbose,
     ):
         steps_list.append(
-            short_path.steps_two_way(
+            short_path.steps_check_deadend(
                 sp, tp, for_locs, for_vals, back_locs, back_vals, max_steps=max_steps
             )
         )
 
-    steps_list = np.array(steps_list, dtype=int)
+    steps_ary = np.array(steps_list, dtype=int)
 
     if make_bad_zero:
-        steps_list[steps_list == max_steps] = 0
+        steps_ary[steps_ary == max_steps] = 0
 
-    return steps_list
+    if include_index:
+        return np.concatenate([index_array, steps_ary[:, None]], axis=1)
+    return steps_ary

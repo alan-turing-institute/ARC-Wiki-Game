@@ -45,7 +45,7 @@ jobs:
       - name: Install package
         run: |
           python -m pip install uv
-          python -m uv pip install ${{ matrix.package }}/.
+          python -m uv pip install -e ${{ matrix.package }}/.
 
       - name: Test package
-        run: python -m pytest ${{ matrix.package }}/ -ra --cov=${{ matrix.package }}/ --cov-report=term --durations=20
+        run: python -m pytest ${{ matrix.package }}/ --cov --cov-report=term -ra--durations=20

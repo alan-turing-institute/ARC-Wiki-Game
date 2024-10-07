@@ -1,8 +1,8 @@
 experiments:
-  test_100:
+  step_list:
     agent_class: GreedyEmbeddingAgent
     game_datasets:
-      - zh_wiki_test_100
+      - zh_wiki_step_list
     models:
       - distiluse-base-multilingual-cased-v1
       - stsb-xlm-r-multilingual
@@ -11,35 +11,19 @@ experiments:
       - all-MiniLM-L6-v2 # Not trained on Chinese, so might not work!
       - jinaai/jina-embeddings-v2-base-zh
       - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
+      - distiluse-base-multilingual-cased-v2
     params:
-      max_rounds: 50
+      max_rounds: 100
 
-  test_1000:
-    agent_class: GreedyEmbeddingAgent
+  step_list_prompt:
+    agent_class: PromptAgent
     game_datasets:
-      - zh_wiki_test_1000
+      - zh_wiki_step_list
     models:
-      - distiluse-base-multilingual-cased-v1
-      - stsb-xlm-r-multilingual
-      - paraphrase-multilingual-mpnet-base-v2
-      - paraphrase-multilingual-MiniLM-L12-v2
-      - all-MiniLM-L6-v2 # Not trained on Chinese, so might not work!
-      - jinaai/jina-embeddings-v2-base-zh
-      - intfloat/multilingual-e5-large
+      - wikigame-gpt-4o
     params:
-      max_rounds: 50
-
-  test_10000:
-    agent_class: GreedyEmbeddingAgent
-    game_datasets:
-      - zh_wiki_test_10000
-    models:
-      - distiluse-base-multilingual-cased-v1
-      - stsb-xlm-r-multilingual
-      - paraphrase-multilingual-mpnet-base-v2
-      - paraphrase-multilingual-MiniLM-L12-v2
-      - all-MiniLM-L6-v2 # Not trained on Chinese, so might not work!
-      - jinaai/jina-embeddings-v2-base-zh
-      - intfloat/multilingual-e5-large
-    params:
-      max_rounds: 50
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
