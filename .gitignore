@@ -13,6 +13,9 @@ agents/scripts/scratch.py
 agents/data/output_data/*
 agents/result/figure/*
 agents/result/table/*
+agents/data/game_data/en_wiki/en_wiki_step_list.csv
+agents/data/game_data/fr_wiki/fr_wiki_step_list.csv
+agents/data/game_data/zh_wiki/zh_wiki_step_list.csv
 
 # Graph Preperation
 
