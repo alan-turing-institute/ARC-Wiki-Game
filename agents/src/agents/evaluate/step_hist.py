@@ -2,11 +2,102 @@ from __future__ import annotations
 
 import numdifftools as nd
 import numpy as np
+import pandas as pd
 from scipy.linalg import inv
 from scipy.optimize import minimize
 from scipy.stats import bootstrap, nbinom
 
-__all__ = ["fit_nbinom", "bootstrap_steps", "faction_success", "nbinom_log_likelihood"]
+__all__ = [
+    "pull_step_data",
+    "faction_success",
+    "bootstrap_steps",
+    "nbinom_log_likelihood",
+    "fit_nbinom",
+]
+
+
+def pull_step_data(
+    data_loc: str, number_list: list[int]
+) -> tuple[np.ndarray[int], np.ndarray[int], np.ndarray[bool], int]:
+    """
+    Pull the data from the csv files and return the for the successful paths the path
+    length and optimal steps, and for all games if the target was found and the total
+    number of games.
+
+    Args:
+        data_loc (str): The location of the data files.
+        number_list (list[int]): The index of the files to pull.
+
+    Returns:
+        sucessful_paths (np.ndarray): The path length for the successful paths.
+        min_steps (np.ndarray): The optimal steps for the successful paths.
+        if_sucess (np.ndarray): If the target was found.
+        total_games (int): The total number of games.
+    """
+    results_list = []
+
+    for num in number_list:
+        results_list.append(
+            pd.read_csv(
+                data_loc + str(num) + ".csv",
+                sep="\t",
+            )
+        )
+
+    results_df = pd.concat(results_list)
+    sucessful_paths = results_df["num_steps"][(results_df["found_target"])].values
+    min_steps = results_df["optimal_steps"][(results_df["found_target"])].values
+    if_sucess = results_df["found_target"].values
+    total_games = len(results_df)
+
+    return sucessful_paths, min_steps, if_sucess, total_games
+
+
+def faction_success(if_success: np.ndarray[bool]) -> tuple[float, float]:
+    """
+    Calculate the fraction of successful paths and the standard deviation of the
+    fraction.
+
+    Args:
+        if_success (np.ndarray[bool]): An array of boolean values indicating if the
+            agent found the target. True indicates success.
+
+    Returns:
+        p_sucess (float): The fraction of successful paths.
+        std (float): The standard deviation of the fraction.
+    """
+    total = len(if_success)
+    p_sucess = if_success.mean()
+    return p_sucess, np.sqrt(p_sucess * (1 - p_sucess) / total)
+
+
+def bootstrap_steps(
+    step_count: np.ndarray[int], **bootstrap_kargs
+) -> tuple[tuple[float, float], tuple[float, float]]:
+    """
+    Generate a bootstrap sample of the step counts.
+
+    Args:
+        step_count (np.ndarray): An array of successful path counts.
+        bootstrap_kargs: Additional keyword arguments to pass to the
+            scipy.stats.bootstrap function.
+
+    Returns:
+        mean_result (tuple[float, float]): The mean of the step counts and the standard
+            error of the mean.
+        std_result (tuple[float, float]): The standard deviation of the step counts and
+            the standard error of the standard deviation.
+    """
+    mean_result = (
+        np.mean(step_count),
+        bootstrap(step_count[None, :], np.mean, **bootstrap_kargs).standard_error,
+    )
+    std_result = (
+        np.std(step_count),
+        bootstrap(step_count[None, :], np.std, **bootstrap_kargs).standard_error,
+    )
+
+    return mean_result, std_result
 
 
 def nbinom_log_likelihood(
@@ -31,24 +122,6 @@ def nbinom_log_likelihood(
     probs = -nbinom.logpmf(step_count - optimum, *params).sum()
     trunc = nbinom.logcdf(truncation - optimum, *params).sum()
     return probs + trunc
-
-
-def faction_success(if_success: np.ndarray[bool]) -> tuple[float, float]:
-    """
-    Calculate the fraction of successful paths and the standard deviation of the
-    fraction.
-
-    Args:
-        if_success (np.ndarray[bool]): An array of boolean values indicating if the
-            agent found the target. True indicates success.
-
-    Returns:
-        p_sucess (float): The fraction of successful paths.
-        std (float): The standard deviation of the fraction.
-    """
-    total = len(if_success)
-    p_sucess = if_success.mean()
-    return p_sucess, np.sqrt(p_sucess * (1 - p_sucess) / total)
 
 
 def fit_nbinom(
@@ -98,32 +171,3 @@ def fit_nbinom(
     result_std = np.sqrt(np.diag(cov_mat))
 
     return (nbinom_results.x[0], result_std[0]), (nbinom_results.x[1], result_std[1])
-
-
-def bootstrap_steps(
-    step_count: np.ndarray[int], **bootstrap_kargs
-) -> tuple[tuple[float, float], tuple[float, float]]:
-    """
-    Generate a bootstrap sample of the step counts.
-
-    Args:
-        step_count (np.ndarray): An array of successful path counts.
-        bootstrap_kargs: Additional keyword arguments to pass to the
-            scipy.stats.bootstrap function.
-
-    Returns:
-        mean_result (tuple[float, float]): The mean of the step counts and the standard
-            error of the mean.
-        std_result (tuple[float, float]): The standard deviation of the step counts and
-            the standard error of the standard deviation.
-    """
-    mean_result = (
-        np.mean(step_count),
-        bootstrap(step_count[None, :], np.mean, **bootstrap_kargs).standard_error,
-    )
-    std_result = (
-        np.std(step_count),
-        bootstrap(step_count[None, :], np.std, **bootstrap_kargs).standard_error,
-    )
-
-    return mean_result, std_result

@@ -72,45 +72,12 @@ def plot_figure(
     plt.close(fig)
 
 
-def pull_data(
-    data_loc: str, number_list: list[int]
-) -> tuple[np.ndarray[int], np.ndarray[int], np.ndarray[bool], int]:
-    """
-    Pull the data from the csv files and return the for the successful paths the path
-    length and optimal steps, and for all games if the target was found and the total
-    number of games.
-
-    Args:
-        data_loc (str): The location of the data files.
-        number_list (list[int]): The index of the files to pull.
-
-    Returns:
-        sucessful_paths (np.ndarray): The path length for the successful paths.
-        min_steps (np.ndarray): The optimal steps for the successful paths.
-        if_sucess (np.ndarray): If the target was found.
-        total_games (int): The total number of games.
-    """
-    results_list = []
-
-    for num in number_list:
-        results_list.append(
-            pd.read_csv(
-                data_loc + str(num) + ".csv",
-                sep="\t",
-            )
-        )
-
-    results_df = pd.concat(results_list)
-    sucessful_paths = results_df["num_steps"][(results_df["found_target"])].values
-    min_steps = results_df["optimal_steps"][(results_df["found_target"])].values
-    if_sucess = results_df["found_target"].values
-    total_games = len(results_df)
-
-    return sucessful_paths, min_steps, if_sucess, total_games
-
-
 def process_model(
-    model_info, main_dir, result_figure_loc, data_set_info, stats_dict_list
+    model_info: dict,
+    main_dir: str,
+    result_figure_loc: str,
+    data_set_info: dict,
+    stats_dict_list: list[dict],
 ) -> None:
     # Set up the paths and information
     number_list = model_info["file_index_list"]
@@ -121,7 +88,7 @@ def process_model(
     )
 
     # Get the data
-    sucessful_paths, min_steps, if_sucess, total_games = pull_data(
+    sucessful_paths, min_steps, if_sucess, total_games = step_hist.pull_step_data(
         data_loc, number_list
     )
 
