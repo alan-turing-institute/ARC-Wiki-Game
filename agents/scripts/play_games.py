@@ -214,7 +214,9 @@ def main():
                             agent = TFIDFAgent(
                                 tools,
                                 max_rounds=max_rounds,
-                                dataset_name=model,
+                                lang_iso_code=config["experiments"][experiment][
+                                    "params"
+                                ]["lang"],
                             )
                         elif agent_class == "PromptAgent":
                             temperature = config["experiments"][experiment]["params"][

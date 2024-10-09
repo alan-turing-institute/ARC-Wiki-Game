@@ -6,7 +6,11 @@ import gensim.downloader as gensim_api
 from gensim.corpora import Dictionary
 from gensim.models import TfidfModel
 from huggingface_hub import HfApi
+from numpy import arange
+from numpy.random import choice, seed
 from sentence_transformers import SentenceTransformer, SimilarityFunction
+
+from agents.agent_models.tools import AgentToolsBase
 
 
 def get_sentence_transformer(model_name: str) -> SentenceTransformer:
@@ -46,6 +50,34 @@ def get_sentence_transformer(model_name: str) -> SentenceTransformer:
 
 
 def get_tfidf_model(
+    agent_tools: AgentToolsBase,
+    manual_seed: int,
+    max_articles: int,
+    preprocess_func: Callable[[str, str], list[str]],
+    lang_iso_code: str,
+):
+    seed(manual_seed)
+    num_articles = agent_tools.matidx_ary.max()
+    if num_articles < max_articles:
+        max_articles = num_articles
+    article_ids = choice(arange(1, num_articles + 1), max_articles, replace=False)
+
+    dct = Dictionary()
+    corpus = []
+
+    for id in article_ids:
+        article_summary = agent_tools.get_article_summary(id)
+        if article_summary is not None:
+            processed_text = preprocess_func(article_summary, lang_iso_code)
+            dct.add_documents([processed_text])
+            corpus.append(dct.doc2bow(processed_text))
+
+    vocab = [dct[i] for i in range(len(dct))]
+    model = TfidfModel(corpus)
+    return model, vocab, dct
+
+
+def get_tfidf_model_wiki(
     dataset_name: str, preprocess_func: Callable[[str], list[str]]
 ) -> tuple[TfidfModel, list[str], Dictionary]:
     corpora = list(gensim_api.info()["corpora"])

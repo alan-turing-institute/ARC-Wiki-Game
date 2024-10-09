@@ -6,13 +6,13 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
-from gensim.parsing.preprocessing import preprocess_string
 from sklearn.metrics.pairwise import cosine_similarity
 from torch import backends, cuda, device
 
 from agents.agent_models.generative_lm import GenLM
 from agents.agent_models.tools import AgentToolsBase
 from agents.utils.models import get_sentence_transformer, get_tfidf_model
+from agents.utils.text import pre_process_chinese, pre_process_with_stemming
 
 
 class Agent(ABC):
@@ -260,6 +260,7 @@ class Agent(ABC):
         similarity: float | None = None,
         optimal_steps: int | None = None,
         err_msg: str = "",
+        additional_fields: dict | None = None,
     ) -> None:
         """
         This method adds the game details provided to the list of played games
@@ -283,6 +284,8 @@ class Agent(ABC):
             will not be provided for all types of agents
         optimal_steps: int | None
             If not none, then this is the optimal number of steps to solve the game
+        additional_fields: dict
+            Stores the value of any non-standard fields to be recorded
         """
         num_steps = len(route) - 2 if route[-1] == -1 else len(route) - 1
         game_summary = {
@@ -292,13 +295,15 @@ class Agent(ABC):
             "target_title": target_title,
             "found_target": found_target,
             "num_steps": num_steps,
-            "route": route,
             "error_message": err_msg,
         }
         if similarity is not None:
             game_summary["similarity"] = similarity
         if optimal_steps is not None:
             game_summary["optimal_steps"] = optimal_steps
+        if additional_fields is not None:
+            for field in additional_fields:
+                game_summary[field] = additional_fields[field]
         game_summary["route"] = route
 
         self._games_played.append(game_summary)
@@ -349,7 +354,10 @@ class TFIDFAgent(Agent):
         self,
         agent_tools: AgentToolsBase,
         max_rounds: int,
-        dataset_name: str,
+        lang_iso_code: str,
+        manual_seed: int = 42,
+        max_articles: int = 100000,
+        agent_tools_for_corpus: AgentToolsBase | None = None,
     ) -> None:
         """
         Class inherits from Agent and plays the wikipedia game by [TO DO]
@@ -361,23 +369,40 @@ class TFIDFAgent(Agent):
             with which the game will be played
         max_rounds: int
             The maximum number of rounds that the game can be played for
-        dataset_name: str
-            The name of the corpus to be downloaded to create the TFIDF model
+        lang_iso_code: str
+            The iso code for the language to be used to create the corpus
+        manual_seed: int
+            The seed to use to select articles to use in the corpus
+        max_articles: int
+            The maximum number of articles to use to create the corpus
+        agent_tools_for_corpus: AgentToolsBase | None
+            If None, then the agent_tools object is used to create the corpus
         """
         super().__init__(agent_tools, max_rounds)
 
+        self._lang = lang_iso_code
+        if agent_tools_for_corpus is None:
+            agent_tools_for_corpus = agent_tools
+        if lang_iso_code == "zh":
+            self._preprocess_func = pre_process_chinese
+        else:
+            self._preprocess_func = pre_process_with_stemming
         self._model, self._vocab, self._dictionary = get_tfidf_model(
-            dataset_name, preprocess_string
+            agent_tools_for_corpus,
+            manual_seed,
+            max_articles,
+            self._preprocess_func,
+            self._lang,
         )
 
     def _vectorise(self, text: str) -> np.array:
-        list_words = preprocess_string(text)
+        list_words = self._preprocess_func(text, self._lang)
         bow = self._dictionary.doc2bow(list_words)
         tfidf_output = self._model[bow]
         vector = np.zeros(len(self._vocab))
         for id, freq in tfidf_output:
             vector[id] = freq
-        return vector
+        return vector, len(list_words), len(list_words) - len(bow)
 
     def _similarity(
         self, candidate_vectors: list[np.array], target_vector: np.array
@@ -433,20 +458,28 @@ class TFIDFAgent(Agent):
             target_summary,
         ) = self._initialise_game(source_page, target_page)
 
-        source_embedding = self._vectorise(source_summary)
-        target_embedding = self._vectorise(target_summary)
+        source_embedding = self._vectorise(source_summary)[0]
+        target_embedding = self._vectorise(target_summary)[0]
         similarity = self._similarity([source_embedding], target_embedding)[0]
 
         current_id = source_id
         route = [source_id]
         found_target = current_id == target_id
+        total_words = 0
+        total_oov_words = 0
         while (len(route) <= self._max_rounds) and not found_target:
-            next_page_id = self._play_round(current_id, route, target_embedding)
+            # num_words: int
+            # num_oov: int
+            next_page_id, num_words, num_oov = self._play_round(
+                current_id, route, target_embedding
+            )
             if next_page_id == -1:
                 break
             found_target = next_page_id == target_id
             route.append(next_page_id)
             current_id = next_page_id
+            total_words += num_words
+            total_oov_words += num_oov
 
         if verbose:
             self._print_route(source_title, target_title, found_target, route)
@@ -460,6 +493,10 @@ class TFIDFAgent(Agent):
             route,
             similarity,
             optimal_steps,
+            additional_fields={
+                "total_words": total_words,
+                "total_oov_words": total_oov_words,
+            },
         )
 
         return found_target, route
@@ -469,7 +506,7 @@ class TFIDFAgent(Agent):
         current_page_id: int,
         route: list[int],
         target_summary: np.ndarray,
-    ) -> int:
+    ) -> tuple[int, int, int]:
         """
         Given a current page id, this method gets all the links that exist on the
         page. It compares the links to the target summary and returns the ID of the
@@ -506,14 +543,19 @@ class TFIDFAgent(Agent):
             ]
             if len(page_text) > 0:
                 embeddings = []
+                num_words = []
+                num_oov = []
                 for text in page_text:
-                    embeddings.append(self._vectorise(str(text)))
+                    embedding, words, oov = self._vectorise(str(text))
+                    embeddings.append(embedding)
+                    num_words.append(words)
+                    num_oov.append(oov)
 
                 similarities = self._similarity(embeddings, target_summary)
                 max_id = np.argmax(similarities)
-                return page_ids[max_id]
-            return -1
-        return -1
+                return page_ids[max_id], sum(num_words), sum(num_oov)
+            return -1, 0, 0
+        return -1, 0, 0
 
 
 class GreedyEmbeddingAgent(Agent):
