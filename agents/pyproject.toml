@@ -25,6 +25,7 @@ dependencies = [
     "gensim",
     "stopwordsiso",
     "jieba",
+    "scipy==1.12",
 ]
 
 
