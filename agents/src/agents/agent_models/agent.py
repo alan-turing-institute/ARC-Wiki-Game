@@ -468,8 +468,6 @@ class TFIDFAgent(Agent):
         total_words = 0
         total_oov_words = 0
         while (len(route) <= self._max_rounds) and not found_target:
-            # num_words: int
-            # num_oov: int
             next_page_id, num_words, num_oov = self._play_round(
                 current_id, route, target_embedding
             )
