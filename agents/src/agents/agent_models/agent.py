@@ -383,6 +383,12 @@ class TFIDFAgent(Agent):
         self._lang = lang_iso_code
         if agent_tools_for_corpus is None:
             agent_tools_for_corpus = agent_tools
+        else:
+            err_msg = (
+                "Still need to implement for scenario where the corpus is created \
+                using a different dataset."
+            )
+            raise NotImplementedError(err_msg)
         if lang_iso_code == "zh":
             self._preprocess_func = pre_process_chinese
         else:

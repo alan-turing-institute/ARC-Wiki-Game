@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Callable
 
-import gensim.downloader as gensim_api
 from gensim.corpora import Dictionary
 from gensim.models import TfidfModel
 from huggingface_hub import HfApi
@@ -15,6 +14,8 @@ from agents.agent_models.tools import AgentToolsBase
 
 def get_sentence_transformer(model_name: str) -> SentenceTransformer:
     """
+    Returns a SentenceTransformer object given a model name.
+
     Parameters
     ----------
     model_name: str
@@ -55,7 +56,35 @@ def get_tfidf_model(
     max_articles: int,
     preprocess_func: Callable[[str, str], list[str]],
     lang_iso_code: str,
-):
+) -> tuple[TfidfModel, list[str], Dictionary]:
+    """
+    Builds and returns a TF-IDF model.
+
+    Parameters
+    ----------
+    agent_tools: AgentToolsBase
+        The Agent Tools object to use to create the dataset for the corpus
+    manual_seed: int
+        The integer value to use to set the first random seed. As the process selects
+        articles at random from the dataset, this will ensure that the same articles
+        can be selected each time the code is run.
+    max_articles: int
+        The maximum number of articles that can be selected
+    preprocess_func: Callable[[str, str], list[str]]
+        A function that takes text and an iso code and returns the processed text
+    lang_iso_code: str
+        The iso code to use for pre-processing the data (identifies the stop words)
+
+    Returns
+    -------
+    TfidfModel
+        The model built using the corpus that was create in this function
+    list[str]
+        A list of the vocabulary words used in the model
+    Dictionary
+        A Gensim dictionary object
+
+    """
     seed(manual_seed)
     num_articles = agent_tools.matidx_ary.max()
     if num_articles < max_articles:
@@ -75,34 +104,3 @@ def get_tfidf_model(
     vocab = [dct[i] for i in range(len(dct))]
     model = TfidfModel(corpus)
     return model, vocab, dct
-
-
-def get_tfidf_model_wiki(
-    dataset_name: str, preprocess_func: Callable[[str], list[str]]
-) -> tuple[TfidfModel, list[str], Dictionary]:
-    corpora = list(gensim_api.info()["corpora"])
-    if dataset_name in corpora and dataset_name == "wiki-english-20171001":
-        dataset = gensim_api.load(dataset_name)
-        dct = Dictionary()
-        max_lines = 10000
-        for id, line in enumerate(dataset):
-            texts = line["section_texts"]
-            processed_texts = [preprocess_func(text) for text in texts]
-            dct.add_documents(processed_texts)
-            if id > max_lines:
-                break
-        corpus = []
-        for id, line in enumerate(dataset):
-            texts = line["section_texts"]
-            processed_texts = [preprocess_func(text) for text in texts]
-            all_words = [word for words in processed_texts for word in words]
-            corpus.append(dct.doc2bow(all_words))
-            if id > max_lines:
-                break
-        # corpus = [dct.doc2bow(line) for line in dataset]
-        vocab = [dct[i] for i in range(len(dct))]
-        model = TfidfModel(corpus)
-        return model, vocab, dct
-    raise ValueError(
-        "The dataset name " + dataset_name + " does not exist in the Gensim corpora."
-    )
