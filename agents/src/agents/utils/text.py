@@ -14,30 +14,61 @@ from gensim.parsing.preprocessing import (
 
 
 def _pre_process_universal(text: str, lang: str):
-    custom_filters = [
-        lambda x: x.lower(),
-        strip_tags,
-        strip_punctuation,
-        strip_multiple_whitespaces,
-        strip_numeric,
-    ]
-    processed_text = preprocess_string(text, custom_filters)
-    sw = stopwordsiso.stopwords(lang)
+    """
+    Takes text and a language code as input and applies some functions to process
+    the text. These functions are expected to be applied to all languages. The
+    stopwords will be removed for the given language code.
 
-    return [word for word in processed_text if word not in sw]
-
-
-def pre_process_with_stemming(text: str, lang: str):
+    Parameters
+    ----------
+    text: str
+        The text that is to be processed
+    lang: str
+        Expected to be a two-letter language code.
+    """
     if stopwordsiso.has_lang(lang):
-        processed_text = _pre_process_universal(text, lang)
-        custom_filters = [lambda x: x.lower(), strip_short, stem_text]
-        return preprocess_string(" ".join(processed_text), custom_filters)
+        custom_filters = [
+            lambda x: x.lower(),
+            strip_tags,
+            strip_punctuation,
+            strip_multiple_whitespaces,
+            strip_numeric,
+        ]
+        processed_text = preprocess_string(text, custom_filters)
+        sw = stopwordsiso.stopwords(lang)
 
+        return [word for word in processed_text if word not in sw]
     raise ValueError("No stopwords found for lanugage code " + lang)
 
 
+def pre_process_with_stemming(text: str, lang: str):
+    """
+    Function to process text including stemming (not done for Chinese text)
+
+    Parameters
+    ----------
+    text: str
+        The text that is to be processed
+    lang: str
+        Expected to be a two-letter language code.
+    """
+    processed_text = _pre_process_universal(text, lang)
+    custom_filters = [lambda x: x.lower(), strip_short, stem_text]
+    return preprocess_string(" ".join(processed_text), custom_filters)
+
+
 def pre_process_chinese(text: str, lang: str):
-    if stopwordsiso.has_lang(lang):
-        cut_text = jieba.lcut(text)
-        return _pre_process_universal(" ".join(cut_text), lang)
-    raise ValueError("No stopwords found for language code " + lang)
+    """
+    Currently this function is only expected to process simplified Chinese text
+    (hence the name of the function). This avoids stemming the text and also
+    does not remove 'short' characters.
+
+    Parameters
+    ----------
+    text: str
+        The text that is to be processed
+    lang: str
+        Expected to be a two-letter language code.
+    """
+    cut_text = jieba.lcut(text)
+    return _pre_process_universal(" ".join(cut_text), lang)

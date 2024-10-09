@@ -360,7 +360,10 @@ class TFIDFAgent(Agent):
         agent_tools_for_corpus: AgentToolsBase | None = None,
     ) -> None:
         """
-        Class inherits from Agent and plays the wikipedia game by [TO DO]
+        Class inherits from Agent and plays the wikipedia game by using a TF-IDF
+        model. The corpus used for the model can be created using the same dataset as
+        used to play the game, and there will also be an option for a different dataset
+        to be used [although, this is NOT YET IMPLEMENTED].
 
         Parameters
         ----------
@@ -389,10 +392,14 @@ class TFIDFAgent(Agent):
                 using a different dataset."
             )
             raise NotImplementedError(err_msg)
+        # Set the function to be used to process the text, both for the TF-IDF model
+        # and also when creating the vectors from the article summaries.
         if lang_iso_code == "zh":
             self._preprocess_func = pre_process_chinese
         else:
             self._preprocess_func = pre_process_with_stemming
+        # Sets the model, vocab and dictionary objects - all of these are needed when
+        # creating a vector of each summary article.
         self._model, self._vocab, self._dictionary = get_tfidf_model(
             agent_tools_for_corpus,
             manual_seed,
@@ -401,7 +408,25 @@ class TFIDFAgent(Agent):
             self._lang,
         )
 
-    def _vectorise(self, text: str) -> np.array:
+    def _vectorise(self, text: str) -> tuple[np.array, int, int]:
+        """
+        This method takes a string of text (expected to be some summary text about
+        an article or page) and returns an array the same length as the vocab vector.
+
+        Parameters
+        ----------
+        text: str
+            The text to be processed
+
+        Returns
+        -------
+        np.array
+            A numpy array representing the text in vector form.
+        int
+            The number of words after the text has been processed
+        int
+            The number of words that did not match a value in the vocabulary
+        """
         list_words = self._preprocess_func(text, self._lang)
         bow = self._dictionary.doc2bow(list_words)
         tfidf_output = self._model[bow]
@@ -413,6 +438,17 @@ class TFIDFAgent(Agent):
     def _similarity(
         self, candidate_vectors: list[np.array], target_vector: np.array
     ) -> np.array:
+        """
+        This method calculates the similarity between a list of candidate
+        vectors and the vector from the target page using the cosine similarity.
+
+        Parameters
+        ----------
+        candidate_vctors: list[np.array]
+            List of arrays representing the links on the current page
+        target_vector: np.array
+            Array representing the target page
+        """
         return cosine_similarity(candidate_vectors, [target_vector])
 
     def play_game(
@@ -425,9 +461,8 @@ class TFIDFAgent(Agent):
         """
         This method takes the source and target page IDs or titles and implements a
         greedy approach to find a route between the two pages. The approach considers
-        the embedding of each of the summaries on the current page, and choses the one
-        that is closest to the target page. The cosine distance is set by default
-        when creating the sentence transformer model.
+        the TF-IDF vector of each of the summaries on the current page, and chooses the
+        one that is closest to the target page.
 
         If a route is found then the method returns True and a list of the route found
         (composed of page IDs). If a route is not found then the method returns False
@@ -471,6 +506,7 @@ class TFIDFAgent(Agent):
         current_id = source_id
         route = [source_id]
         found_target = current_id == target_id
+        # Keep a count of total words and oov words encountered during the game.
         total_words = 0
         total_oov_words = 0
         while (len(route) <= self._max_rounds) and not found_target:
@@ -515,7 +551,7 @@ class TFIDFAgent(Agent):
         Given a current page id, this method gets all the links that exist on the
         page. It compares the links to the target summary and returns the ID of the
         page to navigate to next. This implementation selects the next page by
-        calculating the similarity of the target summary embedding to the summary
+        calculating the similarity of the target summary TF-IDF vector to the summary
         of each possible link page - the link that has the most similar summary is
         the one that is selected.
 
