@@ -211,12 +211,27 @@ def main():
                                 use_titles=use_titles,
                             )
                         elif agent_class == "TFIDFAgent":
+                            tools_corpus = None
+                            if (
+                                "agent_tools_for_corpus"
+                                in config["experiments"][experiment]
+                            ):
+                                err_msg = "Not yet implemented the ability to use \
+                                    different dataset for TF-IDF corpus"
+                                raise NotImplementedError(err_msg)
                             agent = TFIDFAgent(
                                 tools,
                                 max_rounds=max_rounds,
                                 lang_iso_code=config["experiments"][experiment][
                                     "params"
                                 ]["lang"],
+                                manual_seed=config["experiments"][experiment][
+                                    "manual_seed"
+                                ],
+                                max_articles=config["experiments"][experiment][
+                                    "max_articles"
+                                ],
+                                agent_tools_for_corpus=tools_corpus,
                             )
                         elif agent_class == "PromptAgent":
                             temperature = config["experiments"][experiment]["params"][
