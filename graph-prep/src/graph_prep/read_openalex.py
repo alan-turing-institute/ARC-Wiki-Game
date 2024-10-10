@@ -34,7 +34,11 @@ def extract_json(
     # Extract doi
     doi = strip_escapes.sub("", data["doi"]) if data["doi"] is not None else None
     # Extract field
-    if data["primary_topic"] is not None and data["primary_topic"]["field"] is not None:
+    if (
+        "primary_topic" in data
+        and data["primary_topic"] is not None
+        and data["primary_topic"]["field"] is not None
+    ):
         field = strip_escapes.sub("", data["primary_topic"]["field"]["display_name"])
     else:
         field = None
