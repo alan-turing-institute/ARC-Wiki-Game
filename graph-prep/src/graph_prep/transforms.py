@@ -4,6 +4,38 @@ import numpy as np
 from tqdm import tqdm
 
 
+def build_forward_graph(
+    link_pairs: np.ndarray, max_index: int | None = None, verbose: bool = False
+) -> tuple[np.ndarray, np.ndarray]:
+    """Build a forward graph from link pairs.
+
+    Args:
+        link_pairs (np.ndarray): The link pairs as a 2D array, with the first column
+            being the start node and the second column being the end node.
+        max_index (int | None, optional): The maximum index to use. Defaults to None.
+        verbose (bool, optional): Whether to display progress information.
+
+    Returns:
+        forward_locs (np.ndarray): The link indices of the forward links.
+        forward_vals (np.ndarray): The values of the forward links.
+    """
+    link_pairs = link_pairs[link_pairs[:, 0].argsort()]
+
+    if max_index is None:
+        max_index = link_pairs.max()
+
+    forward_locs = np.full((max_index + 1, 2), -1, dtype=int)
+    forward_vals = link_pairs[:, 1].copy()
+
+    for mat_i in tqdm(
+        range(max_index), desc="Building Forward Graph", disable=not verbose
+    ):
+        forward_locs[mat_i, 0] = np.searchsorted(link_pairs[:, 0], mat_i)
+        forward_locs[mat_i, 1] = np.searchsorted(link_pairs[:, 0], mat_i + 1)
+
+    return forward_locs, forward_vals
+
+
 def build_link_pairs(forward_locs: np.ndarray, forward_vals: np.ndarray) -> np.ndarray:
     """Build link pairs based on forward locations and values.
 
