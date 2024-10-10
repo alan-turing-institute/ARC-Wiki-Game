@@ -14,7 +14,7 @@ from graph_prep.read_openalex import extract_json
 
 main_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 database_dir = os.path.join(main_dir, "data", "inter", "openalex_attempt.ddb")
-temp_dir = os.path.join(main_dir, "data", "temp")
+temp_dir = "/tmp"
 os.makedirs(temp_dir, exist_ok=True)
 
 MAX_THREADS = 40
