@@ -12,7 +12,7 @@ from graph_prep.transforms import build_forward_graph
 main_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 extracted_database_path = os.path.join(main_dir, "data/inter/openalex_attempt.ddb")
-new_field_database_path = os.path.join(main_dir, "data/output/op_medical_info.ddb")
+new_field_database_path = os.path.join(main_dir, "data/output/oa_medical_info.ddb")
 
 forward_links_path = os.path.join(main_dir, "data/output/oa_medical_forward_links.hdf5")
 

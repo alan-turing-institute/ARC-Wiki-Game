@@ -22,6 +22,7 @@ dependencies = [
     "tqdm",
     "huggingface_hub",
     "openai",
+    "duckdb"
 ]
 
 
