@@ -66,10 +66,7 @@ def extract_json(
         if ref_id is not None:
             refs.append(int(ref_id.group(1)))
     # Insert data into database
-    return f"""
-        INSERT INTO works
-        (openalex_id, title, citations, doi, field,
-        language, abstract, referenced_works)
-        VALUES ({id}, '{title}', {cites}, '{doi}', '{field}',
-        '{language}', '{abstract}', {refs})
-    """
+    return (
+        f"    ({id}, '{title}', {cites}, '{doi}',"
+        f"'{field}', '{language}', '{abstract}', {refs})"
+    )

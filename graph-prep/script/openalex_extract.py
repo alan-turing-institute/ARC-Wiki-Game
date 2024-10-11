@@ -14,11 +14,12 @@ from graph_prep.read_openalex import extract_json
 
 main_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 database_dir = os.path.join(main_dir, "data", "inter", "openalex_attempt.ddb")
-temp_dir = "/tmp"
+temp_dir = os.path.join(main_dir, "data", "temp")
 os.makedirs(temp_dir, exist_ok=True)
 
 MAX_THREADS = 40
 SPLIT_SIZE = 20_000
+INSERT_SIZE = 500
 
 file_names = glob.glob(os.path.join(main_dir, "data/raw/openalex/*/part*.gz"))
 
@@ -28,6 +29,13 @@ mdatabase.execute(
     "(openalex_id BIGINT, title STRING, citations INT, doi STRING, "
     "field STRING, language STRING, abstract STRING, referenced_works BIGINT[])"
 )
+
+insert_string = """
+INSERT INTO works
+    (openalex_id, title, citations, doi, field,
+    language, abstract, referenced_works)
+VALUES
+"""
 
 
 def extract_file(t_file: str, database: duckdb.DuckDBPyConnection) -> None:
@@ -45,15 +53,22 @@ def extract_file(t_file: str, database: duckdb.DuckDBPyConnection) -> None:
         open(t_file) as temp_f,
         database.cursor() as local_con,
     ):
+        insert_list = []
         w = 0
         for line in temp_f:
             # Get json data
             data = json.loads(line)
-            command = extract_json(data, re_extract_id, re_strip_escapes)
-            if command is None:
+            inset_vals = extract_json(data, re_extract_id, re_strip_escapes)
+            if inset_vals is None:
                 continue
-            local_con.execute(command)
+            insert_list.append(inset_vals)
+            if len(insert_list) >= INSERT_SIZE:
+                local_con.execute(insert_string + ",\n".join(insert_list) + ";")
+                insert_list = []
             w += 1
+
+        if len(insert_list) > 0:
+            local_con.execute(insert_string + ",\n".join(insert_list) + ";")
 
     os.remove(t_file)
     print(f"Finished thread for {os.path.basename(t_file)} with {w:d} works")
