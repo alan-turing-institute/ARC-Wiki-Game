@@ -1,0 +1,13 @@
+# This file contains the list of results that will be used to generate the figures
+
+result_data_file: result/table/tfidf_wiki_summary_stats.csv
+result_figure_loc: result/figure/tfidf_wiki_summary
+data_set_list:
+  - language: English
+    data_loc: data/output_data/en_wiki/step_list_tfidf
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: TFIDF wiki-20171001
+        data_name: en_wiki_step_list_wiki-english-20171001_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: en_wiki_step_list_wiki-english-20171001
