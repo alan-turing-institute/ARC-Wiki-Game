@@ -26,6 +26,9 @@ def extract_json(
     if id_r is None:
         return None
     id = int(id_r.group(1))
+    # Only want to retain works of type 'article'
+    if data["type"] != "article":
+        return None
     # Extract title
     title = data["title"]
     if data["title"] is None:
