@@ -78,6 +78,6 @@ def extract_json(
             refs.append(int(ref_id.group(1)))
     # Insert data into database
     return (
-        f"    ({id}, '{title}', {cites}, '{doi}',"
+        f"    ({id}, '{title}', {cites}, '{doi}', "
         f"'{field}', '{language}', '{abstract}', {refs})"
     )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import duckdb
 import h5py
 import numpy as np
 import pytest
@@ -97,3 +98,36 @@ def matidx_info(testing_dir: str, summary_data: str) -> str:
             f.write(f"{i*2}\t{i}\t{offset_ary[i]}\t{chr(65 + i) * 4}\n")
 
     return matidx_info_path
+
+
+@pytest.fixture(scope="module")
+def summary_database(testing_dir: str, lormum_ipsum: str) -> str:
+    summary_db_path = str(testing_dir / "summary_data.ddb")
+
+    conn = duckdb.connect(summary_db_path)
+
+    # Create table
+    conn.execute(
+        """
+        CREATE TABLE works (
+            MatrixIndex BIGINT,
+            PageID BIGINT,
+            PageTitle STRING,
+            Abstract STRING
+        )
+        """
+    )
+
+    # Insert some data
+    for i in range(20):
+        title = chr(65 + i) * 4
+        conn.execute(
+            """
+            INSERT INTO works (MatrixIndex, PageID, PageTitle, Abstract)
+            VALUES (?, ?, ?, ?)""",
+            (i, i * 2, title, f"{title} {lormum_ipsum}"),
+        )
+
+    conn.close()
+
+    return summary_db_path
