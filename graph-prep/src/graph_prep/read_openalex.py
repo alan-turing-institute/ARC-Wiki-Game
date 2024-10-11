@@ -50,6 +50,7 @@ def extract_json(
         "Arts and Humanities",
         "Biochemistry, Genetics and Molecular Biology",
         "Physics and Astronomy",
+        "Social Sciences",
     ]:
         return None
     # Extract language
