@@ -45,6 +45,13 @@ def extract_json(
         field = strip_escapes.sub("", data["primary_topic"]["field"]["display_name"])
     else:
         field = None
+    if field not in [
+        "Medicine",
+        "Arts and Humanities",
+        "Biochemistry, Genetics and Molecular Biology",
+        "Physics and Astronomy",
+    ]:
+        return None
     # Extract language
     if data["language"] is not None:
         language = strip_escapes.sub("", data["language"])

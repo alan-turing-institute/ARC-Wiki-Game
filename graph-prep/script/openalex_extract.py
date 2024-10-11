@@ -71,7 +71,9 @@ def extract_file(t_file: str, database: duckdb.DuckDBPyConnection) -> None:
             local_con.execute(insert_string + ",\n".join(insert_list) + ";")
 
     os.remove(t_file)
-    print(f"Finished thread for {os.path.basename(t_file)} with {w:d} works")
+    print(
+        f"Finished thread for {os.path.basename(t_file)} with {w:d} works", flush=True
+    )
 
 
 def write_temp_file(
