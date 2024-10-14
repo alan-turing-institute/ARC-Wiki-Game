@@ -56,10 +56,8 @@ def main() -> None:
     extracted_db = duckdb.connect(extracted_database_path, read_only=True)
     new_field_db = duckdb.connect(new_field_database_path, read_only=False)
 
-    total_requested_works = extracted_db.execute(
-        f"""
-        SELECT COUNT(openalex_id) FROM works WHERE field = '{sci_field}'
-    """
+    total_database_size = extracted_db.execute(
+        "SELECT COUNT(openalex_id) FROM works"
     ).fetchone()[0]
 
     new_field_db.execute(
@@ -78,15 +76,20 @@ def main() -> None:
     chuck_size = 1_000_000
 
     for chunk_i in tqdm(
-        range((total_requested_works // chuck_size) + 1),
+        range((total_database_size // chuck_size) + 1),
         desc=f"Inserting {sci_field} Works",
     ):
         sci_field_df = extracted_db.execute(
             f"""
+            WITH work_chunk AS (
+                SELECT openalex_id, title, abstract, language, referenced_works, field
+                FROM works
+                LIMIT {chuck_size} OFFSET {chuck_size*chunk_i}
+
+            )
             SELECT openalex_id, title, abstract, language, referenced_works
-            FROM works
+            FROM work_chunk
             WHERE field = '{sci_field}'
-            LIMIT {chuck_size} OFFSET {chuck_size*chunk_i}
         """
         ).fetchdf()
         new_field_db.register("sci_field_df", sci_field_df)
