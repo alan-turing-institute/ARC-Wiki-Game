@@ -5,9 +5,18 @@ from abc import abstractmethod
 from io import BufferedReader
 from warnings import warn
 
+import duckdb
 import h5py
 import numpy as np
 import pandas as pd
+
+__all__ = [
+    "AgentToolsBase",
+    "AgentToolsDisk",
+    "AgentToolsRAM",
+    "AgentToolsDatabaseRAM",
+    "AgentToolsDatabaseDisk",
+]
 
 
 class AgentToolsBase:
@@ -347,4 +356,227 @@ class AgentToolsRAM(AgentToolsBase):
         return summaries
 
 
-__all__ = ["AgentToolsBase", "AgentToolsDisk", "AgentToolsRAM"]
+class AgentToolsDatabaseRAM(AgentToolsBase):
+    def __init__(
+        self,
+        hdf5_file_path: str,
+        database_file_path: str,
+        old_title_format: bool = False,
+        sort_data: bool = False,
+    ):
+        """Initialize the AgentTools object.
+
+        This object is used to interact with the OpenAlex database and the entries
+        are saved to RAM. This is useful when the database is small enough to fit.
+        It looks for the fields 'MatrixIndex', 'PageTitle', and 'Abstract' in the
+        database.
+        It also loads the graph from the HDF5 file.
+
+        Args:
+            hdf5_file_path (str): The file path to the HDF5 file. This HDF5 file
+                contains the forward links sorted in the order of the Matrix Index.
+                It also contains a lookup table that maps the Matrix Index to the
+                forward link locations.
+            database_file_path (str): The file path to the DuckDB database file. This
+                database file contains the indexes, titles, and abstracts of the
+                articles.
+            old_title_format (bool, optional): If the title is stored under the "Title"
+                column as opposed to "PageTitle". Defaults to False.
+            sort_data (bool, optional): If the Summary data table needs to be sorted.
+                Defaults to False.
+
+        Raises:
+            ValueError: If the Matrix Index is not sorted.
+                (Use the sort_data flag to resolve this issue.)
+        """
+        with duckdb.connect(database_file_path, read_only=True) as con:
+            info_df = con.execute("SELECT * FROM works").fetchdf()
+
+        if sort_data:
+            print("Sorting the Summary Data Table")
+            info_df.sort_values("MatrixIndex", inplace=True)
+            info_df.reset_index(drop=True, inplace=True)
+
+        self.summary_ser = info_df["Abstract"]
+
+        super().__init__(hdf5_file_path, info_df, old_title_format=old_title_format)
+
+    def get_article_summary(self, article_id) -> str | None:
+        """Get the summary of the article for the given article ID.
+
+        Args:
+            article_id (int): The article ID for which the summary is to be fetched.
+
+        Returns:
+            str: The summary of the article, from the Summary file.
+        """
+        idx = np.searchsorted(self.matidx_ary, article_id)
+        if idx < len(self.matidx_ary) and self.matidx_ary[idx] == article_id:
+            summary = self.summary_ser.iloc[idx]
+        else:
+            warn(
+                f"Article ID {article_id} not found in the Matrix Index Info Table",
+                stacklevel=1,
+            )
+            return None
+
+        return str(summary)
+
+    def get_forward_summaries(self, article_id: int) -> list[list[int | str | None]]:
+        """Get the summaries of the articles linked to the given article ID.
+
+        Args:
+            article_id (int): The article ID for which the summaries are to be fetched.
+
+        Returns:
+            List[List[int, str]]: A list of lists containing the article ID and the
+                summary of the articles linked to the given article ID.
+        """
+        forward_links = self.get_forward_links(article_id)
+        summaries = []
+        for link in forward_links:
+            summaries.append([int(link), self.get_article_summary(link)])
+        return summaries
+
+
+class AgentToolsDatabaseDisk(AgentToolsBase):
+    def __init__(
+        self,
+        hdf5_file_path: str,
+        database: str | duckdb.duckdb.DuckDBPyConnection,
+        old_title_format: bool = False,
+        sort_data: bool = False,
+    ):
+        """Initialize the AgentTools object.
+
+        This object is used to interact with the OpenAlex database when the entries
+        are too large to be stored in RAM.
+        It looks for the fields 'MatrixIndex', 'PageTitle', and 'Abstract' in the
+        database.
+        It also loads the graph from the HDF5 file.
+
+        Args:
+            hdf5_file_path (str): The file path to the HDF5 file. This HDF5 file
+                contains the forward links sorted in the order of the Matrix Index.
+                It also contains a lookup table that maps the Matrix Index to the
+                forward link locations.
+            database (str | duckdb.duckdb.DuckDBPyConnection): The path to the DuckDB
+                database file or a DuckDB connection object. This database file contains
+                the indexes, titles, and abstracts of the articles.
+            old_title_format (bool, optional): If the title is stored under the "Title"
+                column as opposed to "PageTitle". Defaults to False.
+            sort_data (bool, optional): If the Summary data table needs to be sorted.
+                Defaults to False.
+
+        Raises:
+            ValueError: If the Matrix Index is not sorted.
+                (Use the sort_data flag to resolve this issue.)
+        """
+        if isinstance(database, str):
+            self._database_path = database
+            self.database_file = None
+            with duckdb.connect(database, read_only=True) as con:
+                info_df = con.execute(
+                    "SELECT MatrixIndex, PageTitle FROM works"
+                ).fetchdf()
+        elif isinstance(database, duckdb.duckdb.DuckDBPyConnection):
+            self.database_file = database
+            info_df = database.execute(
+                "SELECT MatrixIndex, PageTitle FROM works"
+            ).fetchdf()
+        else:
+            msg = (
+                "The database should be either a path to the database file or a "
+                "DuckDB connection."
+            )
+            raise ValueError(msg)
+
+        if sort_data:
+            print("Sorting the Summary Data Table")
+            info_df.sort_values("MatrixIndex", inplace=True)
+            info_df.reset_index(drop=True, inplace=True)
+
+        super().__init__(hdf5_file_path, info_df, old_title_format=old_title_format)
+
+    def __enter__(self) -> AgentToolsBase:
+        """Initialize the AgentTools object."""
+        print("Loading the Database File")
+        self.database_file = duckdb.connect(self._database_path, read_only=True)
+
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Exit the AgentTools object."""
+        self.database_file.close()
+
+    def get_article_summary(self, article_id: int) -> str | None:
+        """Get the summary of the article for the given article ID.
+
+        Args:
+            article_id (int): The article ID for which the summary is to be fetched.
+
+        Returns:
+            str: The summary of the article, from the Summary file.
+        """
+        if self.database_file is None:
+            msg = (
+                "Summary file is not open, use with statement "
+                "`with AgentToolsDatabaseDisk(...)` to open the file "
+                "or provide a duckdb database object."
+            )
+            raise ValueError(msg)
+
+        if not isinstance(article_id, (int, np.integer)):
+            msg = "Article ID should be an integer."
+            raise ValueError(msg)
+
+        fetched = self.database_file.execute(
+            f"""
+            SELECT MatrixIndex, Abstract
+            FROM works
+            WHERE MatrixIndex = {article_id}
+        """
+        ).fetchone()
+
+        if fetched is None:
+            warn(
+                f"Article ID {article_id} not found in the Matrix Index Info Table",
+                stacklevel=1,
+            )
+            return None
+
+        return str(fetched[1])
+
+    def get_forward_summaries(self, article_id: int) -> list[list[int | str | None]]:
+        """Get the summaries of the articles linked to the given article ID.
+
+        Args:
+            article_id (int): The article ID for which the summaries are to be fetched.
+
+        Returns:
+            List[List[int, str]]: A list of lists containing the article ID and the
+                summary of the articles linked to the given article ID.
+        """
+        if self.database_file is None:
+            msg = (
+                "Summary file is not open, use with statement "
+                "`with AgentToolsDatabaseDisk(...)` to open the file "
+                "or provide a duckdb database object."
+            )
+            raise ValueError(msg)
+
+        forward_links = self.get_forward_links(article_id)
+        if forward_links.size == 0:
+            return []
+
+        link_str = ", ".join(map(str, forward_links))
+
+        summaries = self.database_file.execute(
+            f"""
+            SELECT MatrixIndex, Abstract
+            FROM works
+            WHERE MatrixIndex IN ({link_str})
+        """
+        ).fetchnumpy()
+
+        return [list(x) for x in zip(summaries["MatrixIndex"], summaries["Abstract"])]

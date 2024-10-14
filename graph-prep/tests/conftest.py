@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from graph_prep.transforms import swap_graph_direction
+from graph_prep.transforms import build_link_pairs, swap_graph_direction
 
 
 @pytest.fixture(scope="module")
@@ -32,6 +32,11 @@ def forward_locs_vals() -> tuple[np.ndarray, np.ndarray]:
     )
 
     return test_locs, test_vals
+
+
+@pytest.fixture(scope="module")
+def forward_link_pairs(forward_locs_vals) -> np.ndarray:
+    return build_link_pairs(*forward_locs_vals)
 
 
 @pytest.fixture(scope="module")

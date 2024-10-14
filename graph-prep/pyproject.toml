@@ -24,6 +24,9 @@ dependencies = [
     # Wiki Media Data Parsing
     "mwxml",
     "mwparserfromhell",
+    # Open Alex
+    "duckdb",
+    "awscli",
 ]
 
 
