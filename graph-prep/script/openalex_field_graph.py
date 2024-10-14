@@ -53,12 +53,12 @@ def main() -> None:
         main_dir, "data/output/oa_" + sci_field_short + "_forward_links.hdf5"
     )
 
-    extracted_db = duckdb.connect(extracted_database_path, read_only=True)
-    new_field_db = duckdb.connect(new_field_database_path, read_only=False)
+    temp_parquet_path = os.path.join(
+        main_dir, "data/output/oa_" + sci_field_short + "_info.parquet"
+    )
 
-    total_database_size = extracted_db.execute(
-        "SELECT COUNT(openalex_id) FROM works"
-    ).fetchone()[0]
+    extracted_db = duckdb.connect(extracted_database_path, read_only=False)
+    new_field_db = duckdb.connect(new_field_database_path, read_only=False)
 
     new_field_db.execute(
         """
@@ -73,47 +73,29 @@ def main() -> None:
     """
     )
 
-    chuck_size = 1_000_000
-
-    for chunk_i in tqdm(
-        range((total_database_size // chuck_size) + 1),
-        desc=f"Inserting {sci_field} Works",
-    ):
-        sci_field_df = extracted_db.execute(
-            f"""
-            WITH work_chunk AS (
-                SELECT openalex_id, title, abstract, language, referenced_works, field
-                FROM works
-                LIMIT {chuck_size} OFFSET {chuck_size*chunk_i}
-
-            )
-            SELECT openalex_id, title, abstract, language, referenced_works
-            FROM work_chunk
-            WHERE field = '{sci_field}'
+    extracted_db.execute(
+        f"""CREATE TABLE temp_works AS
+        SELECT openalex_id, title, abstract, language, referenced_works
+        FROM works
+        WHERE field = '{sci_field}';
+        COPY temp_works TO '{temp_parquet_path}' (FORMAT 'parquet');
+        DROP TABLE temp_works;
         """
-        ).fetchdf()
-        new_field_db.register("sci_field_df", sci_field_df)
-        new_field_db.execute(
-            """
-            INSERT INTO works (
-                OpenAlexID, PageTitle, Abstract, Language, referenced_works
-            )
-            SELECT openalex_id, title, abstract, language, referenced_works
-            FROM sci_field_df
-        """
-        )
+    )
 
-    del sci_field_df
     extracted_db.close()
 
-    print("Sort the works")
+    print("Load Data to New Database")
     new_field_db.execute(
-        """
-        CREATE TABLE works_sorted AS SELECT * FROM works ORDER BY OpenAlexID;
-        DROP TABLE works;
-        ALTER TABLE works_sorted RENAME TO works;
+        f"""
+        INSERT INTO works (OpenAlexID, PageTitle, Abstract, Language, referenced_works)
+        SELECT openalex_id, title, abstract, language, referenced_works
+        FROM read_parquet('{temp_parquet_path}')
+        ORDER BY openalex_id
     """
     )
+
+    os.remove(temp_parquet_path)
 
     new_field_db.execute(
         """
