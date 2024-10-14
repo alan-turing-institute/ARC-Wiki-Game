@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import os
 
 import duckdb
@@ -12,20 +13,52 @@ from graph_prep.transforms import build_forward_graph
 main_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 extracted_database_path = os.path.join(main_dir, "data/inter/openalex_attempt.ddb")
-new_field_database_path = os.path.join(main_dir, "data/output/oa_medical_info.ddb")
 
-forward_links_path = os.path.join(main_dir, "data/output/oa_medical_forward_links.hdf5")
 
-SCI_FIELD = "Medicine"
+def parse_args():
+    parser = argparse.ArgumentParser(description="Set the field to be extracted")
+
+    parser.add_argument(
+        "-l",
+        "--long_name",
+        required=True,
+        type=str,
+        help="The name of the field to be extracted from the OpenAlex dataset.",
+    )
+    parser.add_argument(
+        "-s",
+        "--short_name",
+        required=False,
+        type=str,
+        help="The name to be given to the dataset when saving it - if not provided, \
+            the long name will be used.",
+    )
+
+    return parser.parse_args()
 
 
 def main() -> None:
+    args = parse_args()
+
+    sci_field = args.long_name
+    sci_field_short = (
+        args.long_name.lower() if args.short_name is None else args.short_name
+    )
+
+    new_field_database_path = os.path.join(
+        main_dir, "data/output/oa_" + sci_field_short + "_info.ddb"
+    )
+
+    forward_links_path = os.path.join(
+        main_dir, "data/output/oa_" + sci_field_short + "_forward_links.hdf5"
+    )
+
     extracted_db = duckdb.connect(extracted_database_path, read_only=True)
     new_field_db = duckdb.connect(new_field_database_path, read_only=False)
 
     total_requested_works = extracted_db.execute(
         f"""
-        SELECT COUNT(openalex_id) FROM works WHERE field = '{SCI_FIELD}'
+        SELECT COUNT(openalex_id) FROM works WHERE field = '{sci_field}'
     """
     ).fetchone()[0]
 
@@ -46,13 +79,13 @@ def main() -> None:
 
     for chunk_i in tqdm(
         range((total_requested_works // chuck_size) + 1),
-        desc=f"Inserting {SCI_FIELD} Works",
+        desc=f"Inserting {sci_field} Works",
     ):
         sci_field_df = extracted_db.execute(
             f"""
             SELECT openalex_id, title, abstract, language, referenced_works
             FROM works
-            WHERE field = '{SCI_FIELD}'
+            WHERE field = '{sci_field}'
             LIMIT {chuck_size} OFFSET {chuck_size*chunk_i}
         """
         ).fetchdf()
