@@ -70,3 +70,13 @@ class OpenAIModel(GenLM):
             return completion.choices[0].message.content
         except BadRequestError:
             return "BadRequestError"
+
+
+class HumanLM(GenLM):
+    def __init__(self) -> None:
+        """This is class that allows a human to respond to the messages."""
+
+    def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
+        for message in messages:
+            print(f"{message['role']}: {message['content']}")
+        return input("Human: ")
