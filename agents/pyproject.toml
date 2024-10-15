@@ -23,7 +23,8 @@ dependencies = [
     "numdifftools",
     "huggingface_hub",
     "openai",
-    "duckdb"
+    "duckdb",
+    "ollama",
 ]
 
 
