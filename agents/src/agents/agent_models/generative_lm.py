@@ -26,9 +26,9 @@ class MockGenLM(GenLM):
         if len(self._test_responses) > 0:
             response = self._test_responses.pop(0)
             if response["type"] == "json":
-                link = response["link"]
+                link = response["title"]
                 return (
-                    '{\n "link": "'
+                    '{\n "title": "'
                     + link
                     + '",\n "reason": "'
                     + messages[-1]["content"][0]

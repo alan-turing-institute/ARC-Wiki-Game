@@ -521,7 +521,7 @@ class PromptAgent(Agent):
             The maximum number of rounds that the game can be played for
         model: GenLM
             An object derived from GenLM which has the functionality of a generative
-            LLM to select a link from a given list.
+            LLM to select a title from a given list.
 
         Raises
         ------
@@ -541,13 +541,13 @@ class PromptAgent(Agent):
         )
         self._response1_content = "Of course! What is your target page?"
         self._response2_content = (
-            "Sure! I can help you navigate to that page, what links are there on "
+            "Sure! I can help you navigate to that page, what titles are there on "
             "your current page?"
         )
         self._play_round_content = (
-            "Here is a list of links, which one should I pick? Please provide your "
-            'answer in JSON format with the selected link given with key "link" and '
-            'a justification given with key "reason". The selected link must be from '
+            "Here is a list of titles, which one should I pick? Please provide your "
+            'answer in JSON format with the selected title given with key "title" and '
+            'a justification given with key "reason". The selected title must be from '
             "the following list: "
         )
 
@@ -561,8 +561,8 @@ class PromptAgent(Agent):
         """
         This method takes the source and target page IDs or titles and implements a
         prompting approach to find a route between the two pages. The approach presents
-        a LLM model with a summary of the target page and a list of the links on the
-        current page and asks the model to pick a link.
+        a LLM model with a summary of the target page and a list of the titles on the
+        current page and asks the model to pick a title.
 
         If a route is found then the method returns True and a list of the route found
         (composed of page IDs). If a route is not found then the method returns False
@@ -570,7 +570,7 @@ class PromptAgent(Agent):
         be found for serveral reasons including:
         - Needing to take more than the maximum number of rounds the object has
           been set
-        - Reaching a page where there are either no links, or no links to which
+        - Reaching a page where there are either no titles, or no titles to which
           the agent has not yet navigated.
 
         Parameters
@@ -606,7 +606,9 @@ class PromptAgent(Agent):
         reasons = ["Start page"]
         found_target = current_id == target_id
         while (len(route) <= self._max_rounds) and not found_target:
-            next_page_id, reason = self._play_round(current_id, route, game_messages)
+            next_page_id, reason = self._play_round(
+                current_id, route, game_messages, target_title
+            )
             route.append(next_page_id)
             reasons.append(reason)
             if next_page_id == -1:
@@ -666,13 +668,17 @@ class PromptAgent(Agent):
         return [message1, message2, message3, message4, message5]
 
     def _play_round(
-        self, current_page_id: int, route: list[int], game_messages: list[dict]
+        self,
+        current_page_id: int,
+        route: list[int],
+        game_messages: list[dict],
+        target_title: str,
     ) -> tuple[int, str]:
         """
-        Given a current page id, this method gets all the titles of the links that exist
-        on the page. It presentes the link titles to the LLM along with a summary of
-        the target page and asks the LLM to select a link.
-        It then returns the ID of the selected link.
+        Given a current page id, this method gets all the titles of the titles that
+        exist on the page. It presentes the title titles to the LLM along with a summary
+        of the target page and asks the LLM to select a title.
+        It then returns the ID of the selected title
 
         Parameters
         ----------
@@ -683,6 +689,8 @@ class PromptAgent(Agent):
         messages: list[dict]
             A list of dictionaries containing the messages to be used at the start of
             the prompt - these are the same for all rounds in the game.
+        target_title: str
+            The title of the target page to provide in error messages.
 
         Returns
         -------
@@ -719,15 +727,19 @@ class PromptAgent(Agent):
                     # response and retry
                     retry += 1
                     response = (
-                        '{\n  "link": "Unknown link",\n "reason": "'
-                        'I did not know which link to select."\n}'
+                        '{\n  "title": "Unknown title",\n "reason": "'
+                        'I did not know which title to select."\n}'
                     )
                     content_retry = (
-                        'But "Unknown link" is not in the list '
-                        "that was provided! You must select a link from the "
-                        "list of links. Please try again and provide your "
-                        "answer in JSON format with the selected link given "
-                        'with key "link" and a justification given with key "reason".'
+                        'But "Unknown title" is not in the list '
+                        "that was provided! You must select a title from the "
+                        "list of titles. Please try again and provide your "
+                        "answer in JSON format with the selected title given "
+                        'with key "title" and a justification given with key "reason". '
+                        "The JSON should only include the two fields 'title' and "
+                        "'reason', and the title should only include the title text. "
+                        "You are tying to select the best page title to reach "
+                        f"the target page '{target_title}'."
                     )
                 elif response == "BadRequestError":
                     return -1, response
@@ -735,8 +747,8 @@ class PromptAgent(Agent):
                     # There is a response
                     try:
                         json_response = json.loads(response)
-                        if "link" in json_response:
-                            next_link = json_response["link"]
+                        if "title" in json_response:
+                            next_link = json_response["title"]
                             if next_link in titles:
                                 # Excellent - no hallucinations!
                                 next_link_id = self._tools.get_article_id(next_link)
@@ -748,14 +760,34 @@ class PromptAgent(Agent):
                                 return next_link_id, json_response["reason"]
                             # *sigh* - hallucination
                             retry += 1
-                            err_msg = "Hallucination - link not in list"
+                            err_msg = "Hallucination - title not in list"
                             content_retry = (
                                 f'But "{next_link}" is not in the list '
-                                "that was provided! You must select a link from the "
-                                "list of links. Please try again and provide your "
-                                "answer in JSON format with the selected link given "
-                                'with key "link" and a justification given with key '
+                                "that was provided! You must select a title from the "
+                                "list of titles. Please try again and provide your "
+                                "answer in JSON format with the selected title given "
+                                'with key "title" and a justification given with key '
                                 '"reason".'
+                                "The JSON should only include the two fields 'title' "
+                                "and 'reason', and the title should only include the "
+                                "title text. "
+                                "You are tying to select the best page title to reach "
+                                f"the target page '{target_title}'."
+                            )
+                        else:
+                            # No link in the response
+                            retry += 1
+                            err_msg = "No title provided in response"
+                            content_retry = (
+                                "You must provide a title to navigate to. Please try "
+                                "again and provide your answer in JSON format with the "
+                                'selected title given with key "title" and a '
+                                'justification given with key "reason". '
+                                "The JSON should only include the two fields 'title' "
+                                "and 'reason', and the title should only include the "
+                                "title text. "
+                                "You are tying to select the best page title to reach "
+                                f"the target page '{target_title}'."
                             )
 
                     except json.decoder.JSONDecodeError:
@@ -765,6 +797,11 @@ class PromptAgent(Agent):
                         content_retry = (
                             "You did not provide your response in JSON "
                             "format - please try again!"
+                            "The JSON should only include the two fields 'title' and "
+                            "'reason', and the title should only include the title "
+                            "text. "
+                            "You are tying to select the best page title to reach "
+                            f"the target page '{target_title}'."
                         )
                 message_response = {"role": "assistant", "content": response}
                 messages.append(message_response)
@@ -775,4 +812,4 @@ class PromptAgent(Agent):
             # The agent was not able to select a link
             return -1, err_msg
         # There are no links from the current page
-        return -1, "Ran out of links to pick"
+        return -1, "Ran out of titles to pick"
