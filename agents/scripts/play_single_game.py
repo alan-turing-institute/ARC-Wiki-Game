@@ -125,6 +125,13 @@ def parse_args():
             response. Note that this does not guarantee that the model is \
             deterministic (for OpenAI)",
     )
+    parser.add_argument(
+        "--from_database",
+        required=False,
+        default=False,
+        type=bool,
+        help="If True, then the database versions of agent tools will be used.",
+    )
     return parser.parse_args()
 
 
@@ -139,8 +146,11 @@ def main():
     verbose = args.verbose if args.verbose is not None else False
     load_data_to_ram = args.load_data_to_ram
     use_old_title = args.old_title
+    from_database = args.from_database
 
-    tools = load_tools(data_path, input_dataset_name, load_data_to_ram, use_old_title)
+    tools = load_tools(
+        data_path, input_dataset_name, load_data_to_ram, use_old_title, from_database
+    )
 
     if args.agent == "GreedyEmbeddingAgent":
         agent = GreedyEmbeddingAgent(

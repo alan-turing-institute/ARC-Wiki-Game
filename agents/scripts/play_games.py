@@ -85,6 +85,13 @@ def parse_args():
             agent, experiment and model. Might want to set to a low value, e.g. 10, \
             when testing locally.",
     )
+    parser.add_argument(
+        "--from_database",
+        required=False,
+        default=False,
+        type=bool,
+        help="If True, then the database versions of agent tools will be used.",
+    )
     return parser.parse_args()
 
 
@@ -114,6 +121,7 @@ def main():
     load_data_to_ram = args.load_data_to_ram
     save_n_games = args.save_n_games
     use_old_title = args.old_title
+    from_database = args.from_database
     max_games = args.max_games
 
     game_data_dir, _, output_data_dir = get_data_folders(data_path)
@@ -155,7 +163,9 @@ def main():
     output_path = os.path.join(output_data_dir, input_dataset_name)
     os.makedirs(output_path, exist_ok=True)
 
-    tools = load_tools(data_path, input_dataset_name, load_data_to_ram, use_old_title)
+    tools = load_tools(
+        data_path, input_dataset_name, load_data_to_ram, use_old_title, from_database
+    )
 
     for experiment in experiments:
         experiment_name = experiment
