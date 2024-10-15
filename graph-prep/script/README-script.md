@@ -32,6 +32,20 @@ It is set up in this slightly complex way as it allows much quicker location of 
 
 ## Processing OpenAlex Data
 
+### openalex_extract
+
+This script requires the raw OpenAlex data to have been downloaded into the `data/raw/openalex` folder. These data will be stored in subfolders. This script extracts the data from these files and stores them into a DuckDB database in the `data/inter` folder. The rules about what data are extracted can be found in the `src/graph_prep/read_openalex.py` file. Currently these rules are hard-coded and include only extracting works of type `article` and only fields that are in one of:
+
+* Medicine
+* Arts and Humanities
+* Biochemistry, Genetics and Molecular Biology
+* Physics and Astronomy
+* Social Sciences
+
+### openalex_field_graph
+
+This script takes the name of one of the fields as an argument and processes these data into its own database and and hdf5 file of forward links. Another argument is a `short_name` which is given to the output that is saved; for example, the field `Physics and Astronomy` might be given a `short_name` of `physics`. The output of this script is saved in the `data/output` folder and will be needed by the `agents` package to play the games.
+
 ## Graph Scripts
 
 These scripts use the hdf5 file of forward links which are common to the output of both the Wiki and OpenAlex data processing.
