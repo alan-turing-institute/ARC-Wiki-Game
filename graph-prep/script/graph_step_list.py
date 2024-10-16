@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from argparse import ArgumentParser
 
+import duckdb
 import h5py
 import numpy as np
 
@@ -28,6 +29,14 @@ def main() -> None:
         type=int,
         required=False,
         default=1000,
+    )
+    parser.add_argument(
+        "--add_language",
+        help="Set to True if the language code is also to be extracted from the \
+            database (for OpenAlex data only)",
+        type=bool,
+        required=False,
+        default=False,
     )
 
     args = parser.parse_args()
@@ -59,12 +68,41 @@ def main() -> None:
         include_index=True,
     )
 
+    header = "StartIndex,EndIndex,Steps"
+    fmt = "%d"
+    if args.add_language:
+        info_db_path = os.path.join(
+            main_dir, "data/output", f"{args.dataset_name}_info.ddb"
+        )
+        with duckdb.connect(info_db_path, read_only=True) as info_db:
+            languages = info_db.execute(
+                """SELECT MatrixIndex, Language, PageTitle FROM works"""
+            ).fetchdf()
+        header = "StartIndex,EndIndex,Steps,StartLang,EndLang"
+        fmt = "%d,%d,%d,%s,%s"
+        new_steps_list = []
+        for item in steps_list:
+            source_id = item[0]
+            target_id = item[1]
+            source_lang = languages.loc[source_id]["Language"]
+            target_lang = languages.loc[target_id]["Language"]
+            new_steps_list.append(
+                np.concatenate(
+                    [
+                        item,
+                        np.array([source_lang, target_lang]),
+                    ],
+                    dtype=object,
+                )
+            )
+        steps_list = new_steps_list
+
     np.savetxt(
         histogram_path,
         steps_list,
         delimiter=",",
-        header="StartIndex,EndIndex,Steps",
-        fmt="%d",
+        header=header,
+        fmt=fmt,
         comments="",
     )
 
