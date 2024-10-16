@@ -507,6 +507,8 @@ class PromptAgent(Agent):
         agent_tools: AgentToolsBase,
         max_rounds: int,
         model: GenLM,
+        num_retries: int = 1,
+        max_titles: int = -1,
     ) -> None:
         """
         Class inherits from Agent and plays the wikipedia game by giving a
@@ -522,6 +524,11 @@ class PromptAgent(Agent):
         model: GenLM
             An object derived from GenLM which has the functionality of a generative
             LLM to select a title from a given list.
+        num_retries: (int, optional)
+            The number of times the agent will retry to select a title if the title
+            selected is not in the list of titles provided. Defaults to 1.
+        max_titles: (int, optional)
+            The maximum number of titles to provide to the model. Defaults to -1.
 
         Raises
         ------
@@ -531,6 +538,8 @@ class PromptAgent(Agent):
         super().__init__(agent_tools, max_rounds)
 
         self._model = model
+        self._num_retries = num_retries
+        self._max_titles = max_titles
 
         self._system_content = (
             "You are a helpful assistant that helps me to play the Wikipedia Game! "
@@ -705,7 +714,7 @@ class PromptAgent(Agent):
         ]
         if len(titles) > 0:
             content = " "
-            for title in titles:
+            for title in titles[: self._max_titles]:
                 content += '"' + title + '", '
             content = "[" + content[:-2] + "]"
 
@@ -721,7 +730,7 @@ class PromptAgent(Agent):
 
             retry = 0
             err_msg = ""
-            while retry < 2:  # allow 1 retry - might want to add this as config?
+            while retry <= self._num_retries:  # allow for retries
                 if response is None:
                     # Will be 'None' if the content filter interferes, simulate a
                     # response and retry
@@ -757,7 +766,9 @@ class PromptAgent(Agent):
                                         "Couldn't find article ID for " + next_link
                                     )
                                     return -1, err_msg
-                                return next_link_id, json_response["reason"]
+                                if "reason" in json_response:
+                                    return next_link_id, json_response["reason"]
+                                return next_link_id, "No reason provided"
                             # *sigh* - hallucination
                             retry += 1
                             err_msg = "Hallucination - title not in list"
@@ -768,6 +779,8 @@ class PromptAgent(Agent):
                                 "answer in JSON format with the selected title given "
                                 'with key "title" and a justification given with key '
                                 '"reason".'
+                                "To jog your memory, 10 example titles from the "
+                                f"list are: {np.random.choice(titles, 10)}. "
                                 "The JSON should only include the two fields 'title' "
                                 "and 'reason', and the title should only include the "
                                 "title text. "
