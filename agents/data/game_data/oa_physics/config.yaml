@@ -1,5 +1,5 @@
 experiments:
-  step_list:
+  step_list_en:
     agent_class: GreedyEmbeddingAgent
     game_datasets:
       - oa_physics_step_list
@@ -19,3 +19,4 @@ experiments:
       - intfloat/multilingual-e5-small
     params:
       max_rounds: 100
+      filter_lang: en
