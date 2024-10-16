@@ -20,3 +20,4 @@ experiments:
     params:
       max_rounds: 100
       filter_lang: en
+      from_database: True
