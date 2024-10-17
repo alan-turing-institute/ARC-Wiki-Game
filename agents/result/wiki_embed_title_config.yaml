@@ -4,6 +4,7 @@ result_data_file: result/table/embed_model_wiki_title_stats.csv
 result_figure_loc: result/figure/embed_title_wiki_summary
 data_set_list:
   - language: English
+    topic: Wikipedia
     data_loc: data/output_data/en_wiki/step_list_titles
     figure_title: English Wiki Titles
     model_list:
@@ -60,6 +61,7 @@ data_set_list:
         file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
         figure_file_name: en_wiki_sum_all-stsb-xlm-r-multilingual
   - language: French
+    topic: Wikipedia
     data_loc: data/output_data/fr_wiki/step_list_titles
     figure_title: French Wiki Titles
     model_list:
@@ -96,6 +98,7 @@ data_set_list:
         file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
         figure_file_name: fr_wiki_sum_all-stsb-xlm-r-multilingual
   - language: Chinese
+    topic: Wikipedia
     data_loc: data/output_data/zh_wiki/step_list_titles
     figure_title: Chinese Wiki Titles
     model_list:
