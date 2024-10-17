@@ -2,7 +2,7 @@ experiments:
   step_list_en:
     agent_class: GreedyEmbeddingAgent
     game_datasets:
-      - oa_medicine_step_list_en
+      - oa_medicine_step_list_lang
     models:
       - all-distilroberta-v1
       - average_word_embeddings_glove.6B.300d
