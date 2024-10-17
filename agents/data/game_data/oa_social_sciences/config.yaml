@@ -1,0 +1,23 @@
+experiments:
+  step_list_en:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - oa_social_sciences_step_list_en
+    models:
+      - all-distilroberta-v1
+      - average_word_embeddings_glove.6B.300d
+      - all-MiniLM-L6-v2
+      - paraphrase-albert-small-v2
+      - all-mpnet-base-v2
+      - all-roberta-large-v1
+      - distiluse-base-multilingual-cased-v1
+      - stsb-xlm-r-multilingual
+      - paraphrase-multilingual-mpnet-base-v2
+      - paraphrase-multilingual-MiniLM-L12-v2
+      - distiluse-base-multilingual-cased-v2
+      - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
+    params:
+      max_rounds: 100
+      filter_lang: en
+      from_database: True

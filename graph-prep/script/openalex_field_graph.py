@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import os
 
 import duckdb
@@ -12,22 +13,52 @@ from graph_prep.transforms import build_forward_graph
 main_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 extracted_database_path = os.path.join(main_dir, "data/inter/openalex_attempt.ddb")
-new_field_database_path = os.path.join(main_dir, "data/output/oa_medical_info.ddb")
 
-forward_links_path = os.path.join(main_dir, "data/output/oa_medical_forward_links.hdf5")
 
-SCI_FIELD = "Medicine"
+def parse_args():
+    parser = argparse.ArgumentParser(description="Set the field to be extracted")
+
+    parser.add_argument(
+        "-l",
+        "--long_name",
+        required=True,
+        type=str,
+        help="The name of the field to be extracted from the OpenAlex dataset.",
+    )
+    parser.add_argument(
+        "-s",
+        "--short_name",
+        required=False,
+        type=str,
+        help="The name to be given to the dataset when saving it - if not provided, \
+            the long name will be used.",
+    )
+
+    return parser.parse_args()
 
 
 def main() -> None:
-    extracted_db = duckdb.connect(extracted_database_path, read_only=True)
-    new_field_db = duckdb.connect(new_field_database_path, read_only=False)
+    args = parse_args()
 
-    total_requested_works = extracted_db.execute(
-        f"""
-        SELECT COUNT(openalex_id) FROM works WHERE field = '{SCI_FIELD}'
-    """
-    ).fetchone()[0]
+    sci_field = args.long_name
+    sci_field_short = (
+        args.long_name.lower() if args.short_name is None else args.short_name
+    )
+
+    new_field_database_path = os.path.join(
+        main_dir, "data/output/oa_" + sci_field_short + "_info.ddb"
+    )
+
+    forward_links_path = os.path.join(
+        main_dir, "data/output/oa_" + sci_field_short + "_forward_links.hdf5"
+    )
+
+    temp_parquet_path = os.path.join(
+        main_dir, "data/output/oa_" + sci_field_short + "_info.parquet"
+    )
+
+    extracted_db = duckdb.connect(extracted_database_path, read_only=False)
+    new_field_db = duckdb.connect(new_field_database_path, read_only=False)
 
     new_field_db.execute(
         """
@@ -42,42 +73,29 @@ def main() -> None:
     """
     )
 
-    chuck_size = 1_000_000
-
-    for chunk_i in tqdm(
-        range((total_requested_works // chuck_size) + 1),
-        desc=f"Inserting {SCI_FIELD} Works",
-    ):
-        sci_field_df = extracted_db.execute(
-            f"""
-            SELECT openalex_id, title, abstract, language, referenced_works
-            FROM works
-            WHERE field = '{SCI_FIELD}'
-            LIMIT {chuck_size} OFFSET {chuck_size*chunk_i}
+    extracted_db.execute(
+        f"""CREATE TABLE temp_works AS
+        SELECT openalex_id, title, abstract, language, referenced_works
+        FROM works
+        WHERE field = '{sci_field}';
+        COPY temp_works TO '{temp_parquet_path}' (FORMAT 'parquet');
+        DROP TABLE temp_works;
         """
-        ).fetchdf()
-        new_field_db.register("sci_field_df", sci_field_df)
-        new_field_db.execute(
-            """
-            INSERT INTO works (
-                OpenAlexID, PageTitle, Abstract, Language, referenced_works
-            )
-            SELECT openalex_id, title, abstract, language, referenced_works
-            FROM sci_field_df
-        """
-        )
+    )
 
-    del sci_field_df
     extracted_db.close()
 
-    print("Sort the works")
+    print("Load Data to New Database")
     new_field_db.execute(
-        """
-        CREATE TABLE works_sorted AS SELECT * FROM works ORDER BY OpenAlexID;
-        DROP TABLE works;
-        ALTER TABLE works_sorted RENAME TO works;
+        f"""
+        INSERT INTO works (OpenAlexID, PageTitle, Abstract, Language, referenced_works)
+        SELECT openalex_id, title, abstract, language, referenced_works
+        FROM read_parquet('{temp_parquet_path}')
+        ORDER BY openalex_id
     """
     )
+
+    os.remove(temp_parquet_path)
 
     new_field_db.execute(
         """
