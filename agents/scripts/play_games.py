@@ -69,14 +69,6 @@ def parse_args():
              'input_data' and 'output_data'",
     )
     parser.add_argument(
-        "--old_title",
-        required=False,
-        default=False,
-        type=bool,
-        help="When loading the wiki data, this can be used if the old title format is\
-            to be used",
-    )
-    parser.add_argument(
         "--max_games",
         required=False,
         default=5000,
@@ -89,17 +81,32 @@ def parse_args():
 
 
 def load_test_dataset(
-    input_dataset_name, game_data_dir, game_dataset_name
+    input_dataset_name: str,
+    game_data_dir: str,
+    game_dataset_name: str,
+    filter_lang_code: str | None,
 ) -> tuple[list[int], list[int]]:
     game_data_path = os.path.join(
         game_data_dir, input_dataset_name, game_dataset_name + ".csv"
     )
 
-    source_target_ids = loadtxt(game_data_path, dtype=int, delimiter=",", skiprows=1)
+    source_target_ids = loadtxt(
+        game_data_path, dtype=bytes, delimiter=",", skiprows=1
+    ).astype(str)
     steps = None
-    if source_target_ids.shape[1] == 3:
+    if source_target_ids.shape[1] >= 3:
+        if source_target_ids.shape[1] == 5 and filter_lang_code is not None:
+            source_target_ids = array(
+                [row for row in source_target_ids if row[4] == filter_lang_code]
+            )
+            if source_target_ids.shape[0] < 1:
+                raise ValueError(
+                    "The language code "
+                    + filter_lang_code
+                    + " doesn't occur in the dataset."
+                )
         # The file also contains the number of steps, only load the valid games
-        source_target_ids = array([row for row in source_target_ids if row[2] > 0])
+        source_target_ids = array([row for row in source_target_ids if int(row[2]) > 0])
         steps = [int(i) for i in source_target_ids[:, 2]]
 
     source_ids = [int(i) for i in source_target_ids[:, 0]]
@@ -113,7 +120,6 @@ def main():
     input_dataset_name = args.input_dataset
     load_data_to_ram = args.load_data_to_ram
     save_n_games = args.save_n_games
-    use_old_title = args.old_title
     max_games = args.max_games
 
     game_data_dir, _, output_data_dir = get_data_folders(data_path)
@@ -155,15 +161,30 @@ def main():
     output_path = os.path.join(output_data_dir, input_dataset_name)
     os.makedirs(output_path, exist_ok=True)
 
-    tools = load_tools(data_path, input_dataset_name, load_data_to_ram, use_old_title)
+    # Load Agent Tools object - some opitional parameters that might exist in config
+    if "from_database" in config["experiments"][experiment]["params"]:
+        from_database = config["experiments"][experiment]["params"]["from_database"]
+    else:
+        from_database = False
+    if "use_old_title" in config["experiments"][experiment]["params"]:
+        use_old_title = config["experiments"][experiment]["params"]["use_old_title"]
+    else:
+        use_old_title = False
+    tools = load_tools(
+        data_path, input_dataset_name, load_data_to_ram, use_old_title, from_database
+    )
 
     for experiment in experiments:
         experiment_name = experiment
         experiment_output_path = os.path.join(output_path, experiment_name)
         os.makedirs(experiment_output_path, exist_ok=True)
         for game_dataset in config["experiments"][experiment]["game_datasets"]:
+            if "filter_lang" in config["experiments"][experiment]["params"]:
+                filter_lang = config["experiments"][experiment]["params"]["filter_lang"]
+            else:
+                filter_lang = None
             source_ids, target_ids, steps = load_test_dataset(
-                input_dataset_name, game_data_dir, game_dataset
+                input_dataset_name, game_data_dir, game_dataset, filter_lang
             )
             # Create a list of model names to be run
             if args.model_name is not None:

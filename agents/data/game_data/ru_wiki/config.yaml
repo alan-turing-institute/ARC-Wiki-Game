@@ -1,0 +1,34 @@
+
+experiments:
+  step_list:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - ru_wiki_step_list
+    models:
+      - all-distilroberta-v1
+      - average_word_embeddings_glove.6B.300d
+      - all-MiniLM-L6-v2
+      - paraphrase-albert-small-v2
+      - all-mpnet-base-v2
+      - all-roberta-large-v1
+      - distiluse-base-multilingual-cased-v1
+      - stsb-xlm-r-multilingual
+      - paraphrase-multilingual-mpnet-base-v2
+      - paraphrase-multilingual-MiniLM-L12-v2
+      - distiluse-base-multilingual-cased-v2
+      - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
+    params:
+      max_rounds: 100
+
+  step_list_prompt:
+    agent_class: PromptAgent
+    game_datasets:
+      - ru_wiki_step_list
+    models:
+      - wikigame-gpt-4o
+    params:
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42

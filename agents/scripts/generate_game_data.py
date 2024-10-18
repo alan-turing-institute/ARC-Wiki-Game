@@ -54,6 +54,13 @@ def parse_args():
         help="When loading the wiki data, this can be used if the old title format is\
             to be used",
     )
+    parser.add_argument(
+        "--from_database",
+        required=False,
+        default=False,
+        type=bool,
+        help="If True, then the database versions of agent tools will be used.",
+    )
 
     return parser.parse_args()
 
@@ -67,6 +74,7 @@ def main():
     input_dataset_name = args.input_dataset
     load_data_to_ram = args.load_data_to_ram
     use_old_title = args.old_title
+    from_database = args.from_database
 
     game_data_dir, _, _ = get_data_folders(data_path)
     os.makedirs(os.path.join(game_data_dir, input_dataset_name), exist_ok=True)
@@ -78,7 +86,9 @@ def main():
             "The file for the test data already exists: \n" + game_data_path
         )
 
-    tools = load_tools(data_path, input_dataset_name, load_data_to_ram, use_old_title)
+    tools = load_tools(
+        data_path, input_dataset_name, load_data_to_ram, use_old_title, from_database
+    )
 
     source_target_ids = choice(
         arange(1, tools.matidx_ary.max() + 1), (num_records, 2), replace=False

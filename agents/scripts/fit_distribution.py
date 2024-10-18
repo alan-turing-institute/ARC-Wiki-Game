@@ -122,6 +122,7 @@ def process_model(
         {
             "Model": model_info["model_name"],
             "Language": data_set_info["language"],
+            "Topic": data_set_info["topic"],
             "Mean": mean_result[0],
             "Mean_std": mean_result[1],
             "Standard_dev": std_result[0],

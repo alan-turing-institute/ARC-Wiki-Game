@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import os
 
-from agents.agent_models.tools import AgentToolsBase, AgentToolsDisk, AgentToolsRAM
+from agents.agent_models.tools import (
+    AgentToolsBase,
+    AgentToolsDatabaseDisk,
+    AgentToolsDatabaseRAM,
+    AgentToolsDisk,
+    AgentToolsRAM,
+)
 
 
 def get_data_folders(data_path: str) -> tuple[str, str, str]:
@@ -48,6 +54,11 @@ def get_input_data_paths(data_path: str, dataset_name: str) -> tuple[str, str, s
         Parent path of the data folders
     dataset_name: str
         The name of the input dataset
+
+    Returns
+    -------
+    tuple[str, str, str]
+        The paths of the files needed to load the input data
     """
     _, input_path, _ = get_data_folders(data_path)
     return (
@@ -57,11 +68,33 @@ def get_input_data_paths(data_path: str, dataset_name: str) -> tuple[str, str, s
     )
 
 
+def get_input_database_paths(data_path: str, dataset_name: str) -> tuple[str, str]:
+    """
+    Parameters
+    ----------
+    data_path: str
+        Parent path of the data folders
+    dataset_name: str
+        The name of the input dataset
+
+    Returns
+    -------
+    tuple[str, str]
+        The paths of the files needed to load the input data via a database
+    """
+    _, input_path, _ = get_data_folders(data_path)
+    return (
+        os.path.join(input_path, dataset_name, dataset_name + "_forward_links.hdf5"),
+        os.path.join(input_path, dataset_name, dataset_name + "_info.ddb"),
+    )
+
+
 def load_tools(
     data_path: str,
     dataset_name: str,
     load_data_to_ram: bool,
     old_title_format: bool = False,
+    from_database: bool = False,
 ) -> AgentToolsBase:
     """
     Parameters
@@ -76,18 +109,34 @@ def load_tools(
         loaded dynamically during run time.
     old_title_format: bool
         True if the data contain the original title format, False otherwise
+    from_database: bool
+        True if the data are stored in a database - e.g., OpenAlex data
 
     Returns
     -------
     AgentToolsBase:
         An object of a derived class of AgentToolsBase
     """
-    # If or when we introduce more datasets, we will need to make the input dataset
-    # an argument that will determine which one is loaded.
+    if from_database:
+        hdf5_file_path, database_path = get_input_database_paths(
+            data_path, dataset_name
+        )
+        if load_data_to_ram:
+            return AgentToolsDatabaseRAM(
+                hdf5_file_path,
+                database_path,
+                sort_data=True,
+                old_title_format=old_title_format,
+            )
+        return AgentToolsDatabaseDisk(
+            hdf5_file_path,
+            database_path,
+            sort_data=True,
+            old_title_format=old_title_format,
+        )
     hdf5_file_path, matrix_info_path, summary_path = get_input_data_paths(
         data_path, dataset_name
     )
-
     if load_data_to_ram:
         return AgentToolsRAM(
             hdf5_file_path,
