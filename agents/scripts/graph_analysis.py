@@ -82,6 +82,14 @@ def analysis():
         # nodes as these can never be reached or be used to start a game.
         num_nodes_in_game = num_nodes - num_nodes_disconnected
         print(f"Total nodes in game: {num_nodes_in_game:_d}")
+        print(
+            f"Total unreachable nodes in game: \
+                {(num_nodes_no_inward_links - num_nodes_disconnected):_d}"
+        )
+        print(
+            f"Total dead-end nodes in game: \
+                {(num_nodes_no_outward_links-num_nodes_disconnected):_d}"
+        )
 
         num_edges = len(tools.forward_vals)
         print(f"Total edges: {num_edges:_d}")
