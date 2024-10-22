@@ -50,7 +50,7 @@ def analysis():
         )
 
         num_nodes = tools.matidx_ary.max()
-        print(f"Total nodes: {num_nodes:_d}")
+        print(f"Total nodes: {num_nodes:_d}", flush=True)
 
         # Get list of nodes that don't have any links into them - these could still
         # be used as a start node in a game (assuming they have an outward link)
