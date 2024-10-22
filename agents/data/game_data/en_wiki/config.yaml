@@ -22,7 +22,7 @@ experiments:
     params:
       max_rounds: 100
 
-  step_list_prompt:
+  step_list_prompt_v2:
     agent_class: PromptAgent
     game_datasets:
       - en_wiki_step_list
@@ -35,7 +35,7 @@ experiments:
       top_p: 0.1
       manual_seed: 42
       num_retries: 5
-      max_titles: -1
+      max_titles: 500
 
   step_list_prompt_llama:
     agent_class: PromptAgent
