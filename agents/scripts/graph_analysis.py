@@ -23,7 +23,7 @@ GRAPH_NAMES = [
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Get settings for creating test dataset"
+        description="Get settings for analysing the graphs."
     )
 
     parser.add_argument(
