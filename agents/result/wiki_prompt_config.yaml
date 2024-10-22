@@ -30,3 +30,12 @@ data_set_list:
         data_name: zh_wiki_step_list_wikigame-gpt-4o_
         file_index_list: [0]
         figure_file_name: zh_wiki_step_list_wikigame-gpt-4o
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_v2
+    figure_title: English Wiki Summary V2
+    model_list:
+      - model_name: ChatGPT 4o
+        data_name: en_wiki_step_list_wikigame-gpt-4o_
+        file_index_list: [0]
+        figure_file_name: en_wiki_step_list_wikigame-gpt-4o
