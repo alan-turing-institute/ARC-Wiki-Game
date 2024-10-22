@@ -7,7 +7,7 @@ import yaml
 from numpy import array, loadtxt, savetxt
 
 from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
-from agents.agent_models.generative_lm import OpenAIModel
+from agents.agent_models.generative_lm import OllamaLM, OpenAIModel
 from agents.utils.data import get_data_folders, load_tools
 
 
@@ -229,11 +229,33 @@ def main():
                             manual_seed = config["experiments"][experiment]["params"][
                                 "manual_seed"
                             ]
-                            gen_model = OpenAIModel(
-                                model, temperature, top_p, manual_seed
-                            )
+                            num_retries = config["experiments"][experiment]["params"][
+                                "num_retries"
+                            ]
+                            max_titles = config["experiments"][experiment]["params"][
+                                "max_titles"
+                            ]
+                            if (
+                                config["experiments"][experiment]["params"]["llm"]
+                                == "gpt"
+                            ):
+                                gen_model = OpenAIModel(
+                                    model, temperature, top_p, manual_seed
+                                )
+                            elif (
+                                config["experiments"][experiment]["params"]["llm"]
+                                == "ollama"
+                            ):
+                                gen_model = OllamaLM(
+                                    model,
+                                    options={"temperature": temperature},
+                                )
                             agent = PromptAgent(
-                                tools, max_rounds=max_rounds, model=gen_model
+                                tools,
+                                max_rounds=max_rounds,
+                                model=gen_model,
+                                num_retries=num_retries,
+                                max_titles=max_titles,
                             )
                         agent.play_games(
                             source_ids[start_index : start_index + max_games],
