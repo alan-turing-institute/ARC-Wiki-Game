@@ -8,16 +8,16 @@ import pandas as pd
 from agents.utils.data import get_data_folders, load_tools
 
 GRAPH_NAMES = [
-    "en_wiki",
-    "fr_wiki",
-    "zh_wiki",
-    "ru_wiki",
+    # "en_wiki",
+    # "fr_wiki",
+    # "zh_wiki",
+    # "ru_wiki",
     "bn_wiki",
     "oa_physics",
-    "oa_biochemistry",
-    "oa_medicine",
-    "oa_social_sciences",
-    "oa_arts",
+    # "oa_biochemistry",
+    # "oa_medicine",
+    # "oa_social_sciences",
+    # "oa_arts",
 ]
 
 
@@ -63,10 +63,22 @@ def analysis():
         tools = load_tools(
             data_path, name, False, old_title_format=False, from_database=from_database
         )
+
+        nodes_without_outward_links = []
+        for idx, arr in enumerate(tools.forward_locs):
+            if arr[0] == arr[1]:
+                nodes_without_outward_links.append(idx)
+
+        nodes_without_inward_links = [
+            idx for idx in tools.matidx_ary if idx not in tools.forward_vals
+        ]
+
         num_nodes = tools.matidx_ary.max()
         num_edges = len(tools.forward_vals)
         density = num_edges / (num_nodes * (num_nodes - 1))
         print("Total nodes: ", tools.matidx_ary.max())
+        print("Total dead-end nodes: ", len(nodes_without_outward_links))
+        print("Total unreachable nodes: ", len(nodes_without_inward_links))
         print("Total edges: ", len(tools.forward_vals))
         print("Directed density ", density)
         print()
