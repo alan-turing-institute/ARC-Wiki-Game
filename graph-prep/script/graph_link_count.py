@@ -41,8 +41,6 @@ def main():
         f"data/metadata/link_count/{args.dataset_name}_link_count_histogram.png",
     )
 
-    dataset_name = "English Wikipedia"
-
     with h5py.File(hdf5_dir, "r") as h5file:
         locs = h5file["forward_locs"][:][:, 0]
 
@@ -67,7 +65,7 @@ def main():
 
     ax.set_xlabel("Number of links")
     ax.set_ylabel("Number of articles")
-    ax.set_title("Distribution of number of links in articles\n" f"{dataset_name}")
+    ax.set_title("Distribution of number of links in articles\n" f"{args.figure_title}")
     ax.set_xlim(0, 100)
     ax.legend(
         title=say_over(100, link_count) + "\n" + say_over(500, link_count),
