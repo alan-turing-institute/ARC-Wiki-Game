@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import duckdb
 import h5py
 import numpy as np
 import pytest
@@ -97,3 +98,59 @@ def matidx_info(testing_dir: str, summary_data: str) -> str:
             f.write(f"{i*2}\t{i}\t{offset_ary[i]}\t{chr(65 + i) * 4}\n")
 
     return matidx_info_path
+
+
+@pytest.fixture(scope="module")
+def summary_database(testing_dir: str, lormum_ipsum: str) -> str:
+    summary_db_path = str(testing_dir / "summary_data.ddb")
+
+    conn = duckdb.connect(summary_db_path)
+
+    # Create table
+    conn.execute(
+        """
+        CREATE TABLE works (
+            MatrixIndex BIGINT,
+            PageID BIGINT,
+            PageTitle STRING,
+            Abstract STRING
+        )
+        """
+    )
+
+    # Insert some data
+    for i in range(20):
+        title = chr(65 + i) * 4
+        conn.execute(
+            """
+            INSERT INTO works (MatrixIndex, PageID, PageTitle, Abstract)
+            VALUES (?, ?, ?, ?)""",
+            (i, i * 2, title, f"{title} {lormum_ipsum}"),
+        )
+
+    conn.close()
+
+    return summary_db_path
+
+
+@pytest.fixture(scope="module")
+def step_data(testing_dir: str) -> str:
+    step_data_path = str(testing_dir / "step_data_0.csv")
+    step_data_path2 = str(testing_dir / "step_data_100.csv")
+
+    optimal_steps = np.tile(np.arange(1, 6), 20)
+    num_steps = np.exp(0.3 + np.arange(1, 101) / 24).astype(int) + optimal_steps
+    found_target1 = np.concatenate([np.tile([True, True, False], 33), [True]])
+    found_target2 = np.tile([True, False], 50)
+
+    with open(step_data_path, "w") as f:
+        f.write("optimal_steps\tnum_steps\tfound_target\n")
+        for i in range(100):
+            f.write(f"{optimal_steps[i]}\t{num_steps[i]}\t{found_target1[i]}\n")
+
+    with open(step_data_path2, "w") as f:
+        f.write("optimal_steps\tnum_steps\tfound_target\n")
+        for i in range(100):
+            f.write(f"{optimal_steps[i]}\t{num_steps[i]}\t{found_target2[i]}\n")
+
+    return step_data_path

@@ -49,9 +49,9 @@ def test_GreedyEmbeddingAgent(
 def test_PromptAgent(hdf5_file: str, matidx_info: str, summary_data: str):
     with AgentToolsDisk(hdf5_file, matidx_info, summary_data) as at:
         responses_success = [
-            {"type": "json", "link": "CCCC"},
-            {"type": "json", "link": "LLLL"},
-            {"type": "json", "link": "PPPP"},
+            {"type": "json", "title": "CCCC"},
+            {"type": "json", "title": "LLLL"},
+            {"type": "json", "title": "PPPP"},
         ]
         gen_model = MockGenLM(responses_success)
         agent = PromptAgent(at, max_rounds=5, model=gen_model)
@@ -63,10 +63,10 @@ def test_PromptAgent(hdf5_file: str, matidx_info: str, summary_data: str):
         assert game["error_message"] == ""
 
         responses_halucinate = [
-            {"type": "json", "link": "CCCC"},
-            {"type": "json", "link": "LLLL"},
-            {"type": "json", "link": "8888"},
-            {"type": "json", "link": "8888"},  # first retry
+            {"type": "json", "title": "CCCC"},
+            {"type": "json", "title": "LLLL"},
+            {"type": "json", "title": "8888"},
+            {"type": "json", "title": "8888"},  # first retry
         ]
         gen_model = MockGenLM(responses_halucinate)
         agent = PromptAgent(at, max_rounds=5, model=gen_model)
@@ -75,15 +75,15 @@ def test_PromptAgent(hdf5_file: str, matidx_info: str, summary_data: str):
         assert not game["found_target"]
         assert game["route"] == [0, 2, 11, -1]
         assert game["num_steps"] == 2
-        assert game["error_message"] == "Hallucination - link not in list"
+        assert game["error_message"] == "Hallucination - title not in list"
 
         responses_max_steps_reached = [
-            {"type": "json", "link": "CCCC"},
-            {"type": "json", "link": "LLLL"},
-            {"type": "json", "link": "HHHH"},
-            {"type": "json", "link": "TTTT"},
-            {"type": "json", "link": "AAAA"},
-            {"type": "json", "link": "BBBB"},
+            {"type": "json", "title": "CCCC"},
+            {"type": "json", "title": "LLLL"},
+            {"type": "json", "title": "HHHH"},
+            {"type": "json", "title": "TTTT"},
+            {"type": "json", "title": "AAAA"},
+            {"type": "json", "title": "BBBB"},
         ]
         gen_model = MockGenLM(responses_max_steps_reached)
         agent = PromptAgent(at, max_rounds=5, model=gen_model)
@@ -95,8 +95,8 @@ def test_PromptAgent(hdf5_file: str, matidx_info: str, summary_data: str):
         assert game["error_message"] == "Maximum number of steps reached"
 
         responses_not_json = [
-            {"type": "json", "link": "CCCC"},
-            {"type": "json", "link": "LLLL"},
+            {"type": "json", "title": "CCCC"},
+            {"type": "json", "title": "LLLL"},
             {"type": "not_json"},
             {"type": "not_json"},  # first retry
         ]

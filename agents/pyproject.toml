@@ -20,12 +20,15 @@ dependencies = [
     "notebook",
     "colorcet",
     "tqdm",
+    "numdifftools",
     "huggingface_hub",
     "openai",
     "gensim",
     "stopwordsiso",
     "jieba",
     "scipy==1.12",
+    "duckdb",
+    "ollama",
 ]
 
 

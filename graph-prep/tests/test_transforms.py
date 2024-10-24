@@ -2,7 +2,31 @@ from __future__ import annotations
 
 import numpy as np
 
-from graph_prep.transforms import build_link_pairs, swap_graph_direction
+from graph_prep.transforms import (
+    build_forward_graph,
+    build_link_pairs,
+    swap_graph_direction,
+)
+
+
+def test_build_forward_graph(forward_link_pairs):
+    # Create some link
+    forward_locs, forward_vals = build_forward_graph(forward_link_pairs)
+
+    # Check they are the same type
+    assert np.issubdtype(forward_locs.dtype, np.integer)
+    assert np.issubdtype(forward_vals.dtype, np.integer)
+    # Check the shape of the forward locations and values
+    assert forward_locs.shape == (20, 2)
+    assert forward_vals.shape == (100,)
+    # Check the forward locations are in the correct range
+    assert np.all(forward_locs >= -1)
+    assert np.all(forward_locs[:, 0] <= forward_locs[:, 1])
+    # Check the forward values are correct (order may be different)
+    assert np.sum(forward_vals) == np.sum(forward_link_pairs[:, 1])
+    assert np.sum(np.square(forward_vals)) == np.sum(
+        np.square(forward_link_pairs[:, 1])
+    )
 
 
 def test_build_link_pairs(forward_locs_vals):

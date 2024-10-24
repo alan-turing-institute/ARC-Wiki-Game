@@ -4,6 +4,7 @@ import os
 from abc import ABC, abstractmethod
 from typing import Any
 
+import ollama
 from openai import AzureOpenAI, BadRequestError
 
 
@@ -26,9 +27,9 @@ class MockGenLM(GenLM):
         if len(self._test_responses) > 0:
             response = self._test_responses.pop(0)
             if response["type"] == "json":
-                link = response["link"]
+                link = response["title"]
                 return (
-                    '{\n "link": "'
+                    '{\n "title": "'
                     + link
                     + '",\n "reason": "'
                     + messages[-1]["content"][0]
@@ -70,3 +71,61 @@ class OpenAIModel(GenLM):
             return completion.choices[0].message.content
         except BadRequestError:
             return "BadRequestError"
+
+
+class HumanLM(GenLM):
+    def __init__(self) -> None:
+        """This is class that allows a human to respond to the messages."""
+
+    def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
+        for message in messages:
+            print(f"{message['role']}: {message['content']}")
+        return input("Human: ")
+
+
+class OllamaLM(GenLM):
+    def __init__(self, model: str, options: dict | None = None, keep_alive: int = 300):
+        """This model calls the Ollama API to get responses.
+
+        To use call the get_response method with a list of messages.
+
+        Args:
+            model (str): The name of the model to use.
+            options (dict | None, optional): The parameters to be passed to the ollama
+                model. Defaults to None. The default includes setting the temperature
+                to 0.0.
+            keep_alive (int, optional): The number of seconds to keep the model loaded
+                to RAM. Defaults to 300.
+        """
+        if options is None:
+            options = {"temperature": 0.0}
+        self.options = options
+
+        self.keep_alive = keep_alive
+
+        if model not in [mod["name"] for mod in ollama.list()["models"]]:
+            print("Model not found. Trying to download...")
+            ollama.pull(model)
+
+        self.model = model
+
+    def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
+        """Get the response from the Ollama model.
+
+        This will be in a JSON format.
+
+        Args:
+            messages (list[dict[Any, Any]]): The list of messages to send to the model.
+                They are un the format {"role": "user", "content": "message"}.
+
+        Returns:
+            str | None: This is the response from the model. It will only include the
+                content of the message. Should be in JSON format.
+        """
+        return ollama.chat(
+            self.model,
+            messages=messages,
+            format="json",
+            options=self.options,
+            keep_alive=self.keep_alive,
+        )["message"]["content"]

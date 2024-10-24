@@ -1,8 +1,8 @@
 # Game Data
 
-This folder stores datasets of pairs of source and target IDs that are used for testing over multiple agents. The data are stored in subfolders, with one subfolder per input dataset. Currently, there is only one input dataset and, therefore, only one subfolder: `wikipedia`.
+This folder stores datasets of pairs of source and target IDs that are used for testing over multiple agents. The data are stored in subfolders, with one subfolder per input dataset. The input datasets either relate to Wikipedia or OpenAlex.
 
-The data can be generated using the script `generate_game_data.py`, this requires arguments specifying the number of records to generate (`num_records`), the name to call the generated dataset (`datasest_name`) and the name of the input dataset to use (`input_dataset`). Currently, the only valid name of the input dataset is `wikipedia`.
+The data can be generated using the script `generate_game_data.py`, this requires arguments specifying the number of records to generate (`num_records`), the name to call the generated dataset (`datasest_name`) and the name of the input dataset to use (`input_dataset`).
 
 In each dataset subfolder there should be a `config.yaml` file and one or more dataset files of games. Each dataset file will contain a list of source (start) and target (end) page IDs - one pair representing each game. The `config.yaml` file will contain the details of the experiments that will be run across the dataset pairs. The structure of the config file is:
 
