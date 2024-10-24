@@ -246,12 +246,12 @@ def main():
                                 lang_iso_code=config["experiments"][experiment][
                                     "params"
                                 ]["lang"],
-                                manual_seed=config["experiments"][experiment][
+                                manual_seed=config["experiments"][experiment]["params"][
                                     "manual_seed"
                                 ],
                                 max_articles=config["experiments"][experiment][
-                                    "max_articles"
-                                ],
+                                    "params"
+                                ]["max_articles"],
                                 agent_tools_for_corpus=tools_corpus,
                             )
                         elif agent_class == "PromptAgent":
