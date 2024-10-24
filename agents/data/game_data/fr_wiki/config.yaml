@@ -57,3 +57,40 @@ experiments:
       - tfidf
     params:
       max_rounds: 100
+
+
+  step_list_tfidf_tuning_1000:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - fr_wiki_step_list
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: fr
+      manual_seed: 42
+      max_articles: 1000
+
+  step_list_tfidf_tuning_10000:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - fr_wiki_step_list
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: fr
+      manual_seed: 42
+      max_articles: 10000
+
+  step_list_tfidf_tuning_100000:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - fr_wiki_step_list
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: fr
+      manual_seed: 42
+      max_articles: 100000
