@@ -84,7 +84,13 @@ class HumanLM(GenLM):
 
 
 class OllamaLM(GenLM):
-    def __init__(self, model: str, options: dict | None = None, keep_alive: int = 300):
+    def __init__(
+        self,
+        model: str,
+        options: dict | None = None,
+        keep_alive: int = 300,
+        host_port: int = 11434,
+    ):
         """This model calls the Ollama API to get responses.
 
         To use call the get_response method with a list of messages.
@@ -109,6 +115,8 @@ class OllamaLM(GenLM):
 
         self.model = model
 
+        self.ollama_client = ollama.Client(host=f"localhost:{host_port:d}")
+
     def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
         """Get the response from the Ollama model.
 
@@ -122,7 +130,7 @@ class OllamaLM(GenLM):
             str | None: This is the response from the model. It will only include the
                 content of the message. Should be in JSON format.
         """
-        return ollama.chat(
+        return self.ollama_client.chat(
             self.model,
             messages=messages,
             format="json",
