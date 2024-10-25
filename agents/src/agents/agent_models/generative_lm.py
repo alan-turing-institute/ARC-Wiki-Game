@@ -115,7 +115,7 @@ class OllamaLM(GenLM):
 
         self.model = model
 
-        self.ollama_client = ollama.Client(host=f"localhost:{host_port:d}")
+        self.ollama_client = ollama.Client(host=f"localhost:{host_port}")
 
     def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
         """Get the response from the Ollama model.
