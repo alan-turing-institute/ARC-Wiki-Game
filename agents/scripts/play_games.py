@@ -232,14 +232,45 @@ def main():
                                 use_titles=use_titles,
                             )
                         elif agent_class == "TFIDFAgent":
-                            tools_corpus = None
+                            tools_for_corpus = None
                             if (
                                 "agent_tools_for_corpus"
                                 in config["experiments"][experiment]
                             ):
-                                err_msg = "Not yet implemented the ability to use \
-                                    different dataset for TF-IDF corpus"
-                                raise NotImplementedError(err_msg)
+                                corpus_dataset_name = config["experiments"][experiment][
+                                    "agent_tools_for_corpus"
+                                ]
+                                from_database = False
+                                use_old_title = False
+                                if (
+                                    "params_for_corpus"
+                                    in config["experiments"][experiment]
+                                ):
+                                    if (
+                                        "from_database"
+                                        in config["experiments"][experiment][
+                                            "params_for_corpus"
+                                        ]
+                                    ):
+                                        from_database = config["experiments"][
+                                            experiment
+                                        ]["params_for_corpus"]["from_database"]
+                                    if (
+                                        "use_old_title"
+                                        in config["experiments"][experiment][
+                                            "params_for_corpus"
+                                        ]
+                                    ):
+                                        use_old_title = config["experiments"][
+                                            experiment
+                                        ]["params_for_corpus"]["use_old_title"]
+                                tools_for_corpus = load_tools(
+                                    data_path,
+                                    corpus_dataset_name,
+                                    load_data_to_ram,
+                                    use_old_title,
+                                    from_database,
+                                )
                             agent = TFIDFAgent(
                                 tools,
                                 max_rounds=max_rounds,
@@ -252,7 +283,7 @@ def main():
                                 max_articles=config["experiments"][experiment][
                                     "params"
                                 ]["max_articles"],
-                                agent_tools_for_corpus=tools_corpus,
+                                agent_tools_for_corpus=tools_for_corpus,
                             )
                         elif agent_class == "PromptAgent":
                             temperature = config["experiments"][experiment]["params"][
