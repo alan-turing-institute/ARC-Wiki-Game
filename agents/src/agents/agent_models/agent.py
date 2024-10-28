@@ -786,6 +786,7 @@ class PromptAgent(Agent):
                                 # just logging as per other errors.
                                 print(titles)
                                 print(ids)
+                                print(list_id)
                                 err_msg = (
                                     "Error with IDs and Titles lists when \
                                     selecting link: "
