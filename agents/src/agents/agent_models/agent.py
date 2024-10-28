@@ -770,27 +770,28 @@ class PromptAgent(Agent):
                             if next_link in titles:
                                 # Excellent - no hallucinations!
                                 list_id = titles.index(next_link)
-                                try:
+                                if list_id in ids:
                                     next_link_id = ids[list_id]
-                                finally:
-                                    # This should never be reached, so raise an error
-                                    # and stop the code from running, rather than
-                                    # just logging as per other errors.
-                                    err_msg = (
-                                        "Error with IDs and Titles lists when \
-                                        selecting link: "
-                                        + next_link
-                                    )
-                                    raise ValueError(err_msg)
-                                if next_link_id is None:
-                                    # This error shouldn't be reached
-                                    err_msg = (
-                                        "Couldn't find article ID for " + next_link
-                                    )
-                                    return -1, err_msg
-                                if "reason" in json_response:
-                                    return next_link_id, json_response["reason"]
-                                return next_link_id, "No reason provided"
+                                    if next_link_id is None:
+                                        # This error shouldn't be reached?
+                                        err_msg = (
+                                            "Couldn't find article ID for " + next_link
+                                        )
+                                        return -1, err_msg
+                                    if "reason" in json_response:
+                                        return next_link_id, json_response["reason"]
+                                    return next_link_id, "No reason provided"
+                                # This should never be reached, so raise an error
+                                # and stop the code from running, rather than
+                                # just logging as per other errors.
+                                print(titles)
+                                print(ids)
+                                err_msg = (
+                                    "Error with IDs and Titles lists when \
+                                    selecting link: "
+                                    + next_link
+                                )
+                                raise ValueError(err_msg)
                             # *sigh* - hallucination
                             retry += 1
                             err_msg = "Hallucination - title not in list"
