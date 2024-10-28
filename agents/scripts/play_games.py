@@ -167,23 +167,25 @@ def main():
     output_path = os.path.join(output_data_dir, input_dataset_name)
     os.makedirs(output_path, exist_ok=True)
 
-    # Load Agent Tools object - some opitional parameters that might exist in config
-    if "from_database" in config["experiments"][experiment]["params"]:
-        from_database = config["experiments"][experiment]["params"]["from_database"]
-    else:
-        from_database = False
-    if "use_old_title" in config["experiments"][experiment]["params"]:
-        use_old_title = config["experiments"][experiment]["params"]["use_old_title"]
-    else:
-        use_old_title = False
-    tools = load_tools(
-        data_path, input_dataset_name, load_data_to_ram, use_old_title, from_database
-    )
-
     for experiment in experiments:
-        experiment_name = experiment
-        experiment_output_path = os.path.join(output_path, experiment_name)
+        experiment_output_path = os.path.join(output_path, experiment)
         os.makedirs(experiment_output_path, exist_ok=True)
+        # Load Agent Tools object - some opitional parameters that might exist in config
+        if "from_database" in config["experiments"][experiment]["params"]:
+            from_database = config["experiments"][experiment]["params"]["from_database"]
+        else:
+            from_database = False
+        if "use_old_title" in config["experiments"][experiment]["params"]:
+            use_old_title = config["experiments"][experiment]["params"]["use_old_title"]
+        else:
+            use_old_title = False
+        tools = load_tools(
+            data_path,
+            input_dataset_name,
+            load_data_to_ram,
+            use_old_title,
+            from_database,
+        )
         for game_dataset in config["experiments"][experiment]["game_datasets"]:
             if "filter_lang" in config["experiments"][experiment]["params"]:
                 filter_lang = config["experiments"][experiment]["params"]["filter_lang"]

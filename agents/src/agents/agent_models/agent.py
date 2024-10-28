@@ -710,7 +710,16 @@ class PromptAgent(Agent):
         titles: list[str] = [
             str(forward_title[1])
             for forward_title in forward_titles
-            if (forward_title[1] is not None) and (forward_title[0] not in route)
+            if (forward_title[0] is not None)
+            and (forward_title[1] is not None)
+            and (forward_title[0] not in route)
+        ]
+        ids: list[int] = [
+            int(forward_title[0])
+            for forward_title in forward_titles
+            if (forward_title[0] is not None)
+            and (forward_title[1] is not None)
+            and (forward_title[0] not in route)
         ]
         if len(titles) > 0:
             content = " "
@@ -760,8 +769,21 @@ class PromptAgent(Agent):
                             next_link = json_response["title"]
                             if next_link in titles:
                                 # Excellent - no hallucinations!
-                                next_link_id = self._tools.get_article_id(next_link)
+                                list_id = titles.index(next_link)
+                                try:
+                                    next_link_id = ids[list_id]
+                                finally:
+                                    # This should never be reached, so raise an error
+                                    # and stop the code from running, rather than
+                                    # just logging as per other errors.
+                                    err_msg = (
+                                        "Error with IDs and Titles lists when \
+                                        selecting link: "
+                                        + next_link
+                                    )
+                                    raise ValueError(err_msg)
                                 if next_link_id is None:
+                                    # This error shouldn't be reached
                                     err_msg = (
                                         "Couldn't find article ID for " + next_link
                                     )
