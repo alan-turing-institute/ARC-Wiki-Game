@@ -77,6 +77,12 @@ def parse_args():
             agent, experiment and model. Might want to set to a low value, e.g. 10, \
             when testing locally.",
     )
+    parser.add_argument(
+        "--ollama_host",
+        required=False,
+        default=11434,
+        help="The host port of the Ollama API",
+    )
     return parser.parse_args()
 
 
@@ -249,6 +255,7 @@ def main():
                                 gen_model = OllamaLM(
                                     model,
                                     options={"temperature": temperature},
+                                    host_port=args.ollama_host,
                                 )
                             agent = PromptAgent(
                                 tools,
