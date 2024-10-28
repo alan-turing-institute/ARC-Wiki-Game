@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 from agents.evaluate import step_hist
 
-CONFIG_FILE = "result/wiki_embed_sum_config.yaml"
+CONFIG_FILE = "result/wiki_prompt_config.yaml"
 
 
 def plot_figure(

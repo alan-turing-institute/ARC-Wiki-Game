@@ -5,28 +5,100 @@ result_figure_loc: result/figure/prompt_wiki_summary
 data_set_list:
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt
+    data_loc: data/output_data/en_wiki/step_list_prompt_v2
     figure_title: English Wiki Summary
     model_list:
-      - model_name: ChatGPT 4o
+      - model_name: GPT 4o
         data_name: en_wiki_step_list_wikigame-gpt-4o_
         file_index_list: [0]
         figure_file_name: en_wiki_step_list_wikigame-gpt-4o
-  - language: French
+  - language: English
     topic: Wikipedia
-    data_loc: data/output_data/fr_wiki/step_list_prompt
-    figure_title: French Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_mini
+    figure_title: English Wiki Summary
     model_list:
-      - model_name: ChatGPT 4o
-        data_name: fr_wiki_step_list_wikigame-gpt-4o_
+      - model_name: GPT 4o mini
+        data_name: en_wiki_step_list_wikigame-gpt-4o-mini_
         file_index_list: [0]
-        figure_file_name: fr_wiki_step_list_wikigame-gpt-4o
-  - language: Chinese
+        figure_file_name: en_wiki_step_list_wikigame-gpt-4o-mini
+  # - language: French
+  #   topic: Wikipedia
+  #   data_loc: data/output_data/fr_wiki/step_list_prompt
+  #   figure_title: French Wiki Summary
+  #   model_list:
+  #     - model_name: ChatGPT 4o
+  #       data_name: fr_wiki_step_list_wikigame-gpt-4o_
+  #       file_index_list: [0]
+  #       figure_file_name: fr_wiki_step_list_wikigame-gpt-4o
+  # - language: Chinese
+  #   topic: Wikipedia
+  #   data_loc: data/output_data/zh_wiki/step_list_prompt
+  #   figure_title: Chinese Wiki Summary
+  #   model_list:
+  #     - model_name: ChatGPT 4o
+  #       data_name: zh_wiki_step_list_wikigame-gpt-4o_
+  #       file_index_list: [0]
+  #       figure_file_name: zh_wiki_step_list_wikigame-gpt-4o
+  - language: English
     topic: Wikipedia
-    data_loc: data/output_data/zh_wiki/step_list_prompt
-    figure_title: Chinese Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_small
+    figure_title: English Wiki Summary
     model_list:
-      - model_name: ChatGPT 4o
-        data_name: zh_wiki_step_list_wikigame-gpt-4o_
-        file_index_list: [0]
-        figure_file_name: zh_wiki_step_list_wikigame-gpt-4o
+      - model_name: Gemma2:27B
+        data_name: en_wiki_step_list_gemma2:27b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+        figure_file_name: en_wiki_step_list_gemma2:27b
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_small
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: Llama3.1:8B
+        data_name: en_wiki_step_list_llama3.1:8b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+        figure_file_name: en_wiki_step_list_llama3.1:8b
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_small
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: Llama3.2:1B
+        data_name: en_wiki_step_list_llama3.2:1b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+        figure_file_name: en_wiki_step_list_llama3.2:1b
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_small
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: Llama3.2:3B
+        data_name: en_wiki_step_list_llama3.2:3b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800]
+        figure_file_name: en_wiki_step_list_llama3.2:3b
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_small
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: Mistral-Nemo
+        data_name: en_wiki_step_list_mistral-nemo:latest_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+        figure_file_name: en_wiki_step_list_mistral-nemo:latest
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_medium
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: Llama3.1:70B
+        data_name: en_wiki_step_list_llama3.1:70b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 50, 150, 250, 350, 450, 550, 650, 750, 850, 950]
+        figure_file_name: en_wiki_step_list_llama3.1:70b
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_large
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: Llama3.1:405B
+        data_name: en_wiki_step_list_llama3.1:405b_
+        file_index_list: [0, 50, 100, 150, 200, 250]
+        figure_file_name: en_wiki_step_list_llama3.1:405b
