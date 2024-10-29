@@ -89,6 +89,7 @@ def get_tfidf_model(
     num_articles = agent_tools.matidx_ary.max()
     if num_articles < max_articles:
         max_articles = num_articles
+    # Select articles ids to be used to create corpus
     article_ids = choice(arange(1, num_articles + 1), max_articles, replace=False)
 
     dct = Dictionary()
@@ -97,10 +98,15 @@ def get_tfidf_model(
     for id in article_ids:
         article_summary = agent_tools.get_article_summary(id)
         if article_summary is not None:
+            # Process the article summary text
             processed_text = preprocess_func(article_summary, lang_iso_code)
+            # Add the processed text to the dictionary as a single document
             dct.add_documents([processed_text])
+            # Append the bow to the corpus
             corpus.append(dct.doc2bow(processed_text))
 
+    # Create the vocabularly - the list of unique words from the dictionary
     vocab = [dct[i] for i in range(len(dct))]
+    # Build the TFIDF model
     model = TfidfModel(corpus)
     return model, vocab, dct

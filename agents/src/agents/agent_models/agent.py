@@ -362,8 +362,8 @@ class TFIDFAgent(Agent):
         """
         Class inherits from Agent and plays the wikipedia game by using a TF-IDF
         model. The corpus used for the model can be created using the same dataset as
-        used to play the game, and there will also be an option for a different dataset
-        to be used [although, this is NOT YET IMPLEMENTED].
+        used to play the game, and there is also be an option for a different dataset
+        to be used as the corpus.
 
         Parameters
         ----------
@@ -385,9 +385,13 @@ class TFIDFAgent(Agent):
 
         self._lang = lang_iso_code
         if agent_tools_for_corpus is None:
+            # If no object is passed as an argument, then set the agent's own agent
+            # tools object to be used to create the corpus as well.
             agent_tools_for_corpus = agent_tools
         # Set the function to be used to process the text, both for the TF-IDF model
-        # and also when creating the vectors from the article summaries.
+        # and also when creating the vectors from the article summaries. Chinese is
+        # currently different to other languages we process as it doesn't require
+        # stemming.
         if lang_iso_code == "zh":
             self._preprocess_func = pre_process_chinese
         else:
@@ -442,6 +446,11 @@ class TFIDFAgent(Agent):
             List of arrays representing the links on the current page
         target_vector: np.array
             Array representing the target page
+
+        Returns
+        -------
+        np.array
+            The cosine similarity value between the candidate vectors and target vector
         """
         return cosine_similarity(candidate_vectors, [target_vector])
 
@@ -562,6 +571,10 @@ class TFIDFAgent(Agent):
         -------
         int
             The ID of the page to navigate to next
+        int
+            The number of words encountered
+        int
+            The number of out-of-vocabularly words
         """
         forward_text = self._tools.get_forward_summaries(current_page_id)
         if len(forward_text) > 0:

@@ -48,7 +48,7 @@ experiments:
       lang: en
       manual_seed: 42
       max_articles: 100000
-      
+
   step_list_prompt_mini:
     agent_class: PromptAgent
     game_datasets:
