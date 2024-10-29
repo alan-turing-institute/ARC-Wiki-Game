@@ -770,7 +770,7 @@ class PromptAgent(Agent):
                             if next_link in titles:
                                 # Excellent - no hallucinations!
                                 list_id = titles.index(next_link)
-                                if list_id in ids:
+                                if list_id < len(ids):
                                     next_link_id = ids[list_id]
                                     if next_link_id is None:
                                         # This error shouldn't be reached?
@@ -784,9 +784,6 @@ class PromptAgent(Agent):
                                 # This should never be reached, so raise an error
                                 # and stop the code from running, rather than
                                 # just logging as per other errors.
-                                print(titles)
-                                print(ids)
-                                print(list_id)
                                 err_msg = (
                                     "Error with IDs and Titles lists when \
                                     selecting link: "
