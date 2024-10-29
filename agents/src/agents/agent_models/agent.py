@@ -721,6 +721,12 @@ class PromptAgent(Agent):
             and (forward_title[1] is not None)
             and (forward_title[0] not in route)
         ]
+        if len(titles) != len(ids):
+            # If this is True, then something has gone very wrong! Throw an error.
+            err_msg = (
+                "Error creating list of IDs and Titles, they are different lengths!"
+            )
+            raise ValueError(err_msg)
         if len(titles) > 0:
             content = " "
             for title in titles[: self._max_titles]:
@@ -770,26 +776,20 @@ class PromptAgent(Agent):
                             if next_link in titles:
                                 # Excellent - no hallucinations!
                                 list_id = titles.index(next_link)
-                                if list_id < len(ids):
-                                    next_link_id = ids[list_id]
-                                    if next_link_id is None:
-                                        # This error shouldn't be reached?
-                                        err_msg = (
-                                            "Couldn't find article ID for " + next_link
-                                        )
-                                        return -1, err_msg
-                                    if "reason" in json_response:
-                                        return next_link_id, json_response["reason"]
-                                    return next_link_id, "No reason provided"
-                                # This should never be reached, so raise an error
-                                # and stop the code from running, rather than
-                                # just logging as per other errors.
-                                err_msg = (
-                                    "Error with IDs and Titles lists when \
-                                    selecting link: "
-                                    + next_link
-                                )
-                                raise ValueError(err_msg)
+                                # list_id should always be a valid index of the ids
+                                # list as there was a check above to make sure that
+                                # the titles and ids lists were the same length and
+                                # no items are removed from the list during this process
+                                next_link_id = ids[list_id]
+                                if next_link_id is None:
+                                    # This error shouldn't be reached?
+                                    err_msg = (
+                                        "Couldn't find article ID for " + next_link
+                                    )
+                                    return -1, err_msg
+                                if "reason" in json_response:
+                                    return next_link_id, json_response["reason"]
+                                return next_link_id, "No reason provided"
                             # *sigh* - hallucination
                             retry += 1
                             err_msg = "Hallucination - title not in list"
