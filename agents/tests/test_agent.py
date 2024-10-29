@@ -107,4 +107,4 @@ def test_PromptAgent(hdf5_file: str, matidx_info: str, summary_data: str):
         assert not game["found_target"]
         assert game["route"] == [0, 2, 11, -1]
         assert game["num_steps"] == 2
-        assert game["error_message"] == "Response not in JSON format"
+        assert game["error_message"] == "Response not in valid JSON format"
