@@ -48,7 +48,6 @@ experiments:
       max_rounds: 100
       use_titles: True
 
-
   step_list_tfidf_wiki_corpus:
     agent_class: TFIDFAgent
     game_datasets:
@@ -58,3 +57,5 @@ experiments:
     params:
       max_rounds: 100
       lang: zh
+      manual_seed: 42
+      max_articles: 100000

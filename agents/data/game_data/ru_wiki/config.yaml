@@ -32,3 +32,15 @@ experiments:
       temperature: 0
       top_p: 0.1
       manual_seed: 42
+
+  step_list_tfidf_wiki_corpus:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - ru_wiki_step_list
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: ru
+      manual_seed: 42
+      max_articles: 100000
