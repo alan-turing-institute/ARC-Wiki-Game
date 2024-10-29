@@ -168,6 +168,8 @@ def main():
     os.makedirs(output_path, exist_ok=True)
 
     for experiment in experiments:
+        experiment_output_path = os.path.join(output_path, experiment)
+        os.makedirs(experiment_output_path, exist_ok=True)
         # Load Agent Tools object - some opitional parameters that might exist in config
         if "from_database" in config["experiments"][experiment]["params"]:
             from_database = config["experiments"][experiment]["params"]["from_database"]
@@ -184,8 +186,6 @@ def main():
             use_old_title,
             from_database,
         )
-        experiment_output_path = os.path.join(output_path, experiment)
-        os.makedirs(experiment_output_path, exist_ok=True)
         for game_dataset in config["experiments"][experiment]["game_datasets"]:
             if "filter_lang" in config["experiments"][experiment]["params"]:
                 filter_lang = config["experiments"][experiment]["params"]["filter_lang"]
