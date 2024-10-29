@@ -710,8 +710,23 @@ class PromptAgent(Agent):
         titles: list[str] = [
             str(forward_title[1])
             for forward_title in forward_titles
-            if (forward_title[1] is not None) and (forward_title[0] not in route)
+            if (forward_title[0] is not None)
+            and (forward_title[1] is not None)
+            and (forward_title[0] not in route)
         ]
+        ids: list[int] = [
+            int(forward_title[0])
+            for forward_title in forward_titles
+            if (forward_title[0] is not None)
+            and (forward_title[1] is not None)
+            and (forward_title[0] not in route)
+        ]
+        if len(titles) != len(ids):
+            # If this is True, then something has gone very wrong! Throw an error.
+            err_msg = (
+                "Error creating list of IDs and Titles, they are different lengths!"
+            )
+            raise ValueError(err_msg)
         if len(titles) > 0:
             content = " "
             for title in titles[: self._max_titles]:
@@ -756,12 +771,37 @@ class PromptAgent(Agent):
                     # There is a response
                     try:
                         json_response = json.loads(response)
+                    except (json.decoder.JSONDecodeError, RecursionError):
+                        json_response = None
+                    if json_response is None:
+                        # Some error when loading the response to JSON - making the
+                        # assumption that the recursion error occurs when decoding
+                        # the JSON object (which is what is happening so far)
+                        retry += 1
+                        err_msg = "Response not in valid JSON format"
+                        content_retry = (
+                            "You did not provide your response in JSON "
+                            "format - please try again!"
+                            "The JSON should only include the two fields 'title' and "
+                            "'reason', and the title should only include the title "
+                            "text. "
+                            "You are tying to select the best page title to reach "
+                            f"the target page '{target_title}'."
+                        )
+                    else:
+                        # We have a valid json object
                         if "title" in json_response:
                             next_link = json_response["title"]
                             if next_link in titles:
                                 # Excellent - no hallucinations!
-                                next_link_id = self._tools.get_article_id(next_link)
+                                list_id = titles.index(next_link)
+                                # list_id should always be a valid index of the ids
+                                # list as there was a check above to make sure that
+                                # the titles and ids lists were the same length and
+                                # no items are removed from the list during this process
+                                next_link_id = ids[list_id]
                                 if next_link_id is None:
+                                    # This error shouldn't be reached?
                                     err_msg = (
                                         "Couldn't find article ID for " + next_link
                                     )
@@ -803,19 +843,6 @@ class PromptAgent(Agent):
                                 f"the target page '{target_title}'."
                             )
 
-                    except json.decoder.JSONDecodeError:
-                        # Some error when loading the response to JSON
-                        retry += 1
-                        err_msg = "Response not in JSON format"
-                        content_retry = (
-                            "You did not provide your response in JSON "
-                            "format - please try again!"
-                            "The JSON should only include the two fields 'title' and "
-                            "'reason', and the title should only include the title "
-                            "text. "
-                            "You are tying to select the best page title to reach "
-                            f"the target page '{target_title}'."
-                        )
                 message_response = {"role": "assistant", "content": response}
                 messages.append(message_response)
                 message_retry = {"role": "user", "content": content_retry}
