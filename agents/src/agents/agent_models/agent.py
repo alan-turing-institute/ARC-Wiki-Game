@@ -771,6 +771,25 @@ class PromptAgent(Agent):
                     # There is a response
                     try:
                         json_response = json.loads(response)
+                    except (json.decoder.JSONDecodeError, RecursionError):
+                        json_response = None
+                    if json_response is None:
+                        # Some error when loading the response to JSON - making the
+                        # assumption that the recursion error occurs when decoding
+                        # the JSON object (which is what is happening so far)
+                        retry += 1
+                        err_msg = "Response not in valid JSON format"
+                        content_retry = (
+                            "You did not provide your response in JSON "
+                            "format - please try again!"
+                            "The JSON should only include the two fields 'title' and "
+                            "'reason', and the title should only include the title "
+                            "text. "
+                            "You are tying to select the best page title to reach "
+                            f"the target page '{target_title}'."
+                        )
+                    else:
+                        # We have a valid json object
                         if "title" in json_response:
                             next_link = json_response["title"]
                             if next_link in titles:
@@ -824,21 +843,6 @@ class PromptAgent(Agent):
                                 f"the target page '{target_title}'."
                             )
 
-                    except (json.decoder.JSONDecodeError, RecursionError):
-                        # Some error when loading the response to JSON - making the
-                        # assumption that the recursion error occurs when decoding
-                        # the JSON object (which is what is happening so far)
-                        retry += 1
-                        err_msg = "Response not in valid JSON format"
-                        content_retry = (
-                            "You did not provide your response in JSON "
-                            "format - please try again!"
-                            "The JSON should only include the two fields 'title' and "
-                            "'reason', and the title should only include the title "
-                            "text. "
-                            "You are tying to select the best page title to reach "
-                            f"the target page '{target_title}'."
-                        )
                 message_response = {"role": "assistant", "content": response}
                 messages.append(message_response)
                 message_retry = {"role": "user", "content": content_retry}
