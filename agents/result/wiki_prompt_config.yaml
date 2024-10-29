@@ -102,3 +102,12 @@ data_set_list:
         data_name: en_wiki_step_list_llama3.1:405b_
         file_index_list: [0, 50, 100, 150, 200, 250]
         figure_file_name: en_wiki_step_list_llama3.1:405b
+  - language: English
+    topic: OpenAlex Physics
+    data_loc: data/output_data/oa_physics/step_list_prompt_small
+    figure_title: OpenAlex Physics Summary
+    model_list:
+      - model_name: Llama3.2:3B
+        data_name: oa_physics_step_list_lang_llama3.2:3b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+        figure_file_name: oa_physics_step_list_lang_llama3.2:3b

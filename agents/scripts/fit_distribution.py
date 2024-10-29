@@ -178,6 +178,7 @@ def main() -> None:
         columns=[
             "Model",
             "Language",
+            "Topic",
             "Mean",
             "Mean_std",
             "Standard_dev",
