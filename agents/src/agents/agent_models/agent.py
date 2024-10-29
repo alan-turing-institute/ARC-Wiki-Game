@@ -824,10 +824,12 @@ class PromptAgent(Agent):
                                 f"the target page '{target_title}'."
                             )
 
-                    except json.decoder.JSONDecodeError:
-                        # Some error when loading the response to JSON
+                    except (json.decoder.JSONDecodeError, RecursionError):
+                        # Some error when loading the response to JSON - making the
+                        # assumption that the recursion error occurs when decoding
+                        # the JSON object (which is what is happening so far)
                         retry += 1
-                        err_msg = "Response not in JSON format"
+                        err_msg = "Response not in valid JSON format"
                         content_retry = (
                             "You did not provide your response in JSON "
                             "format - please try again!"
