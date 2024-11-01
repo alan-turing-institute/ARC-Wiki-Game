@@ -5,8 +5,8 @@ result_figure_loc: result/figure/prompt_wiki_summary
 data_set_list:
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt_v2
-    figure_title: English Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_gpt4o
+    figure_title: English Wiki Summary - max 500 titles
     model_list:
       - model_name: GPT 4o
         data_name: en_wiki_step_list_wikigame-gpt-4o_
@@ -14,8 +14,8 @@ data_set_list:
         figure_file_name: en_wiki_step_list_wikigame-gpt-4o
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt_mini
-    figure_title: English Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_gpt4o_mini
+    figure_title: English Wiki Summary - max 500 titles
     model_list:
       - model_name: GPT 4o mini
         data_name: en_wiki_step_list_wikigame-gpt-4o-mini_
@@ -41,8 +41,8 @@ data_set_list:
   #       figure_file_name: zh_wiki_step_list_wikigame-gpt-4o
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt_small
-    figure_title: English Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_small_200_titles
+    figure_title: English Wiki Summary - max 200 titles
     model_list:
       - model_name: Gemma2:27B
         data_name: en_wiki_step_list_gemma2:27b_
@@ -50,8 +50,8 @@ data_set_list:
         figure_file_name: en_wiki_step_list_gemma2:27b
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt_small
-    figure_title: English Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_small_200_titles
+    figure_title: English Wiki Summary - max 200 titles
     model_list:
       - model_name: Llama3.1:8B
         data_name: en_wiki_step_list_llama3.1:8b_
@@ -59,8 +59,8 @@ data_set_list:
         figure_file_name: en_wiki_step_list_llama3.1:8b
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt_small
-    figure_title: English Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_small_200_titles
+    figure_title: English Wiki Summary - max 200 titles
     model_list:
       - model_name: Llama3.2:1B
         data_name: en_wiki_step_list_llama3.2:1b_
@@ -68,8 +68,8 @@ data_set_list:
         figure_file_name: en_wiki_step_list_llama3.2:1b
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt_small
-    figure_title: English Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_small_200_titles
+    figure_title: English Wiki Summary - max 200 titles
     model_list:
       - model_name: Llama3.2:3B
         data_name: en_wiki_step_list_llama3.2:3b_
@@ -77,8 +77,8 @@ data_set_list:
         figure_file_name: en_wiki_step_list_llama3.2:3b
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt_small
-    figure_title: English Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_small_200_titles
+    figure_title: English Wiki Summary - max 200 titles
     model_list:
       - model_name: Mistral-Nemo
         data_name: en_wiki_step_list_mistral-nemo:latest_
@@ -86,8 +86,8 @@ data_set_list:
         figure_file_name: en_wiki_step_list_mistral-nemo:latest
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt_medium
-    figure_title: English Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_medium_200_titles
+    figure_title: English Wiki Summary - max 200 titles
     model_list:
       - model_name: Llama3.1:70B
         data_name: en_wiki_step_list_llama3.1:70b_
@@ -95,19 +95,19 @@ data_set_list:
         figure_file_name: en_wiki_step_list_llama3.1:70b
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt_large
-    figure_title: English Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_large_200_titles
+    figure_title: English Wiki Summary - max 200 titles
     model_list:
       - model_name: Llama3.1:405B
         data_name: en_wiki_step_list_llama3.1:405b_
-        file_index_list: [0, 50, 100, 150, 200, 250]
+        file_index_list: [0, 50, 100, 150, 200, 250, 300]
         figure_file_name: en_wiki_step_list_llama3.1:405b
-  - language: English
-    topic: OpenAlex Physics
-    data_loc: data/output_data/oa_physics/step_list_prompt_small
-    figure_title: OpenAlex Physics Summary
-    model_list:
-      - model_name: Llama3.2:3B
-        data_name: oa_physics_step_list_lang_llama3.2:3b_
-        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
-        figure_file_name: oa_physics_step_list_lang_llama3.2:3b
+  # - language: English
+  #   topic: OpenAlex Physics
+  #   data_loc: data/output_data/oa_physics/step_list_prompt_small
+  #   figure_title: OpenAlex Physics Summary
+  #   model_list:
+  #     - model_name: Llama3.2:3B
+  #       data_name: oa_physics_step_list_lang_llama3.2:3b_
+  #       file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+  #       figure_file_name: oa_physics_step_list_lang_llama3.2:3b
