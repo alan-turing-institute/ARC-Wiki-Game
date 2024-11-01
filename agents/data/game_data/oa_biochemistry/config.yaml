@@ -21,3 +21,32 @@ experiments:
       max_rounds: 100
       filter_lang: en
       from_database: True
+
+  step_list_tfidf_wiki_corpus:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - oa_biochemistry_step_list_lang
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: en
+      manual_seed: 42
+      max_articles: 100000
+      from_database: True
+    agent_tools_for_corpus: en_wiki
+    params_for_corpus:
+      from_database: False
+
+  step_list_tfidf_openalex_corpus:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - oa_biochemistry_step_list_lang
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: en
+      manual_seed: 42
+      max_articles: 100000
+      from_database: True

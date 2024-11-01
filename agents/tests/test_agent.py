@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
+from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent, TFIDFAgent
 from agents.agent_models.generative_lm import MockGenLM
 from agents.agent_models.tools import AgentToolsDisk
 
@@ -108,3 +108,22 @@ def test_PromptAgent(hdf5_file: str, matidx_info: str, summary_data: str):
         assert game["route"] == [0, 2, 11, -1]
         assert game["num_steps"] == 2
         assert game["error_message"] == "Response not in valid JSON format"
+
+
+def test_TFIDFAgent(hdf5_file: str, matidx_info: str, summary_data: str):
+    with AgentToolsDisk(hdf5_file, matidx_info, summary_data) as at:
+        agent = TFIDFAgent(
+            at, max_rounds=4, lang_iso_code="en", manual_seed=42, max_articles=5
+        )
+        agent.play_game("BBBB", "RRRR")
+        agent.play_game("DDDD", 8)
+        agent.play_game(8, "DDDD")
+        agent.play_game(13, 5)
+        games_played = agent.get_games_played()
+        assert len(games_played) == 4
+        assert not games_played[0]["found_target"]
+        assert games_played[0]["num_steps"] == 4
+        assert len(games_played[0]["route"]) == 5
+        assert games_played[-1]["found_target"]
+        assert games_played[-1]["num_steps"] == 3
+        assert len(games_played[-1]["route"]) == 4

@@ -23,6 +23,10 @@ dependencies = [
     "numdifftools",
     "huggingface_hub",
     "openai",
+    "gensim",
+    "stopwordsiso",
+    "jieba",
+    "scipy==1.12",# 1.12 is required for gensim, which is needed for tf-idf only
     "duckdb",
     "ollama",
 ]

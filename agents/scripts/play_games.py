@@ -6,7 +6,7 @@ import os
 import yaml
 from numpy import array, loadtxt, savetxt
 
-from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
+from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent, TFIDFAgent
 from agents.agent_models.generative_lm import OllamaLM, OpenAIModel
 from agents.utils.data import get_data_folders, load_tools
 
@@ -218,16 +218,80 @@ def main():
                         # Save a placeholder file in the output path - will prevent
                         # another batch job running for these games
                         os.makedirs(os.path.join(experiment_output_path), exist_ok=True)
-                        savetxt(output_path, source_ids)
+                        savetxt(output_path, [])
                         max_rounds = config["experiments"][experiment]["params"][
                             "max_rounds"
                         ]
                         agent_class = config["experiments"][experiment]["agent_class"]
                         if agent_class == "GreedyEmbeddingAgent":
+                            if (
+                                "use_titles"
+                                in config["experiments"][experiment]["params"]
+                            ):
+                                use_titles = config["experiments"][experiment][
+                                    "params"
+                                ]["use_titles"]
+                            else:
+                                use_titles = False
                             agent = GreedyEmbeddingAgent(
                                 tools,
                                 max_rounds=max_rounds,
                                 model_name=model,
+                                use_titles=use_titles,
+                            )
+                        elif agent_class == "TFIDFAgent":
+                            tools_for_corpus = None
+                            if (
+                                "agent_tools_for_corpus"
+                                in config["experiments"][experiment]
+                            ):
+                                corpus_dataset_name = config["experiments"][experiment][
+                                    "agent_tools_for_corpus"
+                                ]
+                                from_database = False
+                                use_old_title = False
+                                if (
+                                    "params_for_corpus"
+                                    in config["experiments"][experiment]
+                                ):
+                                    if (
+                                        "from_database"
+                                        in config["experiments"][experiment][
+                                            "params_for_corpus"
+                                        ]
+                                    ):
+                                        from_database = config["experiments"][
+                                            experiment
+                                        ]["params_for_corpus"]["from_database"]
+                                    if (
+                                        "use_old_title"
+                                        in config["experiments"][experiment][
+                                            "params_for_corpus"
+                                        ]
+                                    ):
+                                        use_old_title = config["experiments"][
+                                            experiment
+                                        ]["params_for_corpus"]["use_old_title"]
+                                tools_for_corpus = load_tools(
+                                    data_path,
+                                    corpus_dataset_name,
+                                    load_data_to_ram,
+                                    use_old_title,
+                                    from_database,
+                                )
+                            agent = TFIDFAgent(
+                                tools,
+                                max_rounds=max_rounds,
+                                lang_iso_code=config["experiments"][experiment][
+                                    "params"
+                                ]["lang"],
+                                manual_seed=config["experiments"][experiment]["params"][
+                                    "manual_seed"
+                                ],
+                                max_articles=config["experiments"][experiment][
+                                    "params"
+                                ]["max_articles"],
+                                agent_tools_for_corpus=tools_for_corpus,
                             )
                         elif agent_class == "PromptAgent":
                             temperature = config["experiments"][experiment]["params"][

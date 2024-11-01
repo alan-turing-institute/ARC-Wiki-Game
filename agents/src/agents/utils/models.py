@@ -1,11 +1,21 @@
 from __future__ import annotations
 
+from typing import Callable
+
+from gensim.corpora import Dictionary
+from gensim.models import TfidfModel
 from huggingface_hub import HfApi
+from numpy import arange
+from numpy.random import choice, seed
 from sentence_transformers import SentenceTransformer, SimilarityFunction
 
+from agents.agent_models.tools import AgentToolsBase
 
-def get_model_from_name(model_name: str) -> SentenceTransformer:
+
+def get_sentence_transformer(model_name: str) -> SentenceTransformer:
     """
+    Returns a SentenceTransformer object given a model name.
+
     Parameters
     ----------
     model_name: str
@@ -38,3 +48,61 @@ def get_model_from_name(model_name: str) -> SentenceTransformer:
             similarity_fn_name=SimilarityFunction.COSINE,
         )
     raise ValueError("The model name " + model_name + " is not a valid model name.")
+
+
+def get_tfidf_model(
+    agent_tools: AgentToolsBase,
+    manual_seed: int,
+    max_articles: int,
+    preprocess_func: Callable[[str, str], list[str]],
+    lang_iso_code: str,
+) -> tuple[TfidfModel, Dictionary]:
+    """
+    Builds and returns a TF-IDF model.
+
+    Parameters
+    ----------
+    agent_tools: AgentToolsBase
+        The Agent Tools object to use to create the dataset for the corpus
+    manual_seed: int
+        The integer value to use to set the first random seed. As the process selects
+        articles at random from the dataset, this will ensure that the same articles
+        can be selected each time the code is run.
+    max_articles: int
+        The maximum number of articles that can be selected
+    preprocess_func: Callable[[str, str], list[str]]
+        A function that takes text and an iso code and returns the processed text
+    lang_iso_code: str
+        The iso code to use for pre-processing the data (identifies the stop words)
+
+    Returns
+    -------
+    TfidfModel
+        The model built using the corpus that was create in this function
+    Dictionary
+        A Gensim dictionary object
+
+    """
+    seed(manual_seed)
+    num_articles = agent_tools.matidx_ary.max()
+    if num_articles < max_articles:
+        max_articles = num_articles
+    # Select articles ids to be used to create corpus
+    article_ids = choice(arange(1, num_articles + 1), max_articles, replace=False)
+
+    dct = Dictionary()
+    corpus = []
+
+    for id in article_ids:
+        article_summary = agent_tools.get_article_summary(id)
+        if article_summary is not None:
+            # Process the article summary text
+            processed_text = preprocess_func(article_summary, lang_iso_code)
+            # Add the processed text to the dictionary as a single document
+            dct.add_documents([processed_text])
+            # Append the bow to the corpus
+            corpus.append(dct.doc2bow(processed_text))
+
+    # Build the TFIDF model
+    model = TfidfModel(corpus)
+    return model, dct

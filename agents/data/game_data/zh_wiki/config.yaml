@@ -30,3 +30,32 @@ experiments:
       manual_seed: 42
       num_retries: 5
       max_titles: 500
+
+  step_list_titles:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - zh_wiki_step_list
+    models:
+      - distiluse-base-multilingual-cased-v1
+      - stsb-xlm-r-multilingual
+      - paraphrase-multilingual-mpnet-base-v2
+      - paraphrase-multilingual-MiniLM-L12-v2
+      - all-MiniLM-L6-v2 # Not trained on Chinese, so might not work!
+      - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
+      - distiluse-base-multilingual-cased-v2
+    params:
+      max_rounds: 100
+      use_titles: True
+
+  step_list_tfidf_wiki_corpus:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - zh_wiki_step_list
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: zh
+      manual_seed: 42
+      max_articles: 100000
