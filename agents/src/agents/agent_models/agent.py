@@ -398,7 +398,7 @@ class TFIDFAgent(Agent):
             self._preprocess_func = pre_process_with_stemming
         # Sets the model, vocab and dictionary objects - all of these are needed when
         # creating a vector of each summary article.
-        self._model, self._vocab, self._dictionary = get_tfidf_model(
+        self._model, self._dictionary = get_tfidf_model(
             agent_tools_for_corpus,
             manual_seed,
             max_articles,
@@ -428,7 +428,7 @@ class TFIDFAgent(Agent):
         list_words = self._preprocess_func(text, self._lang)
         bow = self._dictionary.doc2bow(list_words)
         tfidf_output = self._model[bow]
-        vector = np.zeros(len(self._vocab))
+        vector = np.zeros(len(self._dictionary.values()))
         for id, freq in tfidf_output:
             vector[id] = freq
         return vector, len(list_words), len(list_words) - len(bow)

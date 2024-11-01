@@ -56,7 +56,7 @@ def get_tfidf_model(
     max_articles: int,
     preprocess_func: Callable[[str, str], list[str]],
     lang_iso_code: str,
-) -> tuple[TfidfModel, list[str], Dictionary]:
+) -> tuple[TfidfModel, Dictionary]:
     """
     Builds and returns a TF-IDF model.
 
@@ -79,8 +79,6 @@ def get_tfidf_model(
     -------
     TfidfModel
         The model built using the corpus that was create in this function
-    list[str]
-        A list of the vocabulary words used in the model
     Dictionary
         A Gensim dictionary object
 
@@ -105,8 +103,6 @@ def get_tfidf_model(
             # Append the bow to the corpus
             corpus.append(dct.doc2bow(processed_text))
 
-    # Create the vocabularly - the list of unique words from the dictionary
-    vocab = [dct[i] for i in range(len(dct))]
     # Build the TFIDF model
     model = TfidfModel(corpus)
-    return model, vocab, dct
+    return model, dct
