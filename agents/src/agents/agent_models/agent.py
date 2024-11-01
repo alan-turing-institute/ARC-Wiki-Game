@@ -577,32 +577,40 @@ class TFIDFAgent(Agent):
             The number of out-of-vocabularly words
         """
         forward_text = self._tools.get_forward_summaries(current_page_id)
-        if len(forward_text) > 0:
-            page_ids = [
-                page_info[0]
-                for page_info in forward_text
-                if (page_info[0] not in route) and (page_info[1] is not None)
-            ]
-            page_text = [
-                page_info[1]
-                for page_info in forward_text
-                if (page_info[0] not in route) and (page_info[1] is not None)
-            ]
-            if len(page_text) > 0:
-                embeddings = []
-                num_words = []
-                num_oov = []
-                for text in page_text:
-                    embedding, words, oov = self._vectorise(str(text))
-                    embeddings.append(embedding)
-                    num_words.append(words)
-                    num_oov.append(oov)
-
-                similarities = self._similarity(embeddings, target_summary)
-                max_id = np.argmax(similarities)
-                return page_ids[max_id], sum(num_words), sum(num_oov)
+        if len(forward_text) == 0:
+            # No articles were returned
             return -1, 0, 0
-        return -1, 0, 0
+
+        # Get linked page ids
+        page_ids = [
+            page_info[0]
+            for page_info in forward_text
+            if (page_info[0] not in route) and (page_info[1] is not None)
+        ]
+        # Get linked page summaries / abstracts
+        page_text = [
+            page_info[1]
+            for page_info in forward_text
+            if (page_info[0] not in route) and (page_info[1] is not None)
+        ]
+
+        if len(page_text) == 0:
+            # All articles have been seen before or have not summary
+            return -1, 0, 0
+
+        # Calculate tf-idf embedding values
+        embeddings = []
+        num_words = []
+        num_oov = []
+        for text in page_text:
+            embedding, words, oov = self._vectorise(str(text))
+            embeddings.append(embedding)
+            num_words.append(words)
+            num_oov.append(oov)
+        # Calculate similarities
+        similarities = self._similarity(embeddings, target_summary)
+        max_id = np.argmax(similarities)
+        return page_ids[max_id], sum(num_words), sum(num_oov)
 
 
 class GreedyEmbeddingAgent(Agent):
@@ -762,26 +770,35 @@ class GreedyEmbeddingAgent(Agent):
             forward_text = self._tools.get_forward_titles(current_page_id)
         else:
             forward_text = self._tools.get_forward_summaries(current_page_id)
-        if len(forward_text) > 0:
-            page_ids = [
-                page_info[0]
-                for page_info in forward_text
-                if (page_info[0] not in route) and (page_info[1] is not None)
-            ]
-            page_text = [
-                page_info[1]
-                for page_info in forward_text
-                if (page_info[0] not in route) and (page_info[1] is not None)
-            ]
-            if len(page_text) > 0:
-                embeddings = self._model.encode(page_text)
 
-                similarities = self._model.similarity(embeddings, target_summary)
-                np_similarities = similarities.numpy()
-                max_id = np.argmax(np_similarities)
-                return page_ids[max_id]
+        if len(forward_text) == 0:
+            # No articles were returned
             return -1
-        return -1
+
+        # Get linked page ids
+        page_ids = [
+            page_info[0]
+            for page_info in forward_text
+            if (page_info[0] not in route) and (page_info[1] is not None)
+        ]
+        # Get linked page summaries / abstracts
+        page_text = [
+            page_info[1]
+            for page_info in forward_text
+            if (page_info[0] not in route) and (page_info[1] is not None)
+        ]
+
+        if len(page_text) == 0:
+            # All articles have been seen before or have not summary
+            return -1
+
+        # Calculate embeddings
+        embeddings = self._model.encode(page_text)
+        # Calculate similarities
+        similarities = self._model.similarity(embeddings, target_summary)
+        np_similarities = similarities.numpy()
+        max_id = np.argmax(np_similarities)
+        return page_ids[max_id]
 
 
 class PromptAgent(Agent):
