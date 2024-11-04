@@ -84,7 +84,7 @@ experiments:
       max_rounds: 100
       lang: en
       manual_seed: 42
-      max_articles: 100000
+      max_articles: 100
 
   step_list_tfidf_oa_physics_corpus:
     agent_class: TFIDFAgent
