@@ -111,3 +111,12 @@ data_set_list:
         data_name: oa_physics_step_list_lang_llama3.2:3b_
         file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
         figure_file_name: oa_physics_step_list_lang_llama3.2:3b
+  - language: English
+    topic: OpenAlex Physics
+    data_loc: data/output_data/oa_physics/step_list_prompt_gpt4o
+    figure_title: OpenAlex Physics Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o
+        data_name: oa_physics_step_list_lang_wikigame-gpt-4o_
+        file_index_list: [0]
+        figure_file_name: oa_physics_step_list_lang_wikigame-gpt-4o

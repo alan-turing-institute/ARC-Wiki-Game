@@ -22,6 +22,23 @@ experiments:
       filter_lang: en
       from_database: True
 
+  step_list_titles:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - oa_physics_step_list_lang
+    models:
+      - all-distilroberta-v1
+      - all-MiniLM-L6-v2
+      - all-mpnet-base-v2
+      - all-roberta-large-v1
+      - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
+    params:
+      max_rounds: 100
+      use_titles: True
+      filter_lang: en
+      from_database: True
+
   step_list_tfidf_wiki_corpus:
     agent_class: TFIDFAgent
     game_datasets:
