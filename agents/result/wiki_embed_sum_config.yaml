@@ -493,3 +493,114 @@ data_set_list:
         data_name: oa_social_sciences_step_list_lang_stsb-xlm-r-multilingual_
         file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
         figure_file_name: oa_social_sciences_sum_all-stsb-xlm-r-multilingual
+  - language: French
+    topic: Biochemistry
+    data_loc: data/output_data/oa_biochemistry/step_list_fr
+    figure_title: OpenAlex Biochemistry, Genetics and Molecular Biology
+    model_list:
+      - model_name: All-MPNet-Base v2
+        data_name: oa_biochemistry_step_list_lang_all-mpnet-base-v2_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_biochemistry_sum_all-mpnet-base-v2
+      - model_name: Distiluse-Base-Multilingual-Cased v1
+        data_name: oa_biochemistry_step_list_lang_distiluse-base-multilingual-cased-v1_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_biochemistry_sum_all-distiluse-base-multilingual-cased-v1
+      - model_name: Distiluse-Base-Multilingual-Cased v2
+        data_name: oa_biochemistry_step_list_lang_distiluse-base-multilingual-cased-v2_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_biochemistry_sum_all-distiluse-base-multilingual-cased-v2
+      - model_name: Intfloat Multilingual-E5-Large
+        data_name: oa_biochemistry_step_list_lang_intfloat_multilingual-e5-large_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_biochemistry_sum_all-intfloat_multilingual-e5-large
+      - model_name: Intfloat Multilingual-E5-Small
+        data_name: oa_biochemistry_step_list_lang_intfloat_multilingual-e5-small_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_biochemistry_sum_all-intfloat_multilingual-e5-small
+      - model_name: Paraphrase Multilingual-MiniLM-L12 V2
+        data_name: oa_biochemistry_step_list_lang_paraphrase-multilingual-MiniLM-L12-v2_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_biochemistry_sum_all-paraphrase-multilingual-MiniLM-L12-v2
+      - model_name: Paraphrase Multilingual-Mpnet-Base V2
+        data_name: oa_biochemistry_step_list_lang_paraphrase-multilingual-mpnet-base-v2_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_biochemistry_sum_all-paraphrase-multilingual-mpnet-base-v2
+      - model_name: STSB-XML-R-Multilingual
+        data_name: oa_biochemistry_step_list_lang_stsb-xlm-r-multilingual_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_biochemistry_sum_all-stsb-xlm-r-multilingual
+  - language: French
+    topic: Medicine
+    data_loc: data/output_data/oa_medicine/step_list_fr
+    figure_title: OpenAlex Medicine
+    model_list:
+      - model_name: All-MPNet-Base v2
+        data_name: oa_medicine_step_list_lang_all-mpnet-base-v2_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_medicine_sum_all-mpnet-base-v2
+      - model_name: Distiluse-Base-Multilingual-Cased v1
+        data_name: oa_medicine_step_list_lang_distiluse-base-multilingual-cased-v1_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_medicine_sum_all-distiluse-base-multilingual-cased-v1
+      - model_name: Distiluse-Base-Multilingual-Cased v2
+        data_name: oa_medicine_step_list_lang_distiluse-base-multilingual-cased-v2_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_medicine_sum_all-distiluse-base-multilingual-cased-v2
+      - model_name: Intfloat Multilingual-E5-Large
+        data_name: oa_medicine_step_list_lang_intfloat_multilingual-e5-large_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_medicine_sum_all-intfloat_multilingual-e5-large
+      - model_name: Intfloat Multilingual-E5-Small
+        data_name: oa_medicine_step_list_lang_intfloat_multilingual-e5-small_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_medicine_sum_all-intfloat_multilingual-e5-small
+      - model_name: Paraphrase Multilingual-MiniLM-L12 V2
+        data_name: oa_medicine_step_list_lang_paraphrase-multilingual-MiniLM-L12-v2_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_medicine_sum_all-paraphrase-multilingual-MiniLM-L12-v2
+      - model_name: Paraphrase Multilingual-Mpnet-Base V2
+        data_name: oa_medicine_step_list_lang_paraphrase-multilingual-mpnet-base-v2_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_medicine_sum_all-paraphrase-multilingual-mpnet-base-v2
+      - model_name: STSB-XML-R-Multilingual
+        data_name: oa_medicine_step_list_lang_stsb-xlm-r-multilingual_
+        file_index_list: [0, 100, 200, 300, 400]
+        figure_file_name: oa_medicine_sum_all-stsb-xlm-r-multilingual
+  - language: French
+    topic: Physics
+    data_loc: data/output_data/oa_physics/step_list_fr
+    figure_title: OpenAlex Physics & Astronomy
+    model_list:
+      - model_name: All-MPNet-Base v2
+        data_name: oa_physics_step_list_lang_all-mpnet-base-v2_
+        file_index_list: [0, 100, 200, 300]
+        figure_file_name: oa_physics_sum_all-mpnet-base-v2
+      - model_name: Distiluse-Base-Multilingual-Cased v1
+        data_name: oa_physics_step_list_lang_distiluse-base-multilingual-cased-v1_
+        file_index_list: [0, 100, 200, 300]
+        figure_file_name: oa_physics_sum_all-distiluse-base-multilingual-cased-v1
+      - model_name: Distiluse-Base-Multilingual-Cased v2
+        data_name: oa_physics_step_list_lang_distiluse-base-multilingual-cased-v2_
+        file_index_list: [0, 100, 200, 300]
+        figure_file_name: oa_physics_sum_all-distiluse-base-multilingual-cased-v2
+      - model_name: Intfloat Multilingual-E5-Large
+        data_name: oa_physics_step_list_lang_intfloat_multilingual-e5-large_
+        file_index_list: [0, 100, 200, 300]
+        figure_file_name: oa_physics_sum_all-intfloat_multilingual-e5-large
+      - model_name: Intfloat Multilingual-E5-Small
+        data_name: oa_physics_step_list_lang_intfloat_multilingual-e5-small_
+        file_index_list: [0, 100, 200, 300]
+        figure_file_name: oa_physics_sum_all-intfloat_multilingual-e5-small
+      - model_name: Paraphrase Multilingual-MiniLM-L12 V2
+        data_name: oa_physics_step_list_lang_paraphrase-multilingual-MiniLM-L12-v2_
+        file_index_list: [0, 100, 200, 300]
+        figure_file_name: oa_physics_sum_all-paraphrase-multilingual-MiniLM-L12-v2
+      - model_name: Paraphrase Multilingual-Mpnet-Base V2
+        data_name: oa_physics_step_list_lang_paraphrase-multilingual-mpnet-base-v2_
+        file_index_list: [0, 100, 200, 300]
+        figure_file_name: oa_physics_sum_all-paraphrase-multilingual-mpnet-base-v2
+      - model_name: STSB-XML-R-Multilingual
+        data_name: oa_physics_step_list_lang_stsb-xlm-r-multilingual_
+        file_index_list: [0, 100, 200, 300]
+        figure_file_name: oa_physics_sum_all-stsb-xlm-r-multilingual
