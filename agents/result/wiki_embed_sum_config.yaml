@@ -314,6 +314,10 @@ data_set_list:
         data_name: bn_wiki_step_list_all-MiniLM-L6-v2_
         file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
         figure_file_name: bn_wiki_sum_all-MiniLM-L6-v2
+      - model_name: All-MPNet-Base v2
+        data_name: bn_wiki_step_list_all-mpnet-base-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: bn_wiki_sum_all-mpnet-base-v2
       - model_name: Distiluse-Base-Multilingual-Cased v1
         data_name: bn_wiki_step_list_distiluse-base-multilingual-cased-v1_
         file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
@@ -351,6 +355,10 @@ data_set_list:
         data_name: ru_wiki_step_list_all-MiniLM-L6-v2_
         file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
         figure_file_name: ru_wiki_sum_all-MiniLM-L6-v2
+      - model_name: All-MPNet-Base v2
+        data_name: ru_wiki_step_list_all-mpnet-base-v2_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        figure_file_name: ru_wiki_sum_all-mpnet-base-v2
       - model_name: Distiluse-Base-Multilingual-Cased v1
         data_name: ru_wiki_step_list_distiluse-base-multilingual-cased-v1_
         file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]

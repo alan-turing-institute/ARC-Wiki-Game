@@ -13,6 +13,7 @@ experiments:
       - all-MiniLM-L6-v2
       - intfloat/multilingual-e5-large
       - intfloat/multilingual-e5-small
+      - all-mpnet-base-v2
     params:
       max_rounds: 100
 
