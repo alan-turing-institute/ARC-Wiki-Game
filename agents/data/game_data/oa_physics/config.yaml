@@ -51,12 +51,29 @@ experiments:
       max_articles: 100000
       from_database: True
 
-  step_list_prompt_mini:
+  step_list_prompt_gpt4o_mini:
     agent_class: PromptAgent
     game_datasets:
       - oa_physics_step_list_lang
     models:
       - wikigame-gpt-4o-mini
+    params:
+      llm: gpt
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 500
+      filter_lang: en
+      from_database: True
+
+  step_list_prompt_gpt4o:
+    agent_class: PromptAgent
+    game_datasets:
+      - oa_physics_step_list_lang
+    models:
+      - wikigame-gpt-4o
     params:
       llm: gpt
       max_rounds: 100
@@ -74,6 +91,7 @@ experiments:
       - oa_physics_step_list_lang
     models:
       - llama3.2:3b
+      - gemma2:27b
     params:
       llm: ollama
       max_rounds: 100
