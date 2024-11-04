@@ -64,7 +64,7 @@ experiments:
   step_list_prompt_small:
     agent_class: PromptAgent
     game_datasets:
-      - zh_wiki_step_list_lang
+      - zh_wiki_step_list
     models:
       - llama3.2:3b
       - gemma2:27b
@@ -80,7 +80,7 @@ experiments:
   step_list_prompt_large:
     agent_class: PromptAgent
     game_datasets:
-      - zh_wiki_step_list_lang
+      - zh_wiki_step_list
     models:
       - llama3.1:405b
     params:
