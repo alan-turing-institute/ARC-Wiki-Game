@@ -97,6 +97,10 @@ data_set_list:
         data_name: fr_wiki_step_list_stsb-xlm-r-multilingual_
         file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
         figure_file_name: fr_wiki_sum_all-stsb-xlm-r-multilingual
+      - model_name: All-MPNet-Base v2
+        data_name: fr_wiki_step_list_all-mpnet-base-v2_
+        file_index_list: [0]
+        figure_file_name: fr_wiki_sum_all-mpnet-base-v2
   - language: Chinese
     topic: Wikipedia
     data_loc: data/output_data/zh_wiki/step_list
@@ -134,6 +138,10 @@ data_set_list:
         data_name: zh_wiki_step_list_stsb-xlm-r-multilingual_
         file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
         figure_file_name: zh_wiki_sum_all-stsb-xlm-r-multilingual
+      - model_name: All-MPNet-Base v2
+        data_name: zh_wiki_step_list_all-mpnet-base-v2_
+        file_index_list: [0]
+        figure_file_name: zh_wiki_sum_all-mpnet-base-v2
   - language: English
     topic: Physics
     data_loc: data/output_data/oa_physics/step_list_en
