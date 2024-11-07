@@ -82,7 +82,7 @@ x_vals = np.arange(len(metadata_df))  # the label locations
 
 bars = ax1.bar(x_vals, metadata_df["Article"], color="blue", label="Article")
 ax1.set_xlabel("Wikipedia" + " " * 30 + "Open Alex")
-ax1.set_ylabel("Article Count", color="blue")
+ax1.set_ylabel("Article Count in Millions", color="blue")
 ax1.tick_params(axis="y", labelcolor="blue")
 ax1.set_xticks(x_vals)
 ax1.set_xticklabels(x_labels, rotation=60, ha="right")
@@ -117,7 +117,6 @@ for n, (topic, hist) in enumerate(histograms.items()):
     ax2.plot(
         hist[0],
         hist[1],
-        "-o",
         label=topic,
         color=cc.glasbey_dark[n],
         marker=(n + 3, 0, 0),
@@ -130,7 +129,7 @@ ax2.set_xlabel("Steps through link graph")
 ax2.set_ylabel("Percentage of articles reached")
 
 ax2.grid(alpha=0.7)
-ax2.xaxis.set_minor_locator(AutoMinorLocator())
+ax2.xaxis.set_minor_locator(AutoMinorLocator(2))
 ax2.yaxis.set_minor_locator(AutoMinorLocator())
 ax2.tick_params(which="both", direction="in")
 
