@@ -20,27 +20,23 @@ tfidf_path = results_dir / "tfidf_wiki_summary_stats.csv"
 # Load Data
 
 color_names = {
-    "Open Souce LLM": 185 / 360,
-    "Closed Source LLM": 112 / 360,
-    "Embedding Model": 28 / 360,
-    "TFIDF Model": 298 / 360,
+    "Open LLM": 185 / 360,
+    "Closed LLM": 112 / 360,
+    "Embedding": 28 / 360,
+    "TFIDF": 298 / 360,
     "Human": 355 / 360,
 }
 
 embed_df = pd.read_csv(embed_path, sep="\t")
-embed_df["Colour"] = color_names["Embedding Model"]
+embed_df["Colour"] = color_names["Embedding"]
 
 prompt_df = pd.read_csv(prompt_path, sep="\t")
 prompt_df["Colour"] = prompt_df["Model"].map(
-    lambda m: (
-        color_names["Closed Source LLM"]
-        if "GPT" in m
-        else color_names["Open Souce LLM"]
-    )
+    lambda m: (color_names["Closed LLM"] if "GPT" in m else color_names["Open LLM"])
 )
 
 tfidf_df = pd.read_csv(tfidf_path, sep="\t")
-tfidf_df["Colour"] = color_names["TFIDF Model"]
+tfidf_df["Colour"] = color_names["TFIDF"]
 
 human_df = pd.DataFrame(
     {
