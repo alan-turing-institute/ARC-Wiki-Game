@@ -58,7 +58,7 @@ data_set_list:
         file_index_list: [0, 300, 600, 900]
         figure_file_name: fr_wiki_step_list_wiki_corpus
   - language: English
-    topic: OpenAlex
+    topic: OpenAlex Arts & Humanities
     data_loc: data/output_data/oa_arts/step_list_tfidf_wiki_corpus
     figure_title: OpenAlex Arts and Humanities Summary
     model_list:
@@ -67,7 +67,7 @@ data_set_list:
         file_index_list: [0]
         figure_file_name: oa_arts_step_list_wiki_corpus
   - language: English
-    topic: OpenAlex
+    topic: OpenAlex Arts & Humanities
     data_loc: data/output_data/oa_arts/step_list_tfidf_openalex_corpus
     figure_title: OpenAlex Arts and Humanities Summary
     model_list:
@@ -76,11 +76,74 @@ data_set_list:
         file_index_list: [0]
         figure_file_name: oa_arts_step_list_wiki_corpus
   - language: English
-    topic: OpenAlex
+    topic: OpenAlex Social Sciences
     data_loc: data/output_data/oa_social_sciences/step_list_tfidf_wiki_corpus
-    figure_title: OpenAlex Arts and Humanities Summary
+    figure_title: OpenAlex Social Sciences Summary
     model_list:
       - model_name: TFIDF Wiki Corpus
         data_name: oa_social_sciences_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_social_sciences_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Social Sciences
+    data_loc: data/output_data/oa_social_sciences/step_list_tfidf_openalex_corpus
+    figure_title: OpenAlex Social Sciences Summary
+    model_list:
+      - model_name: TFIDF OpenAlex Corpus
+        data_name: oa_social_sciences_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_social_sciences_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Physics & Astronomy
+    data_loc: data/output_data/oa_physics/step_list_tfidf_wiki_corpus
+    figure_title: OpenAlex Physics & Astronomy Summary
+    model_list:
+      - model_name: TFIDF Wiki Corpus
+        data_name: oa_physics_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_physics_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Physics & Astronomy
+    data_loc: data/output_data/oa_physics/step_list_tfidf_openalex_corpus
+    figure_title: OpenAlex Physics & Astronomy Summary
+    model_list:
+      - model_name: TFIDF OpenAlex Corpus
+        data_name: oa_physics_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_physics_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Medicine
+    data_loc: data/output_data/oa_medicine/step_list_tfidf_wiki_corpus
+    figure_title: OpenAlex Medicine Summary
+    model_list:
+      - model_name: TFIDF Wiki Corpus
+        data_name: oa_medicine_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_medicine_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Medicine
+    data_loc: data/output_data/oa_medicine/step_list_tfidf_openalex_corpus
+    figure_title: OpenAlex Medicine Summary
+    model_list:
+      - model_name: TFIDF OpenAlex Corpus
+        data_name: oa_medicine_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_medicine_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Biochemistry
+    data_loc: data/output_data/oa_biochemistry/step_list_tfidf_wiki_corpus
+    figure_title: OpenAlex Biochemistry, Genetics and Molecular Biology Summary
+    model_list:
+      - model_name: TFIDF Wiki Corpus
+        data_name: oa_biochemistry_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_biochemistry_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Biochemistry
+    data_loc: data/output_data/oa_biochemistry/step_list_tfidf_openalex_corpus
+    figure_title: OpenAlex Biochemistry, Genetics and Molecular Biology Summary
+    model_list:
+      - model_name: TFIDF OpenAlex Corpus
+        data_name: oa_biochemistry_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_biochemistry_step_list_wiki_corpus
