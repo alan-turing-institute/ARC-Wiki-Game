@@ -22,11 +22,16 @@ hist_path = os.path.join(
 metadata_df = pd.read_csv(metadata_path)
 
 topic_name = [
-    ("enwiki", "English\nWikipedia"),
-    ("frwiki", "French\nWikipedia"),
-    ("ruwiki", "Russian\nWikipedia"),
-    ("zhwiki", "Chinese\nWikipedia"),
-    ("bnwiki", "Bengali\nWikipedia"),
+    ("enwiki", "English"),
+    ("frwiki", "French"),
+    ("ruwiki", "Russian"),
+    ("zhwiki", "Chinese"),
+    ("bnwiki", "Bengali"),
+    ("oa_physics", "Physics"),
+    ("oa_biochemistry", "Biology"),
+    ("oa_medicine", "Medicine"),
+    ("oa_social_sciences", "Social Sci"),
+    ("oa_arts", "Arts"),
 ]
 
 histograms = {}
@@ -82,7 +87,7 @@ x_vals = np.arange(len(metadata_df))  # the label locations
 
 bars = ax1.bar(x_vals, metadata_df["Article"], color="blue", label="Article")
 ax1.set_xlabel("Wikipedia" + " " * 30 + "Open Alex")
-ax1.set_ylabel("Article Count in Millions", color="blue")
+ax1.set_ylabel("Article count in millions", color="blue")
 ax1.tick_params(axis="y", labelcolor="blue")
 ax1.set_xticks(x_vals)
 ax1.set_xticklabels(x_labels, rotation=60, ha="right")
@@ -106,27 +111,50 @@ ax1t.plot(
     ms=8,
     label="Links per Article",
 )
-ax1t.set_ylabel("Links per Article", color="red")
+ax1t.set_ylabel("Links per article", color="red")
 ax1t.tick_params(axis="y", labelcolor="red")
 ax1t.set_ylim(0, y_top * 2.5)
 ax1t.set_yticks(y_ticks * 2.5)
 
 ## Axis 2 - Cumulative Percentage of Links ##
 
-for n, (topic, hist) in enumerate(histograms.items()):
+topic_points = dict(
+    zip(
+        [t[1] for t in topic_name],
+        [
+            (3, 0, 0),
+            (4, 0, 0),
+            (5, 0, 0),
+            (6, 0, 0),
+            (7, 0, 0),
+            (4, 1, 45),
+            (5, 1, 45),
+            (6, 1, 45),
+            (7, 1, 45),
+            (8, 1, 45),
+        ],
+        strict=False,
+    )
+)
+
+sorted_histograms = dict(sorted(histograms.items(), key=lambda x: -x[1][1][-1]))
+
+
+for n, (topic, hist) in enumerate(sorted_histograms.items()):
     ax2.plot(
         hist[0],
         hist[1],
         label=topic,
         color=cc.glasbey_dark[n],
-        marker=(n + 3, 0, 0),
+        marker=topic_points[topic],
+        linestyle="--" if topic_points[topic][1] else "-",
     )
 
 
 ax2.set_xlim(0, 10)
 ax2.set_ylim(0, 100)
 ax2.set_xlabel("Steps through link graph")
-ax2.set_ylabel("Percentage of articles reached")
+ax2.set_ylabel("Percentage of reachable articles")
 
 ax2.grid(alpha=0.7)
 ax2.xaxis.set_minor_locator(AutoMinorLocator(2))
