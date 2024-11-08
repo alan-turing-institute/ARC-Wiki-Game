@@ -138,7 +138,7 @@ e5_n = all_df.loc[all_df["Model"] == "Intfloat Multilingual-E5-Small", "n"].valu
 e5_p = all_df.loc[all_df["Model"] == "Intfloat Multilingual-E5-Small", "p"].values[0]
 
 # Setting up the figure
-fig = plt.figure(figsize=(10, 5))
+fig = plt.figure(figsize=(8, 5))
 gs = fig.add_gridspec(2, 2)
 ax1 = fig.add_subplot(gs[0, 0])
 ax2 = fig.add_subplot(gs[1, 0])
@@ -166,7 +166,7 @@ ax2.text(
     ha="right",
 )
 ax3.text(
-    -0.2,
+    -0.25,
     1.0,
     "C",
     transform=ax3.transAxes,
@@ -198,7 +198,7 @@ ax1.set_xlim(0, 100)
 ax1.grid(alpha=0.7)
 ax1.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=1))
 ax1.tick_params(which="both", axis="both", direction="in")
-ax1.xaxis.set_minor_locator(AutoMinorLocator(5))
+ax1.xaxis.set_minor_locator(AutoMinorLocator(4))
 ax1.yaxis.set_minor_locator(AutoMinorLocator(4))
 
 ax1.text(
@@ -235,7 +235,7 @@ ax2.set_ylim(ax1.get_ylim())
 ax2.grid(alpha=0.7)
 ax2.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=1))
 ax2.tick_params(which="both", axis="both", direction="in")
-ax2.xaxis.set_minor_locator(AutoMinorLocator(5))
+ax2.xaxis.set_minor_locator(AutoMinorLocator(4))
 ax2.yaxis.set_minor_locator(AutoMinorLocator(4))
 
 ax2.text(
@@ -263,11 +263,11 @@ bars = ax3.barh(
 ax3.set_yticks(y_pos)
 ax3.set_yticklabels(table_df["ModelName"])
 ax3.set_xlabel("Mean Steps in Successful Games")
-ax3.set_xlim(0, 68)
+ax3.set_xlim(0, 72)
 ax3.set_ylim(-0.6, len(table_df) - 0.4)
 
 ax3.grid(axis="x", linestyle="--", alpha=0.7)
-ax3.xaxis.set_minor_locator(AutoMinorLocator(5))
+ax3.xaxis.set_minor_locator(AutoMinorLocator(10))
 ax3.tick_params(which="both", axis="x", direction="in")
 
 
