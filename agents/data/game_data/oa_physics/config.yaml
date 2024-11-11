@@ -51,6 +51,7 @@ experiments:
       manual_seed: 42
       max_articles: 100000
       from_database: True
+      filter_lang: en
     agent_tools_for_corpus: en_wiki
     params_for_corpus:
       from_database: False
@@ -67,6 +68,7 @@ experiments:
       manual_seed: 42
       max_articles: 100000
       from_database: True
+      filter_lang: en
 
   step_list_prompt_gpt4o_mini:
     agent_class: PromptAgent

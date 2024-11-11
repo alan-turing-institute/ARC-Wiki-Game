@@ -202,7 +202,7 @@ data_set_list:
         data_name: fr_wiki_step_list_llama3.2_3b_
         file_index_list: [0]
         figure_file_name: fr_wiki_step_list_llama3.2:3b
-# No successes for Russian using Llama3.2:3b so the code fails if this is included.
+# No successes for Biochemistry using Llama3.2:3b so the code fails if this is included.
   # - language: English
   #   topic: OpenAlex Biochemistry
   #   data_loc: data/output_data/oa_biochemistry/step_list_prompt_small
@@ -221,3 +221,49 @@ data_set_list:
         data_name: oa_biochemistry_step_list_lang_gemma2_27b_
         file_index_list: [0, 19, 38, 57, 76, 95]
         figure_file_name: oa_biochemistry_step_list_lang_gemma2:27b
+  - language: French
+    topic: Wikipedia
+    data_loc: data/output_data/fr_wiki/step_list_prompt_gpt4o_mini
+    figure_title: French Wiki Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o mini
+        data_name: fr_wiki_step_list_wikigame-gpt-4o-mini_
+        file_index_list: [0]
+        figure_file_name: fr_wiki_step_list_wikigame-gpt-4o-mini
+# No successes for Medicine using Llama3.2:3b so the code fails if this is included.
+  # - language: English
+  #   topic: OpenAlex Medicine
+  #   data_loc: data/output_data/oa_medicine/step_list_prompt_small
+  #   figure_title: OpenAlex Medicine Summary
+  #   model_list:
+  #     - model_name: Llama3.2:3B
+  #       data_name: oa_medicine_step_list_lang_llama3.2_3b_
+  #       file_index_list: [0]
+  #       figure_file_name: oa_medicine_step_list_lang_llama3.2:3b
+  - language: English
+    topic: OpenAlex Medicine
+    data_loc: data/output_data/oa_medicine/step_list_prompt_small
+    figure_title: OpenAlex Medicine Summary
+    model_list:
+      - model_name: Gemma2:27b
+        data_name: oa_medicine_step_list_lang_gemma2_27b_
+        file_index_list: [0]
+        figure_file_name: oa_medicine_step_list_lang_gemma2:27b
+  - language: Bengali
+    topic: Wikipedia
+    data_loc: data/output_data/bn_wiki/step_list_prompt_gpt4o_mini
+    figure_title: Bengali Wiki Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o mini
+        data_name: bn_wiki_step_list_wikigame-gpt-4o-mini_
+        file_index_list: [0]
+        figure_file_name: bn_wiki_step_list_wikigame-gpt-4o-mini
+  - language: Russian
+    topic: Wikipedia
+    data_loc: data/output_data/ru_wiki/step_list_prompt_gpt4o_mini
+    figure_title: Russian Wiki Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o mini
+        data_name: ru_wiki_step_list_wikigame-gpt-4o-mini_
+        file_index_list: [0,8,16,24,32,40,48,56,64,72,80,88,96]
+        figure_file_name: ru_wiki_step_list_wikigame-gpt-4o-mini
