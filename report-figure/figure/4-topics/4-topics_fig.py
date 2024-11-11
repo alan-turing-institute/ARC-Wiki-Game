@@ -79,6 +79,8 @@ show_list = [
 
 all_df = all_df[all_df["Model"].isin(show_list)]
 
+all_df["Topic"] = all_df["Topic"].str.replace("OpenAlex ", "")
+
 topic_names = {
     ("English", "Wikipedia"): "English Wiki",
     ("French", "Wikipedia"): "French Wiki",
@@ -121,7 +123,7 @@ for model in show_list:
         markersize=8,
         capsize=8,
         linestyle=line_choice[model],
-        color=hsv_to_rgb((model_df["Colour"].values[0], 0.95, 0.85)),
+        color=hsv_to_rgb((model_df["Colour"].values[0], 0.95, 0.90)),
         label=model_df["ModelName"].values[0],
     )
     legend_handles.append(
@@ -129,7 +131,7 @@ for model in show_list:
             [0],
             [0],
             marker=marker_choice[model],
-            color=hsv_to_rgb((model_df["Colour"].values[0], 0.95, 0.85)),
+            color=hsv_to_rgb((model_df["Colour"].values[0], 0.95, 0.90)),
             linestyle=line_choice[model],
         )
     )
@@ -164,5 +166,3 @@ ax1.yaxis.set_minor_locator(AutoMinorLocator(5))
 fig.tight_layout()  # Adjust layout to prevent overlap
 
 fig.savefig(fig_path)
-
-print(all_df["Order"].values)
