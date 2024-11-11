@@ -111,7 +111,7 @@ ax1t.plot(
     ms=8,
     label="Links per Article",
 )
-ax1t.set_ylabel("Links per article", color="red")
+ax1t.set_ylabel("Mean links per article", color="red")
 ax1t.tick_params(axis="y", labelcolor="red")
 ax1t.set_ylim(0, y_top * 2.5)
 ax1t.set_yticks(y_ticks * 2.5)
