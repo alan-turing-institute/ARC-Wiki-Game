@@ -59,6 +59,7 @@ rename_dict = {
     "Intfloat Multilingual-E5-Small": "E5-Small",
     "GPT 4o": "GPT-4o",
     "GPT 4o mini": "GPT-4o mini",
+    "TFIDF Self Corpus": "TFIDF",
 }
 
 all_df["ModelName"] = all_df["Model"]
@@ -69,6 +70,7 @@ all_df = all_df.sort_values(by="Success_rate", ascending=True)
 
 show_list = [
     "Human",
+    "TFIDF Self Corpus",
     "GPT 4o",
     "GPT 4o mini",
     "Llama3.1:405B",
@@ -77,9 +79,11 @@ show_list = [
     "All-MPNet-Base v2",
 ]
 
-all_df = all_df[all_df["Model"].isin(show_list)]
-
 all_df["Topic"] = all_df["Topic"].str.replace("OpenAlex ", "")
+all_df["Topic"] = all_df["Topic"].str.replace("&", "and")
+all_df["Topic"] = all_df["Topic"].str.replace(" and Astronomy", "")
+
+all_df = all_df[all_df["Model"].isin(show_list)]
 
 topic_names = {
     ("English", "Wikipedia"): "English Wiki",
@@ -102,67 +106,105 @@ all_df = all_df.sort_values(by="Order")
 
 
 # Setting up the Figure
-fig, ax1 = plt.subplots(1, 1, figsize=(8, 5))
+fig, axes = plt.subplots(1, 2, figsize=(8, 5))
+ax1, ax2 = axes
 
-marker_choice = dict(zip(show_list, ["o", "s", "D", "<", "^", ">", "v"], strict=False))
-line_choice = dict(zip(show_list, ["", "--", ":", "--", ":", "--", ":"], strict=False))
+ax1.text(
+    -0.08,
+    1.0,
+    "A",
+    transform=ax1.transAxes,
+    fontsize=20,
+    fontweight="bold",
+    va="top",
+    ha="right",
+)
+ax2.text(
+    1.08,
+    1.0,
+    "B",
+    transform=ax2.transAxes,
+    fontsize=20,
+    fontweight="bold",
+    va="top",
+    ha="left",
+)
+
+marker_choice = dict(
+    zip(show_list, ["o", "+", "s", "D", "<", "^", ">", "v"], strict=False)
+)
+line_choice = dict(
+    zip(show_list, ["", "--", "--", ":", "--", ":", "--", ":"], strict=False)
+)
 
 
 # Plotting the Figure
 
-legend_handles = []
-legend_labels = []
 
-for model in show_list:
-    model_df = all_df[all_df["Model"] == model]
-    ax1.errorbar(
-        model_df["Order"].values,
-        model_df["Success_rate"].values,
-        yerr=model_df["Success_rate_std"].values,
-        marker=marker_choice[model],
-        markersize=8,
-        capsize=8,
-        linestyle=line_choice[model],
-        color=hsv_to_rgb((model_df["Colour"].values[0], 0.95, 0.90)),
-        label=model_df["ModelName"].values[0],
-    )
-    legend_handles.append(
-        plt.Line2D(
-            [0],
-            [0],
+def plot_axis(axis, to_show_list):
+    legend_handles = []
+    legend_labels = []
+
+    for model in to_show_list:
+        model_df = all_df[all_df["Model"] == model]
+        axis.errorbar(
+            model_df["Order"].values,
+            model_df["Success_rate"].values,
+            yerr=model_df["Success_rate_std"].values,
             marker=marker_choice[model],
-            color=hsv_to_rgb((model_df["Colour"].values[0], 0.95, 0.90)),
+            markersize=8,
+            capsize=8,
             linestyle=line_choice[model],
+            color=hsv_to_rgb((model_df["Colour"].values[0], 0.95, 0.90)),
+            label=model_df["ModelName"].values[0],
         )
+        legend_handles.append(
+            plt.Line2D(
+                [0],
+                [0],
+                marker=marker_choice[model],
+                color=hsv_to_rgb((model_df["Colour"].values[0], 0.95, 0.90)),
+                linestyle=line_choice[model],
+            )
+        )
+        legend_labels.append(model_df["ModelName"].values[0])
+
+    axis.legend(
+        labels=legend_labels,
+        handles=legend_handles,
+        loc="upper right",
+        bbox_to_anchor=(1.0, 1.0),
+        ncol=2,
+        framealpha=1.0,
+        fontsize="small",
     )
-    legend_labels.append(model_df["ModelName"].values[0])
 
-legend_handles.insert(1, plt.Line2D([0], [0], marker="", linestyle=""))
-legend_labels.insert(1, " ")
+    # Formatting the Figure
 
-ax1.legend(
-    labels=legend_labels,
-    handles=legend_handles,
-    loc="upper right",
-    bbox_to_anchor=(1.0, 1.0),
-    ncol=4,
-    framealpha=1.0,
-)
+    axis.grid(axis="y", linestyle="-", alpha=0.7)
+    axis.set_ylim(0, 0.88)
 
-# Formatting the Figure
+    axis.tick_params(axis="y", which="both", direction="in")
+    axis.yaxis.set_minor_locator(AutoMinorLocator(5))
 
-ax1.set_xticks(np.arange(len(topic_order)))
-ax1.set_xticklabels(topic_names.values(), rotation=45, ha="right")
+
+plot_axis(ax1, [show_list[x] for x in [0, 1, 6, 7]])
+plot_axis(ax2, [show_list[x] for x in [0, 2, 3, 4, 5]])
 
 ax1.set_ylabel("Success Rate")
+ax2.set_ylabel("Success Rate")
 
-ax1.grid(axis="y", linestyle="-", alpha=0.7)
-ax1.set_ylim(0, 0.85)
+ax2.yaxis.tick_right()
+ax2.yaxis.set_label_position("right")
 
-ax1.tick_params(axis="y", which="both", direction="in")
-ax1.yaxis.set_minor_locator(AutoMinorLocator(5))
+ax1.set_xticks(np.arange(len(topic_order)))
+ax1.set_xticklabels(topic_names.values(), rotation=60, ha="right")
+ax2.set_xticks(np.arange(len(topic_order) - 2))
+ax2.set_xticklabels(list(topic_names.values())[:-2], rotation=60, ha="right")
 
 
 fig.tight_layout()  # Adjust layout to prevent overlap
+
+fig.subplots_adjust(wspace=0.025)  # Reduce the space between subplots
 
 fig.savefig(fig_path)
