@@ -96,7 +96,7 @@ def process_model(
     )
 
     # Check if no successful paths
-    if not np.all(if_sucess):
+    if not np.any(if_sucess):
         success_rate_error = 1 - np.power(0.159, 1 / total_games)
 
         # Save the statistics to the list

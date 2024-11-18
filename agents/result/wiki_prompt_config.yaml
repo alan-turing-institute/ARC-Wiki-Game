@@ -154,7 +154,7 @@ data_set_list:
     model_list:
       - model_name: Llama3.2:3B
         data_name: ru_wiki_step_list_llama3.2_3b_
-        file_index_list: [0]
+        file_index_list: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
         figure_file_name: ru_wiki_step_list_llama3.2:3b
   - language: Chinese
     topic: Wikipedia
