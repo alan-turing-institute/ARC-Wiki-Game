@@ -120,7 +120,7 @@ def process_model(
         )
         return
     if np.sum(if_sucess) == 1:
-        success_rate_error = np.sqrt((1 - total_games) / (total_games**3))
+        success_rate_error = np.sqrt((total_games - 1) / (total_games**3))
 
         # Save the statistics to the list
         stats_dict_list.append(
