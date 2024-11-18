@@ -12,7 +12,6 @@ def swap_graph_direction(
 
     This will also work for going from a backward graph to a forward graph.
 
-
     Args:
         forward_locs (ndarray): The link indices of the forward links.
         forward_vals (ndarray): The values of the forward links.
@@ -51,6 +50,15 @@ def get_deadends(forward_locs: np.ndarray, give_array=False) -> int | np.ndarray
     """
     Get the articles with no outgoing links.
 
+    Args:
+        forward_locs (ndarray): The link indices of the forward links.
+        give_array (bool): If True then the function returns an array of boolean
+                        values, otherwise the sum of the array is returned
+
+    Returns:
+        int | np.ndarray: Either the total number of unreachable nodes, or an array
+                        the length of the articles with a boolean depending on whether
+                        the article is unreachable or not
     """
     deadends = forward_locs[:, 0] == forward_locs[:, 1]
     if give_array:
@@ -64,8 +72,19 @@ def get_unreacchable(
 ) -> int | np.ndarray:
     """
     Get the articles that are not reachable from any page.
+
+    Args:
+        forward_locs (ndarray): The link indices of the forward links.
+        forward_vals (ndarray): The values of the forward links.
+        give_array (bool): If True then the function returns an array of boolean
+                        values, otherwise the sum of the array is returned
+
+    Returns:
+        int | np.ndarray: Either the total number of unreachable nodes, or an array
+                        the length of the articles with a boolean depending on whether
+                        the article is unreachable or not
     """
-    backward_locs, backward_vals = swap_graph_direction(forward_locs, forward_vals)
+    backward_locs, _ = swap_graph_direction(forward_locs, forward_vals)
     unreachable = backward_locs[:, 0] == backward_locs[:, 1]
     if give_array:
         return unreachable

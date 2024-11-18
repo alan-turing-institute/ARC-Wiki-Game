@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 
 from agents.utils.data import load_tools
+from agents.evaluate import graph_stats, step_hist
 
 GRAPH_NAMES = [
     "en_wiki",
@@ -30,6 +31,13 @@ def parse_args():
         help="The path that the data are stored in, e.g. '/home/wiki-game/data/, \
             must include the 'data' folder",
     )
+    parser.add_argument(
+        "--load_data_to_ram",
+        required=False,
+        default=True,
+        type=bool,
+        help="True if data is to be loaded to RAM, False if it remains on hard drive",
+    )
 
     return parser.parse_args()
 
@@ -37,6 +45,7 @@ def parse_args():
 def analysis():
     args = parse_args()
     data_path = args.data_path
+    load_data_to_ram = args.load_data_to_ram
 
     for name in GRAPH_NAMES:
         print(name)
@@ -46,7 +55,11 @@ def analysis():
             from_database = True
 
         tools = load_tools(
-            data_path, name, False, old_title_format=False, from_database=from_database
+            data_path,
+            name,
+            load_data_to_ram,
+            old_title_format=False,
+            from_database=from_database,
         )
 
         num_nodes = tools.matidx_ary.max()
@@ -59,6 +72,8 @@ def analysis():
         ]
         num_nodes_no_inward_links = len(nodes_no_inward_links)
         print(f"Total unreachable nodes: {num_nodes_no_inward_links:_d}")
+        num_nodes_no_inward_links = graph_stats.get_unreacchable(tools.forward_locs, tools.forward_vals, False)
+        print(f"Total unreachable nodes: {num_nodes_no_inward_links:_d}")
 
         # Get list of nodes that don't have any links out of them - these can never
         # be a start node, but they could still be reached in a game (assuming they
@@ -69,6 +84,7 @@ def analysis():
                 nodes_no_outward_links.append(idx)
         num_nodes_no_outward_links = len(nodes_no_outward_links)
         print(f"Total dead-end nodes: {num_nodes_no_outward_links:_d}")
+        num_nodes_no_outward_links = graph_stats.get_deadends(tools.forward_locs, False)
 
         # Are there any nodes that completely disconnected? These will never be used
         # in a game
