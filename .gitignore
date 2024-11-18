@@ -30,6 +30,10 @@ graph-prep/data/metadata/*
 
 .vscode/
 
+# Report Figures
+
+report-figure/**/*.pdf
+
 ### ~~~~ FROM PYTHON TEMPLATE ~~~~ ###
 
 # Byte-compiled / optimized / DLL files

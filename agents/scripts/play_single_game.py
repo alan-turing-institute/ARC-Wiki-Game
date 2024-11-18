@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent
+from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent, TFIDFAgent
 from agents.agent_models.generative_lm import OpenAIModel
 from agents.utils.data import load_tools
 
@@ -153,9 +153,12 @@ def main():
     )
 
     if args.agent == "GreedyEmbeddingAgent":
+        use_titles = args.titles_only
         agent = GreedyEmbeddingAgent(
-            tools, max_rounds=max_rounds, model_name=model_name
+            tools, max_rounds=max_rounds, model_name=model_name, use_titles=use_titles
         )
+    elif args.agent == "TFIDFAgent":
+        agent = TFIDFAgent(tools, max_rounds, model_name)
     elif args.agent == "PromptAgent":
         temperature = args.temperature
         top_p = args.top_p

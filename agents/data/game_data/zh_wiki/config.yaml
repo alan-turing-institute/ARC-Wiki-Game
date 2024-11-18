@@ -13,10 +13,11 @@ experiments:
       - intfloat/multilingual-e5-large
       - intfloat/multilingual-e5-small
       - distiluse-base-multilingual-cased-v2
+      - all-mpnet-base-v2
     params:
       max_rounds: 100
 
-  step_list_prompt_v2:
+  step_list_prompt_gpt4o:
     agent_class: PromptAgent
     game_datasets:
       - zh_wiki_step_list
@@ -30,3 +31,78 @@ experiments:
       manual_seed: 42
       num_retries: 5
       max_titles: 500
+
+  step_list_prompt_gpt4o_mini:
+    agent_class: PromptAgent
+    game_datasets:
+      - zh_wiki_step_list
+    models:
+      - wikigame-gpt-4o-mini
+    params:
+      llm: gpt
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 500
+
+  step_list_titles:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - zh_wiki_step_list
+    models:
+      - distiluse-base-multilingual-cased-v1
+      - stsb-xlm-r-multilingual
+      - paraphrase-multilingual-mpnet-base-v2
+      - paraphrase-multilingual-MiniLM-L12-v2
+      - all-MiniLM-L6-v2 # Not trained on Chinese, so might not work!
+      - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
+      - distiluse-base-multilingual-cased-v2
+    params:
+      max_rounds: 100
+      use_titles: True
+
+  step_list_tfidf_wiki_corpus:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - zh_wiki_step_list
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: zh
+      manual_seed: 42
+      max_articles: 100000
+
+  step_list_prompt_small:
+    agent_class: PromptAgent
+    game_datasets:
+      - zh_wiki_step_list
+    models:
+      - llama3.2:3b
+      - gemma2:27b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
+
+  step_list_prompt_large:
+    agent_class: PromptAgent
+    game_datasets:
+      - zh_wiki_step_list
+    models:
+      - llama3.1:405b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200

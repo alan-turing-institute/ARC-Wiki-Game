@@ -21,3 +21,86 @@ experiments:
       max_rounds: 100
       filter_lang: en
       from_database: True
+
+  step_list_tfidf_wiki_corpus:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - oa_biochemistry_step_list_lang
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: en
+      manual_seed: 42
+      max_articles: 100000
+      from_database: True
+      filter_lang: en
+    agent_tools_for_corpus: en_wiki
+    params_for_corpus:
+      from_database: False
+
+  step_list_tfidf_openalex_corpus:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - oa_biochemistry_step_list_lang
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: en
+      manual_seed: 42
+      max_articles: 100000
+      from_database: True
+      filter_lang: en
+
+  step_list_prompt_small:
+    agent_class: PromptAgent
+    game_datasets:
+      - oa_biochemistry_step_list_lang
+    models:
+      - llama3.2:3b
+      - gemma2:27b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
+      filter_lang: en
+      from_database: True
+
+  step_list_prompt_large:
+    agent_class: PromptAgent
+    game_datasets:
+      - oa_biochemistry_step_list_lang
+    models:
+      - llama3.1:405b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
+      filter_lang: en
+      from_database: True
+
+  step_list_prompt_gpt4o_mini:
+    agent_class: PromptAgent
+    game_datasets:
+      - oa_biochemistry_step_list_lang
+    models:
+      - wikigame-gpt-4o-mini
+    params:
+      llm: gpt
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 500
+      filter_lang: en
+      from_database: True

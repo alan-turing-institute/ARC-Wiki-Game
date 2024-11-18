@@ -6,11 +6,13 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
 from torch import backends, cuda, device
 
 from agents.agent_models.generative_lm import GenLM
 from agents.agent_models.tools import AgentToolsBase
-from agents.utils.models import get_model_from_name
+from agents.utils.models import get_sentence_transformer, get_tfidf_model
+from agents.utils.text import pre_process_chinese, pre_process_with_stemming
 
 
 class Agent(ABC):
@@ -258,6 +260,7 @@ class Agent(ABC):
         similarity: float | None = None,
         optimal_steps: int | None = None,
         err_msg: str = "",
+        additional_fields: dict | None = None,
     ) -> None:
         """
         This method adds the game details provided to the list of played games
@@ -281,6 +284,8 @@ class Agent(ABC):
             will not be provided for all types of agents
         optimal_steps: int | None
             If not none, then this is the optimal number of steps to solve the game
+        additional_fields: dict
+            Stores the value of any non-standard fields to be recorded
         """
         num_steps = len(route) - 2 if route[-1] == -1 else len(route) - 1
         game_summary = {
@@ -290,13 +295,15 @@ class Agent(ABC):
             "target_title": target_title,
             "found_target": found_target,
             "num_steps": num_steps,
-            "route": route,
             "error_message": err_msg,
         }
         if similarity is not None:
             game_summary["similarity"] = similarity
         if optimal_steps is not None:
             game_summary["optimal_steps"] = optimal_steps
+        if additional_fields is not None:
+            for field in additional_fields:
+                game_summary[field] = additional_fields[field]
         game_summary["route"] = route
 
         self._games_played.append(game_summary)
@@ -342,14 +349,294 @@ class Agent(ABC):
         return self._games_played
 
 
+class TFIDFAgent(Agent):
+    def __init__(
+        self,
+        agent_tools: AgentToolsBase,
+        max_rounds: int,
+        lang_iso_code: str,
+        manual_seed: int = 42,
+        max_articles: int = 100000,
+        agent_tools_for_corpus: AgentToolsBase | None = None,
+    ) -> None:
+        """
+        Class inherits from Agent and plays the wikipedia game by using a TF-IDF
+        model. The corpus used for the model can be created using the same dataset as
+        used to play the game, and there is also be an option for a different dataset
+        to be used as the corpus.
+
+        Parameters
+        ----------
+        agent_tools: AgentToolsBase
+            An instance of AgentToolsBase that will have been pre-loaded with the data
+            with which the game will be played
+        max_rounds: int
+            The maximum number of rounds that the game can be played for
+        lang_iso_code: str
+            The iso code for the language to be used to create the corpus
+        manual_seed: int
+            The seed to use to select articles to use in the corpus
+        max_articles: int
+            The maximum number of articles to use to create the corpus
+        agent_tools_for_corpus: AgentToolsBase | None
+            If None, then the agent_tools object is used to create the corpus
+        """
+        super().__init__(agent_tools, max_rounds)
+
+        self._lang = lang_iso_code
+        if agent_tools_for_corpus is None:
+            # If no object is passed as an argument, then set the agent's own agent
+            # tools object to be used to create the corpus as well.
+            agent_tools_for_corpus = agent_tools
+        # Set the function to be used to process the text, both for the TF-IDF model
+        # and also when creating the vectors from the article summaries. Chinese is
+        # currently different to other languages we process as it doesn't require
+        # stemming.
+        if lang_iso_code == "zh":
+            self._preprocess_func = pre_process_chinese
+        else:
+            self._preprocess_func = pre_process_with_stemming
+        # Sets the model, vocab and dictionary objects - all of these are needed when
+        # creating a vector of each summary article.
+        self._model, self._dictionary = get_tfidf_model(
+            agent_tools_for_corpus,
+            manual_seed,
+            max_articles,
+            self._preprocess_func,
+            self._lang,
+        )
+
+    def _vectorise(self, text: str) -> tuple[np.array, int, int]:
+        """
+        This method takes a string of text (expected to be some summary text about
+        an article or page) and returns an array the same length as the vocab vector.
+
+        Parameters
+        ----------
+        text: str
+            The text to be processed
+
+        Returns
+        -------
+        np.array
+            A numpy array representing the text in vector form.
+        int
+            The number of words after the text has been processed
+        int
+            The number of words that did not match a value in the vocabulary
+        """
+        list_words = self._preprocess_func(text, self._lang)
+        bow = self._dictionary.doc2bow(list_words)
+        tfidf_output = self._model[bow]
+        vector = np.zeros(len(self._dictionary.values()))
+        for id, freq in tfidf_output:
+            vector[id] = freq
+        return vector, len(list_words), len(list_words) - len(bow)
+
+    def _similarity(
+        self, candidate_vectors: list[np.array], target_vector: np.array
+    ) -> np.array:
+        """
+        This method calculates the similarity between a list of candidate
+        vectors and the vector from the target page using the cosine similarity.
+
+        Parameters
+        ----------
+        candidate_vctors: list[np.array]
+            List of arrays representing the links on the current page
+        target_vector: np.array
+            Array representing the target page
+
+        Returns
+        -------
+        np.array
+            The cosine similarity value between the candidate vectors and target vector
+        """
+        return cosine_similarity(candidate_vectors, [target_vector])
+
+    def play_game(
+        self,
+        source_page: int | str,
+        target_page: int | str,
+        verbose: bool = False,
+        optimal_steps: int | None = None,
+    ) -> tuple[bool, list[int]]:
+        """
+        This method takes the source and target page IDs or titles and implements a
+        greedy approach to find a route between the two pages. The approach considers
+        the TF-IDF vector of each of the summaries on the current page, and chooses the
+        one that is closest to the target page.
+
+        If a route is found then the method returns True and a list of the route found
+        (composed of page IDs). If a route is not found then the method returns False
+        and a list of the route taken without reaching the target page. A route may not
+        be found for serveral reasons including:
+        - Needing to take more than the maximum number of rounds the object has
+          been set
+        - Reaching a page where there are either no links, or no links to which
+          the agent has not yet navigated.
+
+        Parameters
+        ----------
+        source_page: int | str
+            Either the source page ID or title
+        target_page: int | str
+            Either the target page ID or title
+        verbose: bool
+            If set to True, then the route is printed out
+        optimal_steps: int | None
+            If not none, then this is the optimal number of steps to solve the game
+
+        Returns
+        -------
+        tuple[bool, list[int]]
+            Returns a boolean that indicates whether a route was found, and a list of
+            the route that was taken - the items in the list will be the page IDs
+        """
+        (
+            source_id,
+            source_title,
+            source_summary,
+            target_id,
+            target_title,
+            target_summary,
+        ) = self._initialise_game(source_page, target_page)
+
+        source_embedding = self._vectorise(source_summary)[0]
+        target_embedding = self._vectorise(target_summary)[0]
+        similarity = self._similarity([source_embedding], target_embedding)[0]
+
+        current_id = source_id
+        route = [source_id]
+        found_target = current_id == target_id
+        # Keep a count of total words and oov words encountered during the game.
+        total_words = 0
+        total_oov_words = 0
+        while (len(route) <= self._max_rounds) and not found_target:
+            next_page_id, num_words, num_oov = self._play_round(
+                current_id, route, target_embedding
+            )
+            if next_page_id == -1:
+                break
+            found_target = next_page_id == target_id
+            route.append(next_page_id)
+            current_id = next_page_id
+            total_words += num_words
+            total_oov_words += num_oov
+
+        if verbose:
+            self._print_route(source_title, target_title, found_target, route)
+
+        self.record_game(
+            source_id,
+            source_title,
+            target_id,
+            target_title,
+            found_target,
+            route,
+            similarity,
+            optimal_steps,
+            additional_fields={
+                "total_words": total_words,
+                "total_oov_words": total_oov_words,
+            },
+        )
+
+        return found_target, route
+
+    def _play_round(
+        self,
+        current_page_id: int,
+        route: list[int],
+        target_summary: np.ndarray,
+    ) -> tuple[int, int, int]:
+        """
+        Given a current page id, this method gets all the links that exist on the
+        page. It compares the links to the target summary and returns the ID of the
+        page to navigate to next. This implementation selects the next page by
+        calculating the similarity of the target summary TF-IDF vector to the summary
+        of each possible link page - the link that has the most similar summary is
+        the one that is selected.
+
+        Parameters
+        ----------
+        current_page_id: int
+            The ID of the current page
+        route: list[int]
+            The rotue taken so far in the current game.
+        target_summary: array
+            An embedding of the summary of the target page.
+
+        Returns
+        -------
+        int
+            The ID of the page to navigate to next
+        int
+            The number of words encountered
+        int
+            The number of out-of-vocabularly words
+        """
+        forward_text = self._tools.get_forward_summaries(current_page_id)
+        if len(forward_text) == 0:
+            # No articles were returned
+            return -1, 0, 0
+
+        # Get linked page ids
+        page_ids = [
+            page_info[0]
+            for page_info in forward_text
+            if (page_info[0] not in route) and (page_info[1] is not None)
+        ]
+        # Get linked page summaries / abstracts
+        page_text = [
+            page_info[1]
+            for page_info in forward_text
+            if (page_info[0] not in route) and (page_info[1] is not None)
+        ]
+
+        if len(page_text) == 0:
+            # All articles have been seen before or have not summary
+            return -1, 0, 0
+
+        # Calculate tf-idf embedding values
+        embeddings = []
+        num_words = []
+        num_oov = []
+        similarities = np.empty(shape=(0, 1), dtype=float)
+        for id, text in enumerate(page_text):
+            embedding, words, oov = self._vectorise(str(text))
+            embeddings.append(embedding)
+            num_words.append(words)
+            num_oov.append(oov)
+            # Owing to OOM errors, we batch this calculation
+            if (id + 1) % 50 == 0:
+                # Calculate similarities
+                similarities = np.append(
+                    similarities, self._similarity(embeddings, target_summary)
+                )
+                embeddings = []
+        if len(embeddings) > 0:
+            # There are some embeddings that haven't yet had their similarity to the
+            # target calculated
+            similarities = np.append(
+                similarities, self._similarity(embeddings, target_summary)
+            )
+        max_id = np.argmax(similarities)
+        return page_ids[max_id], sum(num_words), sum(num_oov)
+
+
 class GreedyEmbeddingAgent(Agent):
     def __init__(
-        self, agent_tools: AgentToolsBase, max_rounds: int, model_name: str
+        self,
+        agent_tools: AgentToolsBase,
+        max_rounds: int,
+        model_name: str,
+        use_titles: bool = False,
     ) -> None:
         """
         Class inherits from Agent and plays the wikipedia game by comparing the
         similarity of summary embeddings of links on the current page and the
-        target page. The algorithm selects the link that has a summary that
+        target page. The algorithm selects the link that has a summary or title that
         is scored as being most similar to the target page summary.
 
         Parameters
@@ -361,6 +648,9 @@ class GreedyEmbeddingAgent(Agent):
             The maximum number of rounds that the game can be played for
         model_name: str
             The name of the sentence transformer model to be used for embeddings
+        use_titles: bool
+            If set to True, the page / link titles will be used instead of summaries.
+            The summaries will be used by default.
         """
         super().__init__(agent_tools, max_rounds)
 
@@ -372,7 +662,8 @@ class GreedyEmbeddingAgent(Agent):
         else:
             self.device = "cpu"
 
-        self._model = get_model_from_name(model_name).to(self.device)
+        self._model = get_sentence_transformer(model_name).to(self.device)
+        self._use_titles = use_titles
 
     def play_game(
         self,
@@ -430,7 +721,9 @@ class GreedyEmbeddingAgent(Agent):
         route = [source_id]
         found_target = current_id == target_id
         while (len(route) <= self._max_rounds) and not found_target:
-            next_page_id = self._play_round(current_id, route, target_embedding)
+            next_page_id = self._play_round(
+                current_id, route, target_embedding, self._use_titles
+            )
             if next_page_id == -1:
                 break
             found_target = next_page_id == target_id
@@ -454,7 +747,11 @@ class GreedyEmbeddingAgent(Agent):
         return found_target, route
 
     def _play_round(
-        self, current_page_id: int, route: list[int], target_summary: np.ndarray
+        self,
+        current_page_id: int,
+        route: list[int],
+        target_summary: np.ndarray,
+        use_titles: bool,
     ) -> int:
         """
         Given a current page id, this method gets all the links that exist on the
@@ -472,33 +769,48 @@ class GreedyEmbeddingAgent(Agent):
             The rotue taken so far in the current game.
         target_summary: array
             An embedding of the summary of the target page.
+        use_titles: bool
+            If set to True, then page / link titles will be used instead of the page
+            summaries
 
         Returns
         -------
         int
             The ID of the page to navigate to next
         """
-        forward_summaries = self._tools.get_forward_summaries(current_page_id)
-        if len(forward_summaries) > 0:
-            page_ids = [
-                summary_info[0]
-                for summary_info in forward_summaries
-                if (summary_info[0] not in route) and (summary_info[1] is not None)
-            ]
-            summaries = [
-                summary_info[1]
-                for summary_info in forward_summaries
-                if (summary_info[0] not in route) and (summary_info[1] is not None)
-            ]
-            if len(summaries) > 0:
-                embeddings = self._model.encode(summaries)
+        if use_titles:
+            forward_text = self._tools.get_forward_titles(current_page_id)
+        else:
+            forward_text = self._tools.get_forward_summaries(current_page_id)
 
-                similarities = self._model.similarity(embeddings, target_summary)
-                np_similarities = similarities.numpy()
-                max_id = np.argmax(np_similarities)
-                return page_ids[max_id]
+        if len(forward_text) == 0:
+            # No articles were returned
             return -1
-        return -1
+
+        # Get linked page ids
+        page_ids = [
+            page_info[0]
+            for page_info in forward_text
+            if (page_info[0] not in route) and (page_info[1] is not None)
+        ]
+        # Get linked page summaries / abstracts
+        page_text = [
+            page_info[1]
+            for page_info in forward_text
+            if (page_info[0] not in route) and (page_info[1] is not None)
+        ]
+
+        if len(page_text) == 0:
+            # All articles have been seen before or have not summary
+            return -1
+
+        # Calculate embeddings
+        embeddings = self._model.encode(page_text)
+        # Calculate similarities
+        similarities = self._model.similarity(embeddings, target_summary)
+        np_similarities = similarities.numpy()
+        max_id = np.argmax(np_similarities)
+        return page_ids[max_id]
 
 
 class PromptAgent(Agent):
@@ -710,8 +1022,23 @@ class PromptAgent(Agent):
         titles: list[str] = [
             str(forward_title[1])
             for forward_title in forward_titles
-            if (forward_title[1] is not None) and (forward_title[0] not in route)
+            if (forward_title[0] is not None)
+            and (forward_title[1] is not None)
+            and (forward_title[0] not in route)
         ]
+        ids: list[int] = [
+            int(forward_title[0])
+            for forward_title in forward_titles
+            if (forward_title[0] is not None)
+            and (forward_title[1] is not None)
+            and (forward_title[0] not in route)
+        ]
+        if len(titles) != len(ids):
+            # If this is True, then something has gone very wrong! Throw an error.
+            err_msg = (
+                "Error creating list of IDs and Titles, they are different lengths!"
+            )
+            raise ValueError(err_msg)
         if len(titles) > 0:
             content = " "
             for title in titles[: self._max_titles]:
@@ -756,12 +1083,37 @@ class PromptAgent(Agent):
                     # There is a response
                     try:
                         json_response = json.loads(response)
+                    except (json.decoder.JSONDecodeError, RecursionError):
+                        json_response = None
+                    if json_response is None:
+                        # Some error when loading the response to JSON - making the
+                        # assumption that the recursion error occurs when decoding
+                        # the JSON object (which is what is happening so far)
+                        retry += 1
+                        err_msg = "Response not in valid JSON format"
+                        content_retry = (
+                            "You did not provide your response in JSON "
+                            "format - please try again!"
+                            "The JSON should only include the two fields 'title' and "
+                            "'reason', and the title should only include the title "
+                            "text. "
+                            "You are tying to select the best page title to reach "
+                            f"the target page '{target_title}'."
+                        )
+                    else:
+                        # We have a valid json object
                         if "title" in json_response:
                             next_link = json_response["title"]
                             if next_link in titles:
                                 # Excellent - no hallucinations!
-                                next_link_id = self._tools.get_article_id(next_link)
+                                list_id = titles.index(next_link)
+                                # list_id should always be a valid index of the ids
+                                # list as there was a check above to make sure that
+                                # the titles and ids lists were the same length and
+                                # no items are removed from the list during this process
+                                next_link_id = ids[list_id]
                                 if next_link_id is None:
+                                    # This error shouldn't be reached?
                                     err_msg = (
                                         "Couldn't find article ID for " + next_link
                                     )
@@ -803,19 +1155,6 @@ class PromptAgent(Agent):
                                 f"the target page '{target_title}'."
                             )
 
-                    except json.decoder.JSONDecodeError:
-                        # Some error when loading the response to JSON
-                        retry += 1
-                        err_msg = "Response not in JSON format"
-                        content_retry = (
-                            "You did not provide your response in JSON "
-                            "format - please try again!"
-                            "The JSON should only include the two fields 'title' and "
-                            "'reason', and the title should only include the title "
-                            "text. "
-                            "You are tying to select the best page title to reach "
-                            f"the target page '{target_title}'."
-                        )
                 message_response = {"role": "assistant", "content": response}
                 messages.append(message_response)
                 message_retry = {"role": "user", "content": content_retry}

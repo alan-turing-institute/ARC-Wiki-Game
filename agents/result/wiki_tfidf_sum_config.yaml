@@ -3,12 +3,147 @@
 result_data_file: result/table/tfidf_wiki_summary_stats.csv
 result_figure_loc: result/figure/tfidf_wiki_summary
 data_set_list:
+  - language: Bengali
+    topic: Wikipedia
+    data_loc: data/output_data/bn_wiki/step_list_tfidf_wiki_corpus
+    figure_title: Bengali Wiki Summary
+    model_list:
+      - model_name: TFIDF Self Corpus
+        data_name: bn_wiki_step_list_tfidf_
+        file_index_list: [0]
+        figure_file_name: bn_wiki_step_list_wiki_corpus
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_tfidf
+    data_loc: data/output_data/en_wiki/step_list_tfidf_wiki_corpus
     figure_title: English Wiki Summary
     model_list:
-      - model_name: TFIDF wiki-20171001
-        data_name: en_wiki_step_list_wiki-english-20171001_
-        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
-        figure_file_name: en_wiki_step_list_wiki-english-20171001
+      - model_name: TFIDF Self Corpus
+        data_name: en_wiki_step_list_tfidf_
+        file_index_list: [0]
+        figure_file_name: en_wiki_step_list_wiki_corpus
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_tfidf_oa_physics_corpus
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: TFIDF OpenAlex Physics Corpus
+        data_name: en_wiki_step_list_tfidf_
+        file_index_list: [0]
+        figure_file_name: en_wiki_step_list_oa_physics_corpus
+  - language: Russian
+    topic: Wikipedia
+    data_loc: data/output_data/ru_wiki/step_list_tfidf_wiki_corpus
+    figure_title: Russian Wiki Summary
+    model_list:
+      - model_name: TFIDF Self Corpus
+        data_name: ru_wiki_step_list_tfidf_
+        file_index_list: [0]
+        figure_file_name: ru_wiki_step_list_wiki_corpus
+  - language: Chinese
+    topic: Wikipedia
+    data_loc: data/output_data/zh_wiki/step_list_tfidf_wiki_corpus
+    figure_title: Chinese Wiki Summary
+    model_list:
+      - model_name: TFIDF Self Corpus
+        data_name: zh_wiki_step_list_tfidf_
+        file_index_list: [0]
+        figure_file_name: zh_wiki_step_list_wiki_corpus
+  - language: French
+    topic: Wikipedia
+    data_loc: data/output_data/fr_wiki/step_list_tfidf_wiki_corpus
+    figure_title: French Wiki Summary
+    model_list:
+      - model_name: TFIDF Self Corpus
+        data_name: fr_wiki_step_list_tfidf_
+        file_index_list: [0, 300, 600, 900]
+        figure_file_name: fr_wiki_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Arts and Humanities
+    data_loc: data/output_data/oa_arts/step_list_tfidf_wiki_corpus
+    figure_title: OpenAlex Arts and Humanities Summary
+    model_list:
+      - model_name: TFIDF English Wiki Corpus
+        data_name: oa_arts_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_arts_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Arts and Humanities
+    data_loc: data/output_data/oa_arts/step_list_tfidf_openalex_corpus
+    figure_title: OpenAlex Arts and Humanities Summary
+    model_list:
+      - model_name: TFIDF Self Corpus
+        data_name: oa_arts_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_arts_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Social Sciences
+    data_loc: data/output_data/oa_social_sciences/step_list_tfidf_wiki_corpus
+    figure_title: OpenAlex Social Sciences Summary
+    model_list:
+      - model_name: TFIDF English Wiki Corpus
+        data_name: oa_social_sciences_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_social_sciences_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Social Sciences
+    data_loc: data/output_data/oa_social_sciences/step_list_tfidf_openalex_corpus
+    figure_title: OpenAlex Social Sciences Summary
+    model_list:
+      - model_name: TFIDF Self Corpus
+        data_name: oa_social_sciences_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_social_sciences_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Physics
+    data_loc: data/output_data/oa_physics/step_list_tfidf_wiki_corpus
+    figure_title: OpenAlex Physics Summary
+    model_list:
+      - model_name: TFIDF English Wiki Corpus
+        data_name: oa_physics_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_physics_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Physics
+    data_loc: data/output_data/oa_physics/step_list_tfidf_openalex_corpus
+    figure_title: OpenAlex Physics Summary
+    model_list:
+      - model_name: TFIDF Self Corpus
+        data_name: oa_physics_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_physics_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Medicine
+    data_loc: data/output_data/oa_medicine/step_list_tfidf_wiki_corpus
+    figure_title: OpenAlex Medicine Summary
+    model_list:
+      - model_name: TFIDF English Wiki Corpus
+        data_name: oa_medicine_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_medicine_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Medicine
+    data_loc: data/output_data/oa_medicine/step_list_tfidf_openalex_corpus
+    figure_title: OpenAlex Medicine Summary
+    model_list:
+      - model_name: TFIDF Self Corpus
+        data_name: oa_medicine_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_medicine_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Biochemistry
+    data_loc: data/output_data/oa_biochemistry/step_list_tfidf_wiki_corpus
+    figure_title: OpenAlex Biochemistry, Genetics and Molecular Biology Summary
+    model_list:
+      - model_name: TFIDF English Wiki Corpus
+        data_name: oa_biochemistry_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_biochemistry_step_list_wiki_corpus
+  - language: English
+    topic: OpenAlex Biochemistry
+    data_loc: data/output_data/oa_biochemistry/step_list_tfidf_openalex_corpus
+    figure_title: OpenAlex Biochemistry, Genetics and Molecular Biology Summary
+    model_list:
+      - model_name: TFIDF Self Corpus
+        data_name: oa_biochemistry_step_list_lang_tfidf_
+        file_index_list: [0]
+        figure_file_name: oa_biochemistry_step_list_wiki_corpus

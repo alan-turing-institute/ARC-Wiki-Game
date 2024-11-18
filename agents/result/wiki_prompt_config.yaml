@@ -5,37 +5,364 @@ result_figure_loc: result/figure/prompt_wiki_summary
 data_set_list:
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt
-    figure_title: English Wiki Summary
+    data_loc: data/output_data/en_wiki/step_list_prompt_gpt4o
+    figure_title: English Wiki Summary - max 500 titles
     model_list:
-      - model_name: ChatGPT 4o
+      - model_name: GPT 4o
         data_name: en_wiki_step_list_wikigame-gpt-4o_
         file_index_list: [0]
         figure_file_name: en_wiki_step_list_wikigame-gpt-4o
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_gpt4o_mini
+    figure_title: English Wiki Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o mini
+        data_name: en_wiki_step_list_wikigame-gpt-4o-mini_
+        file_index_list: [0]
+        figure_file_name: en_wiki_step_list_wikigame-gpt-4o-mini
   - language: French
     topic: Wikipedia
-    data_loc: data/output_data/fr_wiki/step_list_prompt
+    data_loc: data/output_data/fr_wiki/step_list_prompt_gpt4o
     figure_title: French Wiki Summary
     model_list:
-      - model_name: ChatGPT 4o
+      - model_name: GPT 4o
         data_name: fr_wiki_step_list_wikigame-gpt-4o_
         file_index_list: [0]
         figure_file_name: fr_wiki_step_list_wikigame-gpt-4o
-  - language: Chinese
-    topic: Wikipedia
-    data_loc: data/output_data/zh_wiki/step_list_prompt
-    figure_title: Chinese Wiki Summary
-    model_list:
-      - model_name: ChatGPT 4o
-        data_name: zh_wiki_step_list_wikigame-gpt-4o_
-        file_index_list: [0]
-        figure_file_name: zh_wiki_step_list_wikigame-gpt-4o
+  # - language: Chinese
+  #   topic: Wikipedia
+  #   data_loc: data/output_data/zh_wiki/step_list_prompt
+  #   figure_title: Chinese Wiki Summary
+  #   model_list:
+  #     - model_name: ChatGPT 4o
+  #       data_name: zh_wiki_step_list_wikigame-gpt-4o_
+  #       file_index_list: [0]
+  #       figure_file_name: zh_wiki_step_list_wikigame-gpt-4o
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt_v2
-    figure_title: English Wiki Summary V2
+    data_loc: data/output_data/en_wiki/step_list_prompt_small
+    figure_title: English Wiki Summary - max 200 titles
     model_list:
-      - model_name: ChatGPT 4o
-        data_name: en_wiki_step_list_wikigame-gpt-4o_
+      - model_name: Gemma2:27B
+        data_name: en_wiki_step_list_gemma2:27b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+        figure_file_name: en_wiki_step_list_gemma2:27b
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_small
+    figure_title: English Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.1:8B
+        data_name: en_wiki_step_list_llama3.1:8b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+        figure_file_name: en_wiki_step_list_llama3.1:8b
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_small
+    figure_title: English Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.2:1B
+        data_name: en_wiki_step_list_llama3.2:1b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+        figure_file_name: en_wiki_step_list_llama3.2:1b
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_small
+    figure_title: English Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.2:3B
+        data_name: en_wiki_step_list_llama3.2:3b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800]
+        figure_file_name: en_wiki_step_list_llama3.2:3b
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_small
+    figure_title: English Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Mistral-Nemo
+        data_name: en_wiki_step_list_mistral-nemo:latest_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+        figure_file_name: en_wiki_step_list_mistral-nemo:latest
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_medium
+    figure_title: English Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.1:70B
+        data_name: en_wiki_step_list_llama3.1:70b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 50, 150, 250, 350, 450, 550, 650, 750, 850, 950]
+        figure_file_name: en_wiki_step_list_llama3.1:70b
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_prompt_large
+    figure_title: English Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.1:405B
+        data_name: en_wiki_step_list_llama3.1:405b_
+        file_index_list: [0, 50, 100, 150, 200, 250, 300]
+        figure_file_name: en_wiki_step_list_llama3.1:405b
+  - language: English
+    topic: OpenAlex Physics
+    data_loc: data/output_data/oa_physics/step_list_prompt_small
+    figure_title: OpenAlex Physics Summary
+    model_list:
+      - model_name: Llama3.2:3B
+        data_name: oa_physics_step_list_lang_llama3.2:3b_
+        file_index_list: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+        figure_file_name: oa_physics_step_list_lang_llama3.2:3b
+  - language: English
+    topic: OpenAlex Physics
+    data_loc: data/output_data/oa_physics/step_list_prompt_gpt4o
+    figure_title: OpenAlex Physics Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o
+        data_name: oa_physics_step_list_lang_wikigame-gpt-4o_
         file_index_list: [0]
-        figure_file_name: en_wiki_step_list_wikigame-gpt-4o
+        figure_file_name: oa_physics_step_list_lang_wikigame-gpt-4o
+  - language: English
+    topic: OpenAlex Physics
+    data_loc: data/output_data/oa_physics/step_list_prompt_small
+    figure_title: OpenAlex Physics Summary - max 200 titles
+    model_list:
+      - model_name: Gemma2:27B
+        data_name: oa_physics_step_list_lang_gemma2_27b_
+        file_index_list: [0]
+        figure_file_name: oa_physics_step_list_gemma2:27b
+  - language: Bengali
+    topic: Wikipedia
+    data_loc: data/output_data/bn_wiki/step_list_prompt_small
+    figure_title: Bengali Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Gemma2:27B
+        data_name: bn_wiki_step_list_gemma2_27b_
+        file_index_list: [0]
+        figure_file_name: bn_wiki_step_list_gemma2:27b
+  - language: Bengali
+    topic: Wikipedia
+    data_loc: data/output_data/bn_wiki/step_list_prompt_small
+    figure_title: Bengali Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.2:3B
+        data_name: bn_wiki_step_list_llama3.2_3b_
+        file_index_list: [0]
+        figure_file_name: bn_wiki_step_list_llama3.2:3b
+  - language: Russian
+    topic: Wikipedia
+    data_loc: data/output_data/ru_wiki/step_list_prompt_small
+    figure_title: Russian Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Gemma2:27B
+        data_name: ru_wiki_step_list_gemma2_27b_
+        file_index_list: [0]
+        figure_file_name: ru_wiki_step_list_gemma2:27b
+# No successes for Russian using Llama3.2:3b so the code fails if this is included.
+  # - language: Russian
+  #   topic: Wikipedia
+  #   data_loc: data/output_data/ru_wiki/step_list_prompt_small
+  #   figure_title: Russian Wiki Summary - max 200 titles
+  #   model_list:
+  #     - model_name: Llama3.2:3b
+  #       data_name: ru_wiki_step_list_llama3.2_3b_
+  #       file_index_list: [0]
+  #       figure_file_name: ru_wiki_step_list_llama3.2:3b
+  - language: Chinese
+    topic: Wikipedia
+    data_loc: data/output_data/zh_wiki/step_list_prompt_small
+    figure_title: Chinese Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Gemma2:27B
+        data_name: zh_wiki_step_list_gemma2_27b_
+        file_index_list: [0]
+        figure_file_name: zh_wiki_step_list_gemma2:27b
+  - language: Chinese
+    topic: Wikipedia
+    data_loc: data/output_data/zh_wiki/step_list_prompt_small
+    figure_title: Chinese Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.2:3B
+        data_name: zh_wiki_step_list_llama3.2_3b_
+        file_index_list: [0]
+        figure_file_name: zh_wiki_step_list_llama3.2:3b
+  - language: French
+    topic: Wikipedia
+    data_loc: data/output_data/fr_wiki/step_list_prompt_small
+    figure_title: French Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Gemma2:27B
+        data_name: fr_wiki_step_list_gemma2_27b_
+        file_index_list: [0]
+        figure_file_name: fr_wiki_step_list_gemma2:27b
+  - language: French
+    topic: Wikipedia
+    data_loc: data/output_data/fr_wiki/step_list_prompt_small
+    figure_title: French Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.2:3B
+        data_name: fr_wiki_step_list_llama3.2_3b_
+        file_index_list: [0]
+        figure_file_name: fr_wiki_step_list_llama3.2:3b
+# No successes for Biochemistry using Llama3.2:3b so the code fails if this is included.
+  # - language: English
+  #   topic: OpenAlex Biochemistry
+  #   data_loc: data/output_data/oa_biochemistry/step_list_prompt_small
+  #   figure_title: OpenAlex Biochemistry Summary
+  #   model_list:
+  #     - model_name: Llama3.2:3B
+  #       data_name: oa_biochemistry_step_list_lang_llama3.2_3b_
+  #       file_index_list: [0]
+  #       figure_file_name: oa_biochemistry_step_list_lang_llama3.2:3b
+  - language: English
+    topic: OpenAlex Biochemistry
+    data_loc: data/output_data/oa_biochemistry/step_list_prompt_small
+    figure_title: OpenAlex Biochemistry Summary
+    model_list:
+      - model_name: Gemma2:27B
+        data_name: oa_biochemistry_step_list_lang_gemma2_27b_
+        file_index_list: [0, 19, 38, 57, 76, 95]
+        figure_file_name: oa_biochemistry_step_list_lang_gemma2:27b
+  - language: French
+    topic: Wikipedia
+    data_loc: data/output_data/fr_wiki/step_list_prompt_gpt4o_mini
+    figure_title: French Wiki Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o mini
+        data_name: fr_wiki_step_list_wikigame-gpt-4o-mini_
+        file_index_list: [0]
+        figure_file_name: fr_wiki_step_list_wikigame-gpt-4o-mini
+# No successes for Medicine using Llama3.2:3b so the code fails if this is included.
+  # - language: English
+  #   topic: OpenAlex Medicine
+  #   data_loc: data/output_data/oa_medicine/step_list_prompt_small
+  #   figure_title: OpenAlex Medicine Summary
+  #   model_list:
+  #     - model_name: Llama3.2:3B
+  #       data_name: oa_medicine_step_list_lang_llama3.2_3b_
+  #       file_index_list: [0]
+  #       figure_file_name: oa_medicine_step_list_lang_llama3.2:3b
+  - language: English
+    topic: OpenAlex Medicine
+    data_loc: data/output_data/oa_medicine/step_list_prompt_small
+    figure_title: OpenAlex Medicine Summary
+    model_list:
+      - model_name: Gemma2:27B
+        data_name: oa_medicine_step_list_lang_gemma2_27b_
+        file_index_list: [0]
+        figure_file_name: oa_medicine_step_list_lang_gemma2:27b
+  - language: Bengali
+    topic: Wikipedia
+    data_loc: data/output_data/bn_wiki/step_list_prompt_gpt4o_mini
+    figure_title: Bengali Wiki Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o mini
+        data_name: bn_wiki_step_list_wikigame-gpt-4o-mini_
+        file_index_list: [0]
+        figure_file_name: bn_wiki_step_list_wikigame-gpt-4o-mini
+  - language: Russian
+    topic: Wikipedia
+    data_loc: data/output_data/ru_wiki/step_list_prompt_gpt4o_mini
+    figure_title: Russian Wiki Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o mini
+        data_name: ru_wiki_step_list_wikigame-gpt-4o-mini_
+        file_index_list: [0,8,16,24,32,40,48,56,64,72,80,88,96]
+        figure_file_name: ru_wiki_step_list_wikigame-gpt-4o-mini
+  - language: Chinese
+    topic: Wikipedia
+    data_loc: data/output_data/zh_wiki/step_list_prompt_gpt4o_mini
+    figure_title: Chinese Wiki Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o mini
+        data_name: zh_wiki_step_list_wikigame-gpt-4o-mini_
+        file_index_list: [0,8,16,24,32,40,48,56,64,72,75]
+        figure_file_name: zh_wiki_step_list_wikigame-gpt-4o-mini
+  - language: English
+    topic: OpenAlex Physics
+    data_loc: data/output_data/oa_physics/step_list_prompt_gpt4o_mini
+    figure_title: OpenAlex Physics Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o mini
+        data_name: oa_physics_step_list_lang_wikigame-gpt-4o-mini_
+        file_index_list: [0]
+        figure_file_name: oa_physics_step_list_wikigame-gpt-4o-mini
+  - language: English
+    topic: OpenAlex Biochemistry
+    data_loc: data/output_data/oa_biochemistry/step_list_prompt_large
+    figure_title: OpenAlex Biochemistry Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.1:405B
+        data_name: oa_biochemistry_step_list_lang_llama3.1:405b_
+        file_index_list: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
+        figure_file_name: oa_biochemistry_step_list_llama3.1:405b
+  - language: English
+    topic: OpenAlex Medicine
+    data_loc: data/output_data/oa_medicine/step_list_prompt_large
+    figure_title: OpenAlex Medicine Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.1:405B
+        data_name: oa_medicine_step_list_lang_llama3.1:405b_
+        file_index_list: [0, 25, 50, 75]
+        figure_file_name: oa_medicine_step_list_llama3.1:405b
+  - language: English
+    topic: OpenAlex Physics
+    data_loc: data/output_data/oa_physics/step_list_prompt_large
+    figure_title: OpenAlex Physics Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.1:405B
+        data_name: oa_physics_step_list_lang_llama3.1:405b_
+        file_index_list: [0, 25, 50, 75, 100, 125, 150, 175, 200]
+        figure_file_name: oa_physics_step_list_llama3.1:405b
+  - language: English
+    topic: OpenAlex Biochemistry
+    data_loc: data/output_data/oa_biochemistry/step_list_prompt_gpt4o_mini
+    figure_title: OpenAlex Biochemistry Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o mini
+        data_name: oa_biochemistry_step_list_lang_wikigame-gpt-4o-mini_
+        file_index_list: [0]
+        figure_file_name: oa_biochemistry_step_list_wikigame-gpt-4o-mini
+  - language: English
+    topic: OpenAlex Medicine
+    data_loc: data/output_data/oa_medicine/step_list_prompt_gpt4o_mini
+    figure_title: OpenAlex Medicine Summary - max 500 titles
+    model_list:
+      - model_name: GPT 4o mini
+        data_name: oa_medicine_step_list_lang_wikigame-gpt-4o-mini_
+        file_index_list: [0, 90]
+        figure_file_name: oa_medicine_step_list_wikigame-gpt-4o-mini
+  - language: French
+    topic: Wikipedia
+    data_loc: data/output_data/fr_wiki/step_list_prompt_large
+    figure_title: French Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.1:405B
+        data_name: fr_wiki_step_list_llama3.1:405b_
+        file_index_list: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
+        figure_file_name: fr_wiki_step_list_llama3.1:405b
+  - language: Bengali
+    topic: Wikipedia
+    data_loc: data/output_data/bn_wiki/step_list_prompt_large
+    figure_title: Bengali Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.1:405B
+        data_name: bn_wiki_step_list_llama3.1:405b_
+        file_index_list: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
+        figure_file_name: bn_wiki_step_list_llama3.1:405b
+  - language: Chinese
+    topic: Wikipedia
+    data_loc: data/output_data/zh_wiki/step_list_prompt_large
+    figure_title: Chinese Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.1:405B
+        data_name: zh_wiki_step_list_llama3.1:405b_
+        file_index_list: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
+        figure_file_name: zh_wiki_step_list_llama3.1:405b
+  - language: Russian
+    topic: Wikipedia
+    data_loc: data/output_data/ru_wiki/step_list_prompt_large
+    figure_title: Russian Wiki Summary - max 200 titles
+    model_list:
+      - model_name: Llama3.1:405B
+        data_name: ru_wiki_step_list_llama3.1:405b_
+        file_index_list: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
+        figure_file_name: ru_wiki_step_list_llama3.1:405b
