@@ -602,13 +602,25 @@ class TFIDFAgent(Agent):
         embeddings = []
         num_words = []
         num_oov = []
-        for text in page_text:
+        similarities = np.empty(shape=(0, 1), dtype=float)
+        for id, text in enumerate(page_text):
             embedding, words, oov = self._vectorise(str(text))
             embeddings.append(embedding)
             num_words.append(words)
             num_oov.append(oov)
-        # Calculate similarities
-        similarities = self._similarity(embeddings, target_summary)
+            # Owing to OOM errors, we batch this calculation
+            if (id + 1) % 50 == 0:
+                # Calculate similarities
+                similarities = np.append(
+                    similarities, self._similarity(embeddings, target_summary)
+                )
+                embeddings = []
+        if len(embeddings) > 0:
+            # There are some embeddings that haven't yet had their similarity to the
+            # target calculated
+            similarities = np.append(
+                similarities, self._similarity(embeddings, target_summary)
+            )
         max_id = np.argmax(similarities)
         return page_ids[max_id], sum(num_words), sum(num_oov)
 

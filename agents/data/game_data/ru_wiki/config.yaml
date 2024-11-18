@@ -21,17 +21,20 @@ experiments:
     params:
       max_rounds: 100
 
-  step_list_prompt:
+  step_list_prompt_gpt4o_mini:
     agent_class: PromptAgent
     game_datasets:
       - ru_wiki_step_list
     models:
-      - wikigame-gpt-4o
+      - wikigame-gpt-4o-mini
     params:
+      llm: gpt
       max_rounds: 100
       temperature: 0
       top_p: 0.1
       manual_seed: 42
+      num_retries: 5
+      max_titles: 500
 
   step_list_tfidf_wiki_corpus:
     agent_class: TFIDFAgent
@@ -44,3 +47,34 @@ experiments:
       lang: ru
       manual_seed: 42
       max_articles: 100000
+
+  step_list_prompt_small:
+    agent_class: PromptAgent
+    game_datasets:
+      - ru_wiki_step_list
+    models:
+      - llama3.2:3b
+      - gemma2:27b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
+
+  step_list_prompt_large:
+    agent_class: PromptAgent
+    game_datasets:
+      - ru_wiki_step_list
+    models:
+      - llama3.1:405b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200

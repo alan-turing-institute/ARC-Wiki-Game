@@ -22,6 +22,23 @@ experiments:
       filter_lang: en
       from_database: True
 
+  step_list_titles:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - oa_physics_step_list_lang
+    models:
+      - all-distilroberta-v1
+      - all-MiniLM-L6-v2
+      - all-mpnet-base-v2
+      - all-roberta-large-v1
+      - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
+    params:
+      max_rounds: 100
+      use_titles: True
+      filter_lang: en
+      from_database: True
+
   step_list_tfidf_wiki_corpus:
     agent_class: TFIDFAgent
     game_datasets:
@@ -34,6 +51,7 @@ experiments:
       manual_seed: 42
       max_articles: 100000
       from_database: True
+      filter_lang: en
     agent_tools_for_corpus: en_wiki
     params_for_corpus:
       from_database: False
@@ -50,13 +68,31 @@ experiments:
       manual_seed: 42
       max_articles: 100000
       from_database: True
+      filter_lang: en
 
-  step_list_prompt_mini:
+  step_list_prompt_gpt4o_mini:
     agent_class: PromptAgent
     game_datasets:
       - oa_physics_step_list_lang
     models:
       - wikigame-gpt-4o-mini
+    params:
+      llm: gpt
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 500
+      filter_lang: en
+      from_database: True
+
+  step_list_prompt_gpt4o:
+    agent_class: PromptAgent
+    game_datasets:
+      - oa_physics_step_list_lang
+    models:
+      - wikigame-gpt-4o
     params:
       llm: gpt
       max_rounds: 100
@@ -74,6 +110,7 @@ experiments:
       - oa_physics_step_list_lang
     models:
       - llama3.2:3b
+      - gemma2:27b
     params:
       llm: ollama
       max_rounds: 100

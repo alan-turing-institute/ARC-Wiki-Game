@@ -22,7 +22,7 @@ experiments:
     params:
       max_rounds: 100
 
-  step_list_prompt_v2:
+  step_list_prompt_gpt4o:
     agent_class: PromptAgent
     game_datasets:
       - en_wiki_step_list
@@ -37,7 +37,7 @@ experiments:
       num_retries: 5
       max_titles: 500
 
-  step_list_prompt_mini:
+  step_list_prompt_gpt4o_mini:
     agent_class: PromptAgent
     game_datasets:
       - en_wiki_step_list
@@ -84,7 +84,7 @@ experiments:
       max_rounds: 100
       lang: en
       manual_seed: 42
-      max_articles: 100000
+      max_articles: 100
 
   step_list_tfidf_oa_physics_corpus:
     agent_class: TFIDFAgent
