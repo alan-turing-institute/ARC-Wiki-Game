@@ -8,7 +8,7 @@ data_set_list:
     data_loc: data/output_data/bn_wiki/step_list_tfidf_wiki_corpus
     figure_title: Bengali Wiki Summary
     model_list:
-      - model_name: TFIDF Wiki Corpus
+      - model_name: TFIDF Self Corpus
         data_name: bn_wiki_step_list_tfidf_
         file_index_list: [0]
         figure_file_name: bn_wiki_step_list_wiki_corpus
@@ -17,7 +17,7 @@ data_set_list:
     data_loc: data/output_data/en_wiki/step_list_tfidf_wiki_corpus
     figure_title: English Wiki Summary
     model_list:
-      - model_name: TFIDF Wiki Corpus
+      - model_name: TFIDF Self Corpus
         data_name: en_wiki_step_list_tfidf_
         file_index_list: [0]
         figure_file_name: en_wiki_step_list_wiki_corpus
@@ -35,7 +35,7 @@ data_set_list:
     data_loc: data/output_data/ru_wiki/step_list_tfidf_wiki_corpus
     figure_title: Russian Wiki Summary
     model_list:
-      - model_name: TFIDF Wiki Corpus
+      - model_name: TFIDF Self Corpus
         data_name: ru_wiki_step_list_tfidf_
         file_index_list: [0]
         figure_file_name: ru_wiki_step_list_wiki_corpus
@@ -44,7 +44,7 @@ data_set_list:
     data_loc: data/output_data/zh_wiki/step_list_tfidf_wiki_corpus
     figure_title: Chinese Wiki Summary
     model_list:
-      - model_name: TFIDF Wiki Corpus
+      - model_name: TFIDF Self Corpus
         data_name: zh_wiki_step_list_tfidf_
         file_index_list: [0]
         figure_file_name: zh_wiki_step_list_wiki_corpus
@@ -53,7 +53,7 @@ data_set_list:
     data_loc: data/output_data/fr_wiki/step_list_tfidf_wiki_corpus
     figure_title: French Wiki Summary
     model_list:
-      - model_name: TFIDF Wiki Corpus
+      - model_name: TFIDF Self Corpus
         data_name: fr_wiki_step_list_tfidf_
         file_index_list: [0, 300, 600, 900]
         figure_file_name: fr_wiki_step_list_wiki_corpus
@@ -62,7 +62,7 @@ data_set_list:
     data_loc: data/output_data/oa_arts/step_list_tfidf_wiki_corpus
     figure_title: OpenAlex Arts and Humanities Summary
     model_list:
-      - model_name: TFIDF Wiki Corpus
+      - model_name: TFIDF English Wiki Corpus
         data_name: oa_arts_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_arts_step_list_wiki_corpus
@@ -71,7 +71,7 @@ data_set_list:
     data_loc: data/output_data/oa_arts/step_list_tfidf_openalex_corpus
     figure_title: OpenAlex Arts and Humanities Summary
     model_list:
-      - model_name: TFIDF OpenAlex Corpus
+      - model_name: TFIDF Self Corpus
         data_name: oa_arts_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_arts_step_list_wiki_corpus
@@ -80,7 +80,7 @@ data_set_list:
     data_loc: data/output_data/oa_social_sciences/step_list_tfidf_wiki_corpus
     figure_title: OpenAlex Social Sciences Summary
     model_list:
-      - model_name: TFIDF Wiki Corpus
+      - model_name: TFIDF English Wiki Corpus
         data_name: oa_social_sciences_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_social_sciences_step_list_wiki_corpus
@@ -89,7 +89,7 @@ data_set_list:
     data_loc: data/output_data/oa_social_sciences/step_list_tfidf_openalex_corpus
     figure_title: OpenAlex Social Sciences Summary
     model_list:
-      - model_name: TFIDF OpenAlex Corpus
+      - model_name: TFIDF Self Corpus
         data_name: oa_social_sciences_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_social_sciences_step_list_wiki_corpus
@@ -98,7 +98,7 @@ data_set_list:
     data_loc: data/output_data/oa_physics/step_list_tfidf_wiki_corpus
     figure_title: OpenAlex Physics & Astronomy Summary
     model_list:
-      - model_name: TFIDF Wiki Corpus
+      - model_name: TFIDF English Wiki Corpus
         data_name: oa_physics_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_physics_step_list_wiki_corpus
@@ -107,7 +107,7 @@ data_set_list:
     data_loc: data/output_data/oa_physics/step_list_tfidf_openalex_corpus
     figure_title: OpenAlex Physics & Astronomy Summary
     model_list:
-      - model_name: TFIDF OpenAlex Corpus
+      - model_name: TFIDF Self Corpus
         data_name: oa_physics_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_physics_step_list_wiki_corpus
@@ -116,7 +116,7 @@ data_set_list:
     data_loc: data/output_data/oa_medicine/step_list_tfidf_wiki_corpus
     figure_title: OpenAlex Medicine Summary
     model_list:
-      - model_name: TFIDF Wiki Corpus
+      - model_name: TFIDF English Wiki Corpus
         data_name: oa_medicine_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_medicine_step_list_wiki_corpus
@@ -125,7 +125,7 @@ data_set_list:
     data_loc: data/output_data/oa_medicine/step_list_tfidf_openalex_corpus
     figure_title: OpenAlex Medicine Summary
     model_list:
-      - model_name: TFIDF OpenAlex Corpus
+      - model_name: TFIDF Self Corpus
         data_name: oa_medicine_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_medicine_step_list_wiki_corpus
@@ -134,7 +134,7 @@ data_set_list:
     data_loc: data/output_data/oa_biochemistry/step_list_tfidf_wiki_corpus
     figure_title: OpenAlex Biochemistry, Genetics and Molecular Biology Summary
     model_list:
-      - model_name: TFIDF Wiki Corpus
+      - model_name: TFIDF English Wiki Corpus
         data_name: oa_biochemistry_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_biochemistry_step_list_wiki_corpus
@@ -143,7 +143,7 @@ data_set_list:
     data_loc: data/output_data/oa_biochemistry/step_list_tfidf_openalex_corpus
     figure_title: OpenAlex Biochemistry, Genetics and Molecular Biology Summary
     model_list:
-      - model_name: TFIDF OpenAlex Corpus
+      - model_name: TFIDF Self Corpus
         data_name: oa_biochemistry_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_biochemistry_step_list_wiki_corpus
