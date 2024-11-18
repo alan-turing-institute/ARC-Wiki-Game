@@ -58,7 +58,7 @@ data_set_list:
         file_index_list: [0, 300, 600, 900]
         figure_file_name: fr_wiki_step_list_wiki_corpus
   - language: English
-    topic: OpenAlex Arts & Humanities
+    topic: OpenAlex Arts and Humanities
     data_loc: data/output_data/oa_arts/step_list_tfidf_wiki_corpus
     figure_title: OpenAlex Arts and Humanities Summary
     model_list:
@@ -67,7 +67,7 @@ data_set_list:
         file_index_list: [0]
         figure_file_name: oa_arts_step_list_wiki_corpus
   - language: English
-    topic: OpenAlex Arts & Humanities
+    topic: OpenAlex Arts and Humanities
     data_loc: data/output_data/oa_arts/step_list_tfidf_openalex_corpus
     figure_title: OpenAlex Arts and Humanities Summary
     model_list:
@@ -94,18 +94,18 @@ data_set_list:
         file_index_list: [0]
         figure_file_name: oa_social_sciences_step_list_wiki_corpus
   - language: English
-    topic: OpenAlex Physics & Astronomy
+    topic: OpenAlex Physics
     data_loc: data/output_data/oa_physics/step_list_tfidf_wiki_corpus
-    figure_title: OpenAlex Physics & Astronomy Summary
+    figure_title: OpenAlex Physics Summary
     model_list:
       - model_name: TFIDF English Wiki Corpus
         data_name: oa_physics_step_list_lang_tfidf_
         file_index_list: [0]
         figure_file_name: oa_physics_step_list_wiki_corpus
   - language: English
-    topic: OpenAlex Physics & Astronomy
+    topic: OpenAlex Physics
     data_loc: data/output_data/oa_physics/step_list_tfidf_openalex_corpus
-    figure_title: OpenAlex Physics & Astronomy Summary
+    figure_title: OpenAlex Physics Summary
     model_list:
       - model_name: TFIDF Self Corpus
         data_name: oa_physics_step_list_lang_tfidf_

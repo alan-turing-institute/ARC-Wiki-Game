@@ -143,7 +143,7 @@ data_set_list:
     data_loc: data/output_data/bn_wiki/step_list_prompt_small
     figure_title: Bengali Wiki Summary - max 200 titles
     model_list:
-      - model_name: Llama3.2:3b
+      - model_name: Llama3.2:3B
         data_name: bn_wiki_step_list_llama3.2_3b_
         file_index_list: [0]
         figure_file_name: bn_wiki_step_list_llama3.2:3b
@@ -180,7 +180,7 @@ data_set_list:
     data_loc: data/output_data/zh_wiki/step_list_prompt_small
     figure_title: Chinese Wiki Summary - max 200 titles
     model_list:
-      - model_name: Llama3.2:3b
+      - model_name: Llama3.2:3B
         data_name: zh_wiki_step_list_llama3.2_3b_
         file_index_list: [0]
         figure_file_name: zh_wiki_step_list_llama3.2:3b

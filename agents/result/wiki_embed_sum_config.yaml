@@ -202,7 +202,7 @@ data_set_list:
   - language: English
     topic: Arts and Humanities
     data_loc: data/output_data/oa_arts/step_list_en
-    figure_title: OpenAlex Arts & Humanities
+    figure_title: OpenAlex Arts and Humanities
     model_list:
       - model_name: MiniLM-L6 v2
         data_name: oa_arts_step_list_en_all-MiniLM-L6-v2_
