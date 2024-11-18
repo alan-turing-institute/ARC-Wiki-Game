@@ -75,13 +75,12 @@ show_list = [
     "GPT 4o mini",
     "Llama3.1:405B",
     "Gemma2:27B",
+    "Llama3.2:3B",
     "Intfloat Multilingual-E5-Small",
     "All-MPNet-Base v2",
 ]
 
 all_df["Topic"] = all_df["Topic"].str.replace("OpenAlex ", "")
-all_df["Topic"] = all_df["Topic"].str.replace("&", "and")
-all_df["Topic"] = all_df["Topic"].str.replace(" and Astronomy", "")
 
 all_df = all_df[all_df["Model"].isin(show_list)]
 
@@ -92,7 +91,7 @@ topic_names = {
     ("Chinese", "Wikipedia"): "Chinese Wiki",
     ("Bengali", "Wikipedia"): "Bengali Wiki",
     ("English", "Physics"): "Physics OA",
-    ("English", "Biochemistry"): "Biochemistry OA",
+    ("English", "Biochemistry"): "Biology OA",
     ("English", "Medicine"): "Medicine OA",
     ("English", "Social Sciences"): "Social Sci OA",
     ("English", "Arts and Humanities"): "Arts OA",
@@ -131,10 +130,10 @@ ax2.text(
 )
 
 marker_choice = dict(
-    zip(show_list, ["o", "+", "s", "D", "<", "^", ">", "v"], strict=False)
+    zip(show_list, ["o", "+", "s", "D", "<", "^", ">", "P", "X"], strict=False)
 )
 line_choice = dict(
-    zip(show_list, ["", "--", "--", ":", "--", ":", "--", ":"], strict=False)
+    zip(show_list, ["", "--", "--", ":", "--", ":", "-.", "--", ":"], strict=False)
 )
 
 
@@ -188,8 +187,8 @@ def plot_axis(axis, to_show_list):
     axis.yaxis.set_minor_locator(AutoMinorLocator(5))
 
 
-plot_axis(ax1, [show_list[x] for x in [0, 1, 6, 7]])
-plot_axis(ax2, [show_list[x] for x in [0, 2, 3, 4, 5]])
+plot_axis(ax1, [show_list[x] for x in [0, 1, 7, 8]])
+plot_axis(ax2, [show_list[x] for x in [0, 2, 3, 4, 5, 6]])
 
 ax1.set_ylabel("Success Rate")
 ax2.set_ylabel("Success Rate")
