@@ -95,6 +95,31 @@ def process_model(
         data_loc, number_list
     )
 
+    # Check if no successful paths
+    if not np.all(if_sucess):
+        success_rate_error = 1 - np.power(0.159, 1 / total_games)
+
+        # Save the statistics to the list
+        stats_dict_list.append(
+            {
+                "Model": model_info["model_name"],
+                "Language": data_set_info["language"],
+                "Topic": data_set_info["topic"],
+                "Mean": np.nan,
+                "Mean_std": np.nan,
+                "Standard_dev": np.nan,
+                "Standard_dev_std": np.nan,
+                "Success_rate": 0.0,
+                "Success_rate_std": success_rate_error,
+                "n": np.nan,
+                "n_std": np.nan,
+                "p": np.nan,
+                "p_std": np.nan,
+                "Total_games": total_games,
+            }
+        )
+        return
+
     # Do Statistics
     mean_result, std_result = step_hist.bootstrap_steps(sucessful_paths)
     sucess_frac = step_hist.faction_success(if_sucess)
