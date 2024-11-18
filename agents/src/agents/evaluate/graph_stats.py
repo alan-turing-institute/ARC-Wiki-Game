@@ -97,6 +97,17 @@ def get_lone_articles(
 ) -> int | np.ndarray:
     """
     Get the articles with no incoming or outgoing links.
+
+    Args:
+        forward_locs (ndarray): The link indices of the forward links.
+        forward_vals (ndarray): The values of the forward links.
+        give_array (bool): If True then the function returns an array of boolean
+                        values, otherwise the sum of the array is returned
+
+    Returns:
+        int | np.ndarray: Either the total number of disconnected nodes, or an array
+                        the length of the articles with a boolean depending on whether
+                        the article is unreachable or not
     """
     deadends = get_deadends(forward_locs, give_array=True)
     unreachable = get_unreacchable(forward_locs, forward_vals, give_array=True)
