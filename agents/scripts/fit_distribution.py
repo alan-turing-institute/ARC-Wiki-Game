@@ -119,10 +119,38 @@ def process_model(
             }
         )
         return
+    if np.sum(if_sucess) == 1:
+        success_rate_error = np.sqrt((1 - total_games) / (total_games**3))
+
+        # Save the statistics to the list
+        stats_dict_list.append(
+            {
+                "Model": model_info["model_name"],
+                "Language": data_set_info["language"],
+                "Topic": data_set_info["topic"],
+                "Mean": np.mean(sucessful_paths),
+                "Mean_std": np.nan,
+                "Standard_dev": np.nan,
+                "Standard_dev_std": np.nan,
+                "Success_rate": 1 / total_games,
+                "Success_rate_std": success_rate_error,
+                "n": np.nan,
+                "n_std": np.nan,
+                "p": np.nan,
+                "p_std": np.nan,
+                "Total_games": total_games,
+            }
+        )
+        return
+
+    if np.all(if_sucess):
+        # Catch if all the games are successful
+        sucess_frac = (1.0, np.power(0.159, 1 / total_games))
+    else:
+        sucess_frac = step_hist.faction_success(if_sucess)
 
     # Do Statistics
     mean_result, std_result = step_hist.bootstrap_steps(sucessful_paths)
-    sucess_frac = step_hist.faction_success(if_sucess)
     n_result, p_result = step_hist.fit_nbinom(sucessful_paths, min_steps)
 
     # Plot the figure
