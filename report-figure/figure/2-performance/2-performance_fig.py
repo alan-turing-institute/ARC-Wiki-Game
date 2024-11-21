@@ -86,7 +86,7 @@ rename_dict = {
     "Roberta-Large v1": "Roberta-Large",
     "GPT 4o": "GPT-4o",
     "GPT 4o mini": "GPT-4o mini",
-    "TFIDF Wiki Corpus": "TFIDF",
+    "TFIDF Self Corpus": "TFIDF",
 }
 
 all_df["ModelName"] = all_df["Model"]
@@ -112,7 +112,7 @@ table_list = [
     "All-MPNet-Base v2",
     "Average Word Embeddings Glove 6B300d",
     "Roberta-Large v1",
-    "TFIDF Wiki Corpus",
+    "TFIDF Self Corpus",
     "Human",
 ]
 
