@@ -147,20 +147,6 @@ def analysis():
     df_metadata["LinkPage"] = round(df_metadata["LinkPage"], 1)
     df_metadata.to_csv(output_path + "datasest_metadata.csv")
 
-    df_metadata_v2 = df_stats[
-        ["Dataset", "Topic", "num_nodes_in_games", "mean_edges_per_node_in_games"]
-    ]
-    df_metadata_v2.rename(
-        columns={
-            "num_nodes_in_games": "Article",
-            "mean_edges_per_node_in_games": "LinkPage",
-        },
-        inplace=True,
-    )
-    df_metadata_v2["Article"] = round(df_metadata_v2["Article"] / 1000000, 2)
-    df_metadata_v2["LinkPage"] = round(df_metadata_v2["LinkPage"], 1)
-    df_metadata_v2.to_csv(output_path + "datasest_metadata_v2.csv")
-
 
 if __name__ == "__main__":
     analysis()
