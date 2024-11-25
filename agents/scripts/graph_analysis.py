@@ -15,9 +15,9 @@ GRAPH_NAMES = {
     "bn_wiki": {"dataset": "Wiki", "topic": "Bengali"},
     "oa_physics": {"dataset": "OA", "topic": "Physics"},
     "oa_biochemistry": {"dataset": "OA", "topic": "Biochemistry"},
-    # "oa_medicine": {"dataset": "OA", "topic": "Medicine"},
-    # "oa_social_sciences": {"dataset": "OA", "topic": "Social Sci"},
-    # "oa_arts": {"dataset": "OA", "topic": "Arts"},
+    "oa_medicine": {"dataset": "OA", "topic": "Medicine"},
+    "oa_social_sciences": {"dataset": "OA", "topic": "Social Sci"},
+    "oa_arts": {"dataset": "OA", "topic": "Arts"},
 }
 
 
