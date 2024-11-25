@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 
 from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent, TFIDFAgent
-from agents.agent_models.generative_lm import OpenAIModel
+from agents.agent_models.generative_lm import OllamaLM, OpenAIModel
 from agents.utils.data import load_tools
 
 
@@ -98,7 +98,16 @@ def parse_args():
         "--input_dataset",
         required=True,
         help="The name of the input dataset which the experiments are to be run.\
-             This is expected to match the name of a folder in the `input_data` folder",
+              This is expected to match the name of a folder in the `input_data` \
+              folder",
+    )
+    parser.add_argument(
+        "--llm",
+        required=False,
+        default="gpt",
+        type=str,
+        help="Only an option for the PromptAgent, either gpt or ollama depending on \
+            the type of LLM to use",
     )
     parser.add_argument(
         "--temperature",
@@ -115,6 +124,22 @@ def parse_args():
         type=float,
         help="Only an option for the PromptAgent, default set to 0.1 but can be a value\
               between 0 and 1.",
+    )
+    parser.add_argument(
+        "--num_retries",
+        required=False,
+        default=5,
+        type=float,
+        help="Only an option for the PromptAgent, the number of times to retry a \
+            prompt if there is an error with the LLM output - such as a hallucination.",
+    )
+    parser.add_argument(
+        "--max_titles",
+        required=False,
+        default=500,
+        type=float,
+        help="Only an option for the PromptAgent, the maximum number of article titles \
+            to be listed in the prompt of the LLM.",
     )
     parser.add_argument(
         "--manual_seed",
@@ -147,15 +172,18 @@ def main():
     load_data_to_ram = args.load_data_to_ram
     use_old_title = args.old_title
     from_database = args.from_database
+    llm = args.llm
 
     tools = load_tools(
         data_path, input_dataset_name, load_data_to_ram, use_old_title, from_database
     )
 
     if args.agent == "GreedyEmbeddingAgent":
-        use_titles = args.titles_only
+        # use_titles = args.titles_only
         agent = GreedyEmbeddingAgent(
-            tools, max_rounds=max_rounds, model_name=model_name, use_titles=use_titles
+            tools,
+            max_rounds=max_rounds,
+            model_name=model_name,  # , use_titles=use_titles
         )
     elif args.agent == "TFIDFAgent":
         agent = TFIDFAgent(tools, max_rounds, model_name)
@@ -163,8 +191,19 @@ def main():
         temperature = args.temperature
         top_p = args.top_p
         manual_seed = args.manual_seed
-        gen_model = OpenAIModel(model_name, temperature, top_p, manual_seed)
-        agent = PromptAgent(tools, max_rounds=max_rounds, model=gen_model)
+        num_retries = args.num_retries
+        max_titles = args.max_titles
+        if llm == "gpt":
+            gen_model = OpenAIModel(model_name, temperature, top_p, manual_seed)
+        elif llm == "ollama":
+            gen_model = OllamaLM(model_name, options={"temperature": temperature})
+        agent = PromptAgent(
+            tools,
+            max_rounds=max_rounds,
+            model=gen_model,
+            num_retries=num_retries,
+            max_titles=max_titles,
+        )
     else:
         raise ValueError(
             "Invalid name for agent provided: "
