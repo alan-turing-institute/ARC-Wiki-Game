@@ -7,18 +7,18 @@ import pandas as pd
 from agents.evaluate import graph_stats
 from agents.utils.data import load_tools
 
-GRAPH_NAMES = [
-    "bn_wiki",
-    "en_wiki",
-    "fr_wiki",
-    "zh_wiki",
-    "ru_wiki",
-    # "oa_physics",
-    # "oa_biochemistry",
-    # "oa_medicine",
-    # "oa_social_sciences",
-    # "oa_arts",
-]
+GRAPH_NAMES = {
+    "en_wiki": {"dataset": "Wiki", "topic": "English"},
+    "fr_wiki": {"dataset": "Wiki", "topic": "French"},
+    "ru_wiki": {"dataset": "Wiki", "topic": "Russian"},
+    "zh_wiki": {"dataset": "Wiki", "topic": "Chinese"},
+    "bn_wiki": {"dataset": "Wiki", "topic": "Bengali"},
+    "oa_physics": {"dataset": "OA", "topic": "Physics"},
+    "oa_biochemistry": {"dataset": "OA", "topic": "Biochemistry"},
+    # "oa_medicine": {"dataset": "OA", "topic": "Medicine"},
+    # "oa_social_sciences": {"dataset": "OA", "topic": "Social Sci"},
+    # "oa_arts": {"dataset": "OA", "topic": "Arts"},
+}
 
 
 def parse_args():
@@ -62,7 +62,10 @@ def analysis():
     for name in GRAPH_NAMES:
         print(name)
 
-        di_stats = {"dataset": name}
+        di_stats = {
+            "Dataset": GRAPH_NAMES[name]["dataset"],
+            "Topic": GRAPH_NAMES[name]["topic"],
+        }
 
         from_database = False
         if name[:2] == "oa":
@@ -82,12 +85,6 @@ def analysis():
         # Get list of nodes that don't have any links into them - these could still
         # be used as a start node in a game (assuming they have an outward link)
 
-        # nodes_no_inward_links = [
-        #     idx for idx in tools.matidx_ary if idx not in tools.forward_vals
-        # ]
-        # num_nodes_no_inward_links = len(nodes_no_inward_links)
-        # print(f"Total unreachable nodes: {num_nodes_no_inward_links:_d}")
-
         # This returns one more value than I expect - looks like there is an extra value
         # on the end of forward_locs [-1,-1]
         num_nodes_no_inward_links = graph_stats.get_unreacchable(
@@ -99,22 +96,12 @@ def analysis():
         # Get list of nodes that don't have any links out of them - these can never
         # be a start node, but they could still be reached in a game (assuming they
         # have an inward link)
-        # nodes_no_outward_links = []
-        # for idx, arr in enumerate(tools.forward_locs):
-        #     if arr[0] == arr[1]:
-        #         nodes_no_outward_links.append(idx)
-        # num_nodes_no_outward_links = len(nodes_no_outward_links)
-
         num_nodes_no_outward_links = graph_stats.get_deadends(tools.forward_locs, False)
         di_stats["num_deadends"] = num_nodes_no_outward_links
         di_stats["perc_deadends"] = 100 * num_nodes_no_outward_links / num_nodes
 
         # Are there any nodes that completely disconnected? These will never be used
         # in a game
-        # nodes_disconnected = [
-        #     idx for idx in nodes_no_inward_links if idx in nodes_no_outward_links
-        # ]
-        # num_nodes_disconnected = len(nodes_disconnected)
         num_nodes_disconnected = graph_stats.get_lone_articles(
             tools.forward_locs, tools.forward_vals, False
         )
@@ -128,12 +115,7 @@ def analysis():
 
         # Number of nodes that can be navigated in a game
         di_stats["num_reachable_nodes_in_games"] = num_nodes - num_nodes_no_inward_links
-        di_stats["num_unreachable_in_games"] = (
-            num_nodes_no_inward_links - num_nodes_disconnected
-        )
-        di_stats["perc_unreachable_in_games"] = (
-            100 * di_stats["num_unreachable_in_games"] / num_nodes_in_game
-        )
+
         di_stats["num_deadends_in_games"] = (
             num_nodes_no_outward_links - num_nodes_disconnected
         )
@@ -144,7 +126,7 @@ def analysis():
         num_edges = len(tools.forward_vals)
         di_stats["num_edges"] = num_edges
         di_stats["mean_edges_per_node"] = num_edges / num_nodes
-        di_stats["mean_edges_per_node_in_game"] = num_edges / num_nodes_in_game
+        di_stats["mean_edges_per_node_in_games"] = num_edges / num_nodes_in_game
 
         # Calculated directed density, see https://en.wikipedia.org/wiki/Dense_graph
         # Using for both datasets, even though OpenAlex is symmetric - is this ok?
@@ -155,6 +137,29 @@ def analysis():
 
     df_stats = pd.DataFrame(li_di_stats)
     df_stats.to_csv(output_path + "graph_analysis.tsv", sep="\t")
+
+    df_metadata = df_stats[["Dataset", "Topic", "num_nodes", "mean_edges_per_node"]]
+    df_metadata.rename(
+        columns={"num_nodes": "Article", "mean_edges_per_node": "LinkPage"},
+        inplace=True,
+    )
+    df_metadata["Article"] = round(df_metadata["Article"] / 1000000, 2)
+    df_metadata["LinkPage"] = round(df_metadata["LinkPage"], 1)
+    df_metadata.to_csv(output_path + "datasest_metadata.csv")
+
+    df_metadata_v2 = df_stats[
+        ["Dataset", "Topic", "num_nodes_in_games", "mean_edges_per_node_in_games"]
+    ]
+    df_metadata_v2.rename(
+        columns={
+            "num_nodes_in_games": "Article",
+            "mean_edges_per_node_in_games": "LinkPage",
+        },
+        inplace=True,
+    )
+    df_metadata_v2["Article"] = round(df_metadata_v2["Article"] / 1000000, 2)
+    df_metadata_v2["LinkPage"] = round(df_metadata_v2["LinkPage"], 1)
+    df_metadata_v2.to_csv(output_path + "datasest_metadata_v2.csv")
 
 
 if __name__ == "__main__":

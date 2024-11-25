@@ -14,8 +14,8 @@ from agents.evaluate import step_hist
 
 # CONFIG_FILE = "result/wiki_embed_sum_config.yaml"
 # CONFIG_FILE = "result/wiki_embed_title_config.yaml"
-CONFIG_FILE = "result/wiki_prompt_config.yaml"
-# CONFIG_FILE = "result/wiki_tfidf_sum_config.yaml"
+# CONFIG_FILE = "result/wiki_prompt_config.yaml"
+CONFIG_FILE = "result/wiki_tfidf_sum_config.yaml"
 
 
 def plot_figure(
