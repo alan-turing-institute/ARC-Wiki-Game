@@ -69,6 +69,9 @@ param_dict = {
     "Intfloat Multilingual-E5-Small": 0.118,
     "MiniLM-L6 v2": 0.023,
     "Mistral-Nemo": 12,
+    "Roberta-Large v1": 0.335,
+    "All-MPNet-Base v2": 0.109,
+    "Average Word Embeddings Glove 6B300d": 0.12,
 }
 param_err = {
     "GPT 4o": 800,
