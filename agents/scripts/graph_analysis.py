@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from statistics import median
 
 import pandas as pd
 
@@ -132,6 +133,14 @@ def analysis():
         # Using for both datasets, even though OpenAlex is symmetric - is this ok?
         density = num_edges / (num_nodes_in_game * (num_nodes_in_game - 1))
         di_stats["directed_density"] = density
+
+        # Calculate the mean and median title length of the articles
+        article_lengths = []
+        for i in range(1, num_nodes + 1):
+            article_length = len(str(tools.get_article_title(i)))
+            article_lengths.append(article_length)
+        di_stats["mean_article_len"] = sum(article_lengths) / num_nodes
+        di_stats["median_article_len"] = median(article_lengths)
 
         li_di_stats.append(di_stats)
 

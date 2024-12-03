@@ -146,9 +146,25 @@ def parse_args():
         required=False,
         default=42,
         type=int,
-        help="Only an option for the PromptAgent, the seed to use to set each \
-            response. Note that this does not guarantee that the model is \
+        help="An option for the TFIDFAgent and PromptAgent, the seed to use to set \
+            each response. Note that this does not guarantee that the model is \
             deterministic (for OpenAI)",
+    )
+    parser.add_argument(
+        "--iso_code",
+        required=False,
+        default="en",
+        type=str,
+        help="Only required for TFIDFAgent, a two letter iso code for the language to \
+            use for stopwords.",
+    )
+    parser.add_argument(
+        "--max_articles",
+        required=False,
+        default=100000,
+        type=int,
+        help="Only required for TFIDFAgent, is the maximum number of articles to use \
+            to create the corpus.",
     )
     parser.add_argument(
         "--from_database",
@@ -186,7 +202,13 @@ def main():
             model_name=model_name,  # , use_titles=use_titles
         )
     elif args.agent == "TFIDFAgent":
-        agent = TFIDFAgent(tools, max_rounds, model_name)
+        iso_code = args.iso_code
+        manual_seed = args.manual_seed
+        max_articles = args.max_articles
+        # The agent tools for the corpus will just be the same one as already created
+        # by default in this script - could be updated as per the play_games.py script
+        # so that a different corpus could be used.
+        agent = TFIDFAgent(tools, max_rounds, iso_code, manual_seed, max_articles)
     elif args.agent == "PromptAgent":
         temperature = args.temperature
         top_p = args.top_p
