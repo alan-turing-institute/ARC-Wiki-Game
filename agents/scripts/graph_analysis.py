@@ -85,10 +85,7 @@ def analysis():
 
         # Get list of nodes that don't have any links into them - these could still
         # be used as a start node in a game (assuming they have an outward link)
-
-        # This returns one more value than I expect - looks like there is an extra value
-        # on the end of forward_locs [-1,-1]
-        num_nodes_no_inward_links = graph_stats.get_unreacchable(
+        num_nodes_no_inward_links = graph_stats.get_unreachable(
             tools.forward_locs, tools.forward_vals, False
         )
         di_stats["num_unreachable"] = num_nodes_no_inward_links
@@ -128,11 +125,6 @@ def analysis():
         di_stats["num_edges"] = num_edges
         di_stats["mean_edges_per_node"] = num_edges / num_nodes
         di_stats["mean_edges_per_node_in_games"] = num_edges / num_nodes_in_game
-
-        # Calculated directed density, see https://en.wikipedia.org/wiki/Dense_graph
-        # Using for both datasets, even though OpenAlex is symmetric - is this ok?
-        density = num_edges / (num_nodes_in_game * (num_nodes_in_game - 1))
-        di_stats["directed_density"] = density
 
         # Calculate the mean and median title length of the articles
         article_lengths = []

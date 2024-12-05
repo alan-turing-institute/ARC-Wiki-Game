@@ -4,13 +4,14 @@ import numpy as np
 from tqdm import tqdm
 
 
-# TAKEN FROM GRAPH PREP #
 def swap_graph_direction(
     forward_locs: np.ndarray, forward_vals: np.ndarray, verbose: bool = False
 ) -> tuple[np.ndarray, np.ndarray]:
     """Reverses the direction of a graph represented by forward links.
 
     This will also work for going from a backward graph to a forward graph.
+
+    This is the same function as in the graph prep code.
 
     Args:
         forward_locs (ndarray): The link indices of the forward links.
@@ -48,7 +49,9 @@ def swap_graph_direction(
 
 def get_deadends(forward_locs: np.ndarray, give_array=False) -> int | np.ndarray:
     """
-    Get the articles with no outgoing links.
+    Get the articles with no outgoing links. The last node of
+    forward_locs doesn't correspond to a page, and was a placeholder for error checking
+    so we don't use the last value in the array.
 
     Args:
         forward_locs (ndarray): The link indices of the forward links.
@@ -60,18 +63,20 @@ def get_deadends(forward_locs: np.ndarray, give_array=False) -> int | np.ndarray
                         the length of the articles with a boolean depending on whether
                         the article is unreachable or not
     """
-    deadends = forward_locs[:, 0] == forward_locs[:, 1]
+    deadends = forward_locs[:-1, 0] == forward_locs[:-1, 1]
     if give_array:
         return deadends
 
     return np.sum(deadends)
 
 
-def get_unreacchable(
+def get_unreachable(
     forward_locs: np.ndarray, forward_vals: np.ndarray, give_array=False
 ) -> int | np.ndarray:
     """
-    Get the articles that are not reachable from any page.
+    Get the articles that are not reachable from any page. The last node of
+    forward_locs doesn't correspond to a page, and was a placeholder for error checking
+    so we don't use the last value in the array.
 
     Args:
         forward_locs (ndarray): The link indices of the forward links.
@@ -84,7 +89,7 @@ def get_unreacchable(
                         the length of the articles with a boolean depending on whether
                         the article is unreachable or not
     """
-    backward_locs, _ = swap_graph_direction(forward_locs, forward_vals)
+    backward_locs, _ = swap_graph_direction(forward_locs[:-1, :], forward_vals)
     unreachable = backward_locs[:, 0] == backward_locs[:, 1]
     if give_array:
         return unreachable
@@ -110,7 +115,7 @@ def get_lone_articles(
                         the article is unreachable or not
     """
     deadends = get_deadends(forward_locs, give_array=True)
-    unreachable = get_unreacchable(forward_locs, forward_vals, give_array=True)
+    unreachable = get_unreachable(forward_locs, forward_vals, give_array=True)
     lone_articles = deadends * unreachable
 
     if give_array:
