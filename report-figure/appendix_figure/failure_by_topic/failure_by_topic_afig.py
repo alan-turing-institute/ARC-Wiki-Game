@@ -9,7 +9,8 @@ from matplotlib.ticker import AutoMinorLocator
 
 # Set up paths
 current_dir = Path(__file__).resolve().parent
-fig_path = current_dir / "afig_failure_by_topic.pdf"
+fig_path_1 = current_dir / "afig_failure_by_topic_llm.pdf"
+fig_path_2 = current_dir / "afig_failure_by_topic_embed.pdf"
 results_dir = current_dir.parents[2] / "agents" / "result" / "table"
 
 embed_path = results_dir / "embed_model_wiki_summary_game_count.csv"
@@ -81,9 +82,14 @@ all_df = all_df.sort_values(by="Order")
 
 # Make model dataframes
 
+gpt4o_df = all_df[all_df["ModelName"] == "GPT-4o"]
 llama405_df = all_df[all_df["ModelName"] == "Llama3.1:405B"]
 gemma27_df = all_df[all_df["ModelName"] == "Gemma2:27B"]
+llama3b_df = all_df[all_df["ModelName"] == "Llama3.2:3B"]
+
+e5small_df = all_df[all_df["ModelName"] == "E5-Small"]
 mpnet_df = all_df[all_df["ModelName"] == "All-MPNet-Base"]
+glove_df = all_df[all_df["ModelName"] == "Glove Word"]
 
 # Set up plotting function
 
@@ -117,16 +123,83 @@ def plot_topic_bar(axis, data_df, title):
     axis.yaxis.set_minor_locator(AutoMinorLocator(5))
 
 
-# Setting up the figure
-fig, axes = plt.subplots(1, 3, figsize=(8, 5))
+# Setting up the figure 1
+fig1, axes = plt.subplots(1, 4, figsize=(8, 5), width_ratios=[0.5, 1, 1, 1])
+
+ax1 = axes[0]
+ax2 = axes[1]
+ax3 = axes[2]
+ax4 = axes[3]
+
+plot_topic_bar(ax1, gpt4o_df, "GPT-4o")
+plot_topic_bar(ax2, llama405_df, "Llama3.1:405B")
+plot_topic_bar(ax3, gemma27_df, "Gemma2:27B")
+plot_topic_bar(ax4, llama3b_df, "Llama3.2:3B")
+
+ax1.set_ylabel("Fraction of Game Outcomes")
+ax4.set_ylabel("Fraction of Game Outcomes")
+ax4.yaxis.set_label_position("right")
+ax1.tick_params(
+    which="both",
+    axis="y",
+    direction="in",
+    left=True,
+    right=True,
+    labelright=False,
+    labelleft=True,
+)
+ax2.tick_params(
+    which="both",
+    axis="y",
+    direction="in",
+    left=True,
+    right=True,
+    labelright=False,
+    labelleft=False,
+)
+ax3.tick_params(
+    which="both",
+    axis="y",
+    direction="in",
+    left=True,
+    right=True,
+    labelright=False,
+    labelleft=False,
+)
+ax4.tick_params(
+    which="both",
+    axis="y",
+    direction="in",
+    left=True,
+    right=True,
+    labelright=True,
+    labelleft=False,
+)
+
+fig1.legend(
+    handles=ax1.get_legend_handles_labels()[0],
+    labels=ax1.get_legend_handles_labels()[1],
+    loc="lower center",
+    bbox_to_anchor=(0.5, 0.0),
+    ncol=3,
+)
+
+fig1.tight_layout()  # Adjust layout to prevent overlap
+
+fig1.subplots_adjust(wspace=0.025, bottom=0.3)  # Reduce the space between subplots
+
+fig1.savefig(fig_path_1)
+
+# Setting up the figure 2
+fig2, axes = plt.subplots(1, 3, figsize=(8, 5), width_ratios=[1, 1, 0.7])
 
 ax1 = axes[0]
 ax2 = axes[1]
 ax3 = axes[2]
 
-plot_topic_bar(ax1, llama405_df, "Llama3.1:405B")
-plot_topic_bar(ax2, gemma27_df, "Gemma2:27B")
-plot_topic_bar(ax3, mpnet_df, "All-MPNet-Base")
+plot_topic_bar(ax1, e5small_df, "E5-Small")
+plot_topic_bar(ax2, mpnet_df, "All-MPNet-Base")
+plot_topic_bar(ax3, glove_df, "Glove Word")
 
 ax1.set_ylabel("Fraction of Game Outcomes")
 ax3.set_ylabel("Fraction of Game Outcomes")
@@ -159,7 +232,7 @@ ax3.tick_params(
     labelleft=False,
 )
 
-fig.legend(
+fig2.legend(
     handles=ax1.get_legend_handles_labels()[0],
     labels=ax1.get_legend_handles_labels()[1],
     loc="lower center",
@@ -167,8 +240,8 @@ fig.legend(
     ncol=3,
 )
 
-fig.tight_layout()  # Adjust layout to prevent overlap
+fig2.tight_layout()  # Adjust layout to prevent overlap
 
-fig.subplots_adjust(wspace=0.025, bottom=0.3)  # Reduce the space between subplots
+fig2.subplots_adjust(wspace=0.025, bottom=0.3)  # Reduce the space between subplots
 
-fig.savefig(fig_path)
+fig2.savefig(fig_path_2)
