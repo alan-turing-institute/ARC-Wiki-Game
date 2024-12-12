@@ -38,6 +38,13 @@ def main() -> None:
         required=False,
         default=False,
     )
+    parser.add_argument(
+        "--min_target_index",
+        type=int,
+        required=False,
+        default=None,
+        help="The minimum value of the target index",
+    )
 
     args = parser.parse_args()
 
@@ -66,6 +73,7 @@ def main() -> None:
         backward_vals,
         verbose=True,
         include_index=True,
+        min_target_index=args.min_target_index,
     )
 
     header = "StartIndex,EndIndex,Steps"
