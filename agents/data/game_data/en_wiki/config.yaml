@@ -183,7 +183,7 @@ experiments:
   step_list_2024_targets_prompt_small:
     agent_class: PromptAgent
     game_datasets:
-      - en_wiki_step_list
+      - en_wiki_step_list_2024_targets
     models:
       - llama3.1:8b
       - gemma2:27b
@@ -199,7 +199,7 @@ experiments:
   step_list_2024_targets_prompt_large:
     agent_class: PromptAgent
     game_datasets:
-      - en_wiki_step_list
+      - en_wiki_step_list_2024_targets
     models:
       - llama3.1:405b
     params:
@@ -214,7 +214,7 @@ experiments:
   step_list_2024_targets_tfidf_wiki_corpus:
     agent_class: TFIDFAgent
     game_datasets:
-      - en_wiki_step_list
+      - en_wiki_step_list_2024_targets
     models:
       - tfidf
     params:
@@ -226,7 +226,7 @@ experiments:
   step_list_2024_targets_embeddings:
     agent_class: GreedyEmbeddingAgent
     game_datasets:
-      - en_wiki_step_list
+      - en_wiki_step_list_2024_targets
     models:
       - all-mpnet-base-v2
       - intfloat/multilingual-e5-large
