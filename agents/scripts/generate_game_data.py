@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 
-from numpy import arange, savetxt
+from numpy import arange, column_stack, savetxt
 from numpy.random import choice
 
 from agents.utils.data import get_data_folders, load_tools
@@ -62,6 +62,14 @@ def parse_args():
         help="If True, then the database versions of agent tools will be used.",
     )
 
+    parser.add_argument(
+        "--min_target_index",
+        type=int,
+        required=False,
+        default=None,
+        help="The minimum value of the target index",
+    )
+
     return parser.parse_args()
 
 
@@ -75,6 +83,7 @@ def main():
     load_data_to_ram = args.load_data_to_ram
     use_old_title = args.old_title
     from_database = args.from_database
+    min_target_index = args.min_target_index
 
     game_data_dir, _, _ = get_data_folders(data_path)
     os.makedirs(os.path.join(game_data_dir, input_dataset_name), exist_ok=True)
@@ -90,9 +99,23 @@ def main():
         data_path, input_dataset_name, load_data_to_ram, use_old_title, from_database
     )
 
-    source_target_ids = choice(
-        arange(1, tools.matidx_ary.max() + 1), (num_records, 2), replace=False
-    )
+    if min_target_index is not None:
+        if tools.matidx_ary.max() - min_target_index < num_records:
+            msg = (
+                "You are requesting more records than there are possible targets pairs."
+            )
+            raise ValueError(msg)
+        first_column = choice(arange(1, min_target_index), num_records, replace=False)
+        second_column = choice(
+            arange(min_target_index, tools.matidx_ary.max() + 1),
+            num_records,
+            replace=False,
+        )
+        source_target_ids = column_stack((first_column, second_column))
+    else:
+        source_target_ids = choice(
+            arange(1, tools.matidx_ary.max() + 1), (num_records, 2), replace=False
+        )
 
     savetxt(game_data_path, source_target_ids, delimiter=",", fmt="%i")
 

@@ -164,3 +164,72 @@ experiments:
       manual_seed: 42
       num_retries: 5
       max_titles: 200
+
+  step_list_2024_targets_prompt_gpt4o_mini:
+    agent_class: PromptAgent
+    game_datasets:
+      - en_wiki_step_list_2024_targets
+    models:
+      - wikigame-gpt-4o-mini
+    params:
+      llm: gpt
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 500
+
+  step_list_2024_targets_prompt_small:
+    agent_class: PromptAgent
+    game_datasets:
+      - en_wiki_step_list_2024_targets
+    models:
+      - llama3.1:8b
+      - gemma2:27b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
+
+  step_list_2024_targets_prompt_large:
+    agent_class: PromptAgent
+    game_datasets:
+      - en_wiki_step_list_2024_targets
+    models:
+      - llama3.1:405b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
+
+  step_list_2024_targets_tfidf_wiki_corpus:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - en_wiki_step_list_2024_targets
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: en
+      manual_seed: 42
+      max_articles: 100
+
+  step_list_2024_targets_embeddings:
+    agent_class: GreedyEmbeddingAgent
+    game_datasets:
+      - en_wiki_step_list_2024_targets
+    models:
+      - all-mpnet-base-v2
+      - intfloat/multilingual-e5-large
+      - intfloat/multilingual-e5-small
+    params:
+      max_rounds: 100
