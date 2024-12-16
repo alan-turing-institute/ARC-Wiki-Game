@@ -5,7 +5,7 @@ result_figure_loc: result/figure/prompt_wiki_summary
 data_set_list:
   - language: English
     topic: Wikipedia
-    data_loc: data/output_data/en_wiki/step_list_prompt_gpt4o
+    data_loc: data/output_data/en_wiki/step_list_prompt_gpt_4o
     figure_title: English Wiki Summary - max 500 titles
     model_list:
       - model_name: GPT 4o
