@@ -1,6 +1,6 @@
 # This file contains the list of results that will be used to generate the figures
 
-result_data_file: result/table/all_2024_target_summary.csv
+result_data_file: result/table/all_2024_target_summary_stats.csv
 result_figure_loc: result/figure/all_2024_target_summary
 data_set_list:
   - language: English

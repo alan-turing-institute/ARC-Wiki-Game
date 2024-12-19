@@ -8,8 +8,9 @@ from tqdm import tqdm
 
 # CONFIG_FILE = "result/wiki_embed_sum_config.yaml"
 # CONFIG_FILE = "result/wiki_embed_title_config.yaml"
-CONFIG_FILE = "result/wiki_prompt_config.yaml"
+# CONFIG_FILE = "result/wiki_prompt_config.yaml"
 # CONFIG_FILE = "result/wiki_tfidf_sum_config.yaml"
+CONFIG_FILE = "result/wiki_all_2024_target_config.yaml"
 
 
 def pull_game_ends(
