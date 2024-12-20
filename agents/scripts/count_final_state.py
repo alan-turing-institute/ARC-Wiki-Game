@@ -9,12 +9,12 @@ from tqdm import tqdm
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Get arguments for evaluating output")
+    parser = argparse.ArgumentParser(description="Get arguments for processing results")
     parser.add_argument(
         "config_file",
         type=str,
-        help="The path of the config file to be used, e.g. \
-            'result/wiki_embed_sum_config.yaml'",
+        help="The path of the config file to be used, relative to the agents package \
+            e.g. 'result/wiki_embed_sum_config.yaml'",
     )
     return parser.parse_args()
 
