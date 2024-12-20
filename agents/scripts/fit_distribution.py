@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import os
 
 import matplotlib.pyplot as plt
@@ -12,10 +13,16 @@ from tqdm import tqdm
 
 from agents.evaluate import step_hist
 
-CONFIG_FILE = "result/wiki_embed_sum_config.yaml"
-# CONFIG_FILE = "result/wiki_embed_title_config.yaml"
-# CONFIG_FILE = "result/wiki_prompt_config.yaml"
-# CONFIG_FILE = "result/wiki_tfidf_sum_config.yaml"
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Get arguments for processing results")
+    parser.add_argument(
+        "config_file",
+        type=str,
+        help="The path of the config file to be used, relative to the agents package \
+            e.g. 'result/wiki_embed_sum_config.yaml'",
+    )
+    return parser.parse_args()
 
 
 def plot_figure(
@@ -195,9 +202,11 @@ def process_model(
 
 
 def main() -> None:
+    args = parse_args()
+
     main_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-    with open(os.path.join(main_dir, CONFIG_FILE)) as yaml_file:
+    with open(os.path.join(main_dir, args.config_file)) as yaml_file:
         res_yaml = yaml.safe_load(yaml_file.read())
 
     result_figure_loc = os.path.join(main_dir, res_yaml["result_figure_loc"])

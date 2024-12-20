@@ -1,0 +1,44 @@
+# This file contains the list of results that will be used to generate the figures
+
+result_data_file: result/table/all_2024_target_summary_stats.csv
+result_figure_loc: result/figure/all_2024_target_summary
+data_set_list:
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_2024_targets_embeddings
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: All-MPNet-Base v2
+        data_name: en_wiki_step_list_2024_targets_all-mpnet-base-v2_
+        file_index_list: [0]
+        figure_file_name: en_wiki_sum_all-mpnet-base-v2
+      - model_name: Intfloat Multilingual-E5-Large
+        data_name: en_wiki_step_list_2024_targets_intfloat_multilingual-e5-large_
+        file_index_list: [0]
+        figure_file_name: en_wiki_sum_all-intfloat_multilingual-e5-large
+      - model_name: Intfloat Multilingual-E5-Small
+        data_name: en_wiki_step_list_2024_targets_intfloat_multilingual-e5-small_
+        file_index_list: [0]
+        figure_file_name: en_wiki_sum_all-intfloat_multilingual-e5-small
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_2024_targets_prompt_small
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: Gemma2:27B
+        data_name: en_wiki_step_list_2024_targets_gemma2:27b_
+        file_index_list: [0, 25, 50, 75]
+        figure_file_name: en_wiki_step_list_gemma2:27b
+      - model_name: Llama3.1:8B
+        data_name: en_wiki_step_list_2024_targets_llama3.1:8b_
+        file_index_list: [0, 25, 50, 75]
+        figure_file_name: en_wiki_step_list_llama3.1:8b
+  - language: English
+    topic: Wikipedia
+    data_loc: data/output_data/en_wiki/step_list_2024_targets_tfidf_wiki_corpus
+    figure_title: English Wiki Summary
+    model_list:
+      - model_name: TFIDF Self Corpus
+        data_name: en_wiki_step_list_2024_targets_tfidf_
+        file_index_list: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000]
+        figure_file_name: en_wiki_step_list_2024_targets_wiki_corpus
