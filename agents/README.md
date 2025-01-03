@@ -8,6 +8,7 @@ The agents in this package will play the Wikipedia game.
 - [Agent Classes](#agent-classes)
 - [Playing a Single Game](#playing-a-single-game)
 - [Playing Multiple Games](#playing-multiple-games)
+- [Analysing Output](#analysing-output)
 
 ## Getting Started
 Assuming the repo has already been cloned, change directory to the `agents` package and install with `pip`:
