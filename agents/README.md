@@ -16,7 +16,9 @@ Assuming the repo has already been cloned, change directory to the `agents` pack
    pip install .
    ```
 
-Graph datasets in the required format to be used by the agents to play the Wikipedia game can be created using the [graph-prep package](../graph-prep/). The files for each graph dataset can be stored in sub-folders in the [data/input_data](data/input_data/) folder, with one sub-folder for each dataset - although it is feasible to load them from other locations as well (see [Loading Graph Datasets](#loading-graph-datasets)).
+Graph datasets in the required format to be used by the agents to play the Wikipedia game can be created using the [graph-prep package](../graph-prep/). The files for each graph dataset should be stored in sub-folders in the [data/input_data](data/input_data/) folder, with one sub-folder for each dataset.
+
+A file containing a list of multiple source and target articles representing multiple games can also be generated using the [graph-prep package](../graph-prep/). These files should be stored in sub-folders in the [data/game_data](data/game_data/) folder, with one sub-folder for each graph datase in [data/input_data](data/input_data/). The names of the sub-folders in [data/input_data](data/input_data/) and [data/game_data](data/game_data/) should match.
 
 If OpenAI models are to be used in a `PromptAgent` object (see [PromtAgent](#promptagent)), then the following environment variables must be set:
 ```
@@ -27,7 +29,19 @@ export AZURE_OPENAI_ENDPOINT="REPLACE_WITH_YOUR_ENDPOINT_HERE"
 If Ollama models are to be used in a `PromptAgent` object, then [Ollama](https://ollama.com/) must be installed.
 
 ## Input Data: Graph Datasets
-This package is designed to be implemented with a graph dataset stored in one of two specific formats, see the [graph-prep package](../graph-prep/) for more details on how to create the datasets.
+This package is designed to be implemented with a graph dataset stored in one of two specific formats, these can be created using the [graph-prep package](../graph-prep/), which provides more details on that process.
+
+### Format of Graph Datasets
+
+There are two possible formats for the graph datasets. The first format expects the following files, where `dataset_name` is replaced with the given name of the graph dataset:
+* `dataset_name_summary.tsv` - This file holds the summaries of the articles in a tab-separated file. It also has the PageID, MatrixIndex, and PageTitle before the Summary field.
+* `dataset_name_title_info.tsv` - This file holds the information of all the articles and redirects in the wiki. It includes PageID, MatrixIndex, PageTitle, IsRedirect, and RedirectTitle. These are all ordered by the PageTitle for easier searching.
+* `dataset_name_matrix_index_info.tsv` - This file holds the info on the articles ordered by the Matrix Index. It holds the PageID, MatrixIndex, PageTitle, and Offset. The Offset refers to the number of bytes the relevant page is in the summary file.
+* `dataset_name-forward.hdf5` - This has the graph representation for the dataset in the form of a lookup for each page with what articles it links to.
+
+The second format stores the article titles and summaries in a [DuckDB Database](https://duckdb.org/) and expects the following files, where `dataset_name` is replaced with the given name of the graph dataset:
+* `datase_name_info.ddb` - To do description.
+* `dataset_name_forward_links.hdf5` - This has the graph representation for the dataset in the form of a lookup for each page with what articles it links to.
 
 ### Agent Tools Classes
 A faimily of classes found in [src/agents/agent_models/tools.py](src/agents/agent_models/tools.py) have been designed to load and manage the data. The `AgentToolsBase` is an abstract base class, which the other classes inherit from. The choice of class to use to load and manage the data will depend on the size of the dataset, the hardware being used to run the code and the storage format of the data:
@@ -112,8 +126,6 @@ This class takes the following additional arguments for initialisation:
 - `num_retries` - the number of times the agent will retry to select a title if the language model hallucinates by generating title selected is not in the list of titles provided or failing to provide the output in the required JSON format
 - `max_titles` - the maximum number of titles provided to the model
 
-#### GenLM
-
 `GenLM` is an abstract class for holding a language model. It contains one method `get_response` which returns the response of the language model given a list of messages. There are two derived classes of `GenLM`:
 
 - `OllamaModel` - this model calls the Ollama API to get responses
@@ -121,24 +133,45 @@ This class takes the following additional arguments for initialisation:
 
 ## Playing a Single Game
 
-The script `play_single_game.py` can be run to play an instance of the Wikipedia game.
+The script [play_single_game.py](scripts/play_single_game.py) can be run to play an instance of the Wikipedia game. The possible arguments to use are all documented in the script. An example of how to run the script to navigate on a graph dataset of English Wikipedia from `Ofotbanen (company)` to `Raptorial`:
+
+```
+python play_single_game.py -p=../data/ --input_dataset=en_wiki --agent=GreedyEmbeddingAgent --model=intfloat/multilingual-e5-small --source=Ofotbanen\ \(company\) --target=Raptorial --verbose=True --load_data_to_ram=False
+```
+
+This script is only designed to be used for ad-hoc testing.
 
 ## Playing Multiple Games
 
-A script `play_games.py` sets up an agent to play a pre-determined list of games (defined by source and target IDs).
+The script [play_games.py](scripts/play_games.py) sets up an agent to play a pre-determined list of games (defined by source and target IDs). This script requires two additional files to set up the games: one file to store a list of the games to be played and another to record the configuration for models to play the list of games.
 
-### Game Data
-Data for playing multiple games can be stored in a single file.
+### List of Games
+At least one file of multiple games should be stored in a sub-folder in [data/game_data](data/game_data/). There should be one sub-folder per graph dataset in the [data/input_data](data/input_data/) folder.
 
-This folder stores datasets of pairs of source and target IDs that are used for testing over multiple agents. The data are stored in subfolders, with one subfolder per input dataset. The input datasets either relate to Wikipedia or OpenAlex.
+Each game file contains pairs of source and target article IDs - each pair representing a single game. These files can be generated in the [graph-prep package](../graph-prep/). When this is generated from the [graph-prep package](../graph-prep/), it can also include the optimal number of steps (the shortest possible path) between the two articles, which will be recorded in the output.
 
-The data can be generated using the script `generate_game_data.py`, this requires arguments specifying the number of records to generate (`num_records`), the name to call the generated dataset (`datasest_name`) and the name of the input dataset to use (`input_dataset`).
+### Configuration
 
-In each dataset subfolder there should be a `config.yaml` file and one or more dataset files of games. Each dataset file will contain a list of source (start) and target (end) page IDs - one pair representing each game. The `config.yaml` file will contain the details of the experiments that will be run across the dataset pairs. The structure of the config file is:
+In each dataset subfolder of [data/game_data](data/game_data/) should be a `config.yaml` file. The `config.yaml` file will contain the details of the experiments that will be run across the dataset pairs. The structure of the config file is:
 
 ```
 experiments:
-  initial_test_100:
+  initial_test_tfidf:
+    agent_class: TFIDFAgent
+    game_datasets:
+      - wikipedia_test_100
+    models:
+      - tfidf
+    params:
+      max_rounds: 100
+      lang: en
+      manual_seed: 42
+      max_articles: 100
+    agent_tools_for_corpus: another_dataset_name
+    params_for_corpus:
+      from_database: True
+
+  initial_test_embedding:
     agent_class: GreedyEmbeddingAgent
     game_datasets:
       - wikipedia_test_100
@@ -146,17 +179,56 @@ experiments:
       - all-distilroberta-v1
       - average_word_embeddings_glove.6B.300d
       - all-MiniLM-L6-v2
-      - paraphrase-albert-small-v2
-      - all-mpnet-base-v2
-      - all-roberta-large-v1
     params:
-      max_rounds: 50
+      max_rounds: 100
+
+  initial_test_ollama:
+    agent_class: PromptAgent
+    game_datasets:
+      - wikipedia_test_100
+    models:
+      - llama3.1:8b
+      - gemma2:27b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
+
+  initial_test_openai:
+    agent_class: PromptAgent
+    game_datasets:
+      - wikipedia_test_100
+    models:
+      - wikigame-gpt-4o-mini
+    params:
+      llm: gpt
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 500
 ```
 
-Each experiment will be given a name, in this example `initial_test_100`. The other arguments that need to be specified are:
-- `agent_class` - the agent class to be used for the experiment (currently the only one available is `GreedyEmbeddingAgent`)
-- `game_datasets` - the dataset to run the agent over, this name must match one of the datasets in the same folder as the config file
-- `models` - a list of the models to be used in the agent. In this example, these are embedding models but for other agents they may be different types of model, e.g., 'GPT-3' or 'GPT-4'.
-- `params: max_rounds` - the maximum number of rounds each game should be played for.
+Each experiment will be given a name, in this example the experiments are named `initial_test_tfidf`, `initial_test_embedding`, `initial_test_ollama` and `initial_test_openai`. The other arguments that need to be specified are:
+- `agent_class` - the agent class to be used for the experiment: either `TFIDFAgent`, `GreedyEmbeddingAgent`, or `PromptAgent`, an example is given for all three above
+- `game_datasets` - the dataset(s) to run the agent over, this name must match one of the datasets in the same folder as the config file
+- `models` - a list of the models to be used in the agent. The only option for the `TFIDFAgent` is a model named `tfidf`, but the `GreedyEmbeddingAgent` and `PromptAgent` have multiple options, which must match the name of a sentence transformer model or a deployed prompting model, respectively.
+- `params` - a list of parameters that are used to set characteristics of the model and game environment. One mandatory parameter is `max_rounds`, which determines the maximum number of rounds to be played (number of steps to be taken) before a game is recorded as a failure. Additional parameters can be set for loading the agent tools (such as `from_database`) and yet further parameters can be set for the `TFIDFAgent` and `PromptAgent`, which have some additional configuration.
+- `agent_tools_for_corpus` - this is only an option for the `TFIDFAgent` and is not mandatory. If required, this is to be populated with the name of the dataset (which should exist in a subfolder of the given name in `data/input_data`) that is to be used to create the corpus.
+- `params_for_corpus` - this is only required if the `agent_tools_for_corpus` is set and allows parameters to be set to load the agent tools for the additional dataset.
 
-The experiments can be run by running the script `play_games.py` which only takes one argement which is the name of the input dataset (`input_dataset`). This will then load the config file associated with that dataset and run all the experiments listed in the dataset. If an output file already exists for one combination of game dataset and model, then that combination will not be re-run (so no output files will get overwritten). The `play_games.py` script also has optional arguments so that a single experiment and / or model can be passed to the script and only these combination(s) will be run.
+The experiments can be run by running the script `play_games.py` which takes arguments that are documented in the script. These argument will not change the outcome of the games that are run, but can be used to change how they are run. For example, a single experiment from a config file can be run, or all experiments can be run. Similarly, there is one argument which sets a limit on the number of games that can be run and another that controls how frequently the output is saved.
+
+The script will create a sub-folder of [data/output_data](data/output_data/) with the name of the sub-folder matching the name of the input dataset and sub-folders will be created - one for each experiment that is run.
+Each output file therefore resides in `data/output_data/<input_dataset_name>/<experiment_name>` has the naming convention:
+'''
+<input_dataset_name>_<experiment_name>_<model_name>_<start_index>.csv
+'''
+
+where `<model_name>` is the name of the model that was selected to run, e.g., `all-distilroberta-v1`, and `<start_index>` is an integer representing the index from the list of games where the agent started playing.
+If an output file already exists for one combination of input dataset, experiment name, model and start index, then that combination will not be re-run (so no output files will get overwritten).
