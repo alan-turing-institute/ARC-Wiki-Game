@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import csv
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from io import BufferedReader
 from warnings import warn
 
@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-class AgentToolsBase:
+class AgentToolsBase(ABC):
     def __init__(
         self,
         hdf5_file_path: str,
