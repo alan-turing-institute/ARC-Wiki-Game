@@ -232,3 +232,19 @@ Each output file therefore resides in `data/output_data/<input_dataset_name>/<ex
 
 where `<model_name>` is the name of the model that was selected to run, e.g., `all-distilroberta-v1`, and `<start_index>` is an integer representing the index from the list of games where the agent started playing.
 If an output file already exists for one combination of input dataset, experiment name, model and start index, then that combination will not be re-run (so no output files will get overwritten).
+
+## Analysing Output
+
+The scripts described in this section can be used to evaluate and analyse the graph datasets and the output of the games:
+
+### Graph analysis
+The [graph_analysis.py](scripts/graph_analysis.py) script calculates some basic statistics about the graph datasets used to play the game, such as the number of deadend and unreachable nodes in the graph. The names of the graph datasets have been hard-coded in a dictionary called `GRAPH_NAMES` in this script, and would need to be updated if differently named datasets were to be analysed. The output will be saved to [result/analysis](result/analysis/).
+
+### Evaluate Output
+The [evaluate_output.py](scripts/evaluate_output.py) script calculates some basic statistics over all the output for a given number of `n` games. It can be used as a quicker option for analysing the output than the [fit_distribution.py](scripts/fit_distribution.py) script as it does not require a config file.
+
+### Fit Distribution
+The [fit_distribution.py](scripts/fit_distribution.py) script takes the path of a result config file as input, such as those stored in the [result](result) folder. These list all the combinations of output to be analysed and the script attempts to fit output of number of steps above optimal to a negative binomial distribution and saves the resulting charts in [result/figure](result/figure/). A csv file containing statistics about the games are also saved in [result/table](result/table/).
+
+### Count Final State
+The [count_final_state.py](scripts/count_final_state.py) script also takes the path of a result config file as input, such as those stored in the [result](result) folder. This script counts the number of games that finished in each of the possible end states (i.e., either a success when the target page was reached or one of a finite number of failure reasons). The output is saved to a csv file in [result/table](result/table/).
