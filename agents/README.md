@@ -3,24 +3,31 @@
 The agents in this package will play the Wikipedia game.
 
 ## Table of Contents
-- [Getting Started](#getting-started)
+- [Set-up](#set-up)
 - [Input Data: Graph Datasets](#input-data-graph-datasets)
 - [Agent Classes](#agent-classes)
 - [Playing a Single Game](#playing-a-single-game)
 - [Playing Multiple Games](#playing-multiple-games)
 - [Analysing Output](#analysing-output)
 
-## Getting Started
+## Set-up
+
+### Installing
 Assuming the repo has already been cloned, change directory to the `agents` package and install with `pip`:
 
    ```bash
    pip install .
    ```
 
+### Input data
 Graph datasets in the required format to be used by the agents to play the Wikipedia game can be created using the [graph-prep package](../graph-prep/). The files for each graph dataset should be stored in sub-folders in the [data/input_data](data/input_data/) folder, with one sub-folder for each dataset.
 
+### Game data
 A file containing a list of multiple source and target articles representing multiple games can also be generated using the [graph-prep package](../graph-prep/). These files should be stored in sub-folders in the [data/game_data](data/game_data/) folder, with one sub-folder for each graph datase in [data/input_data](data/input_data/). The names of the sub-folders in [data/input_data](data/input_data/) and [data/game_data](data/game_data/) should match.
 
+A config file for each graph dataset will also need to be currated, but this will need be done 'manually'. The details of the requirements for the config file can be found in [Playing Multiple Games](#playing-multiple-games).
+
+### Prompting Agent Requirements
 If OpenAI models are to be used in a `PromptAgent` object (see [PromtAgent](#promptagent)), then the following environment variables must be set:
 ```
 export AZURE_OPENAI_API_KEY="REPLACE_WITH_YOUR_KEY_VALUE_HERE"
