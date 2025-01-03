@@ -226,9 +226,9 @@ The experiments can be run by running the script `play_games.py` which takes arg
 
 The script will create a sub-folder of [data/output_data](data/output_data/) with the name of the sub-folder matching the name of the input dataset and sub-folders will be created - one for each experiment that is run.
 Each output file therefore resides in `data/output_data/<input_dataset_name>/<experiment_name>` has the naming convention:
-'''
+```
 <input_dataset_name>_<experiment_name>_<model_name>_<start_index>.csv
-'''
+```
 
 where `<model_name>` is the name of the model that was selected to run, e.g., `all-distilroberta-v1`, and `<start_index>` is an integer representing the index from the list of games where the agent started playing.
 If an output file already exists for one combination of input dataset, experiment name, model and start index, then that combination will not be re-run (so no output files will get overwritten).
