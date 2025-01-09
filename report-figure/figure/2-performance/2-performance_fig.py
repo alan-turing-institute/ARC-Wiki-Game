@@ -123,7 +123,7 @@ table_df = all_df[all_df["Model"].isin(table_list)]
 
 
 # Setting up the figure
-fig, axes = plt.subplots(1, 2, figsize=(8, 5))
+fig, axes = plt.subplots(1, 2, figsize=(8, 4.2))
 
 ax1 = axes[0]
 ax2 = axes[1]

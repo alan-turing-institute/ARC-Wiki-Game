@@ -105,7 +105,7 @@ all_df = all_df.sort_values(by="Order")
 
 
 # Setting up the Figure
-fig, axes = plt.subplots(1, 2, figsize=(8, 5))
+fig, axes = plt.subplots(1, 2, figsize=(8, 4.2))
 ax1, ax2 = axes
 
 ax1.text(

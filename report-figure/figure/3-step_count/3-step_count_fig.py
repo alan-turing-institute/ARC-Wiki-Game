@@ -138,7 +138,7 @@ e5_n = all_df.loc[all_df["Model"] == "Intfloat Multilingual-E5-Small", "n"].valu
 e5_p = all_df.loc[all_df["Model"] == "Intfloat Multilingual-E5-Small", "p"].values[0]
 
 # Setting up the figure
-fig = plt.figure(figsize=(8, 5))
+fig = plt.figure(figsize=(8, 4.2))
 gs = fig.add_gridspec(2, 2)
 ax1 = fig.add_subplot(gs[0, 0])
 ax2 = fig.add_subplot(gs[1, 0])
@@ -146,7 +146,7 @@ ax3 = fig.add_subplot(gs[:, 1])
 
 # Axes Labels
 ax1.text(
-    -0.1,
+    -0.07,
     1.0,
     "A",
     transform=ax1.transAxes,
@@ -156,7 +156,7 @@ ax1.text(
     ha="right",
 )
 ax2.text(
-    -0.1,
+    -0.07,
     1.0,
     "B",
     transform=ax2.transAxes,
@@ -194,6 +194,7 @@ ax1.plot(
 ax1.set_xlabel("Number of steps above optimal")
 ax1.set_ylabel("Game Frequency")
 ax1.set_xlim(0, 100)
+ax1.set_ylim(0, 0.075)
 
 ax1.grid(alpha=0.7)
 ax1.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=1))

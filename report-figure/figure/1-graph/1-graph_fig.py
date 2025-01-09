@@ -47,7 +47,7 @@ for dataset, topic in topic_name:
 
 ##  Set up Figure ##
 
-fig, axes = plt.subplots(1, 2, figsize=(8, 5))
+fig, axes = plt.subplots(1, 2, figsize=(8, 4.2))
 
 ax1 = axes[0]
 ax2 = axes[1]
