@@ -22,7 +22,7 @@ tfidf_path = results_dir / "tfidf_wiki_summary_stats.csv"
 data_output_dir = current_dir.parents[2] / "agents" / "data" / "output_data" / "en_wiki"
 gpt_games_path = (
     data_output_dir
-    / "step_list_prompt_gpt_4o"
+    / "step_list_prompt_gpt4o"
     / "en_wiki_step_list_wikigame-gpt-4o_0.csv"
 )
 
