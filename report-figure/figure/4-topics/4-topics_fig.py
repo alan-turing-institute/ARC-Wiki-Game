@@ -20,7 +20,7 @@ tfidf_path = results_dir / "tfidf_wiki_summary_stats.csv"
 
 # Load Data
 
-color_names = {
+color_hue = {
     "Open LLM": 185 / 360,
     "Closed LLM": 112 / 360,
     "Embedding": 28 / 360,
@@ -28,23 +28,31 @@ color_names = {
     "Human": 355 / 360,
 }
 
+color_val = {
+    "Open LLM": 0.95,
+    "Closed LLM": 0.9,
+    "Embedding": 0.85,
+    "TFIDF": 0.8,
+    "Human": 0.85,
+}
+
 embed_df = pd.read_csv(embed_path, sep="\t")
-embed_df["Colour"] = color_names["Embedding"]
+embed_df["Colour_name"] = "Embedding"
 
 prompt_df = pd.read_csv(prompt_path, sep="\t")
-prompt_df["Colour"] = prompt_df["Model"].map(
-    lambda m: (color_names["Closed LLM"] if "GPT" in m else color_names["Open LLM"])
+prompt_df["Colour_name"] = prompt_df["Model"].map(
+    lambda m: ("Closed LLM" if "GPT" in m else "Open LLM")
 )
 
 tfidf_df = pd.read_csv(tfidf_path, sep="\t")
-tfidf_df["Colour"] = color_names["TFIDF"]
+tfidf_df["Colour_name"] = "TFIDF"
 
 human_df = pd.DataFrame(
     {
         "Model": ["Human"],
         "Success_rate": [0.688],
         "Success_rate_std": [0.044],
-        "Colour": [color_names["Human"]],
+        "Colour_name": ["Human"],
         "Language": ["English"],
         "Topic": ["Wikipedia"],
     },
@@ -146,6 +154,13 @@ def plot_axis(axis, to_show_list):
 
     for model in to_show_list:
         model_df = all_df[all_df["Model"] == model]
+        col_in_rgb = hsv_to_rgb(
+            (
+                color_hue[model_df["Colour_name"].values[0]],
+                0.95,
+                color_val[model_df["Colour_name"].values[0]],
+            )
+        )
         axis.errorbar(
             model_df["Order"].values,
             model_df["Success_rate"].values,
@@ -154,7 +169,7 @@ def plot_axis(axis, to_show_list):
             markersize=8,
             capsize=8,
             linestyle=line_choice[model],
-            color=hsv_to_rgb((model_df["Colour"].values[0], 0.95, 0.90)),
+            color=col_in_rgb,
             label=model_df["ModelName"].values[0],
         )
         legend_handles.append(
@@ -162,7 +177,7 @@ def plot_axis(axis, to_show_list):
                 [0],
                 [0],
                 marker=marker_choice[model],
-                color=hsv_to_rgb((model_df["Colour"].values[0], 0.95, 0.90)),
+                color=col_in_rgb,
                 linestyle=line_choice[model],
             )
         )

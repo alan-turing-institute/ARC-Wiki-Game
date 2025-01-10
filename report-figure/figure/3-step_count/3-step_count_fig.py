@@ -32,7 +32,7 @@ e5_games_path_start = (
 
 # Load Data
 
-color_names = {
+color_hue = {
     "Open LLM": 185 / 360,
     "Closed LLM": 112 / 360,
     "Embedding": 28 / 360,
@@ -40,16 +40,24 @@ color_names = {
     "Human": 355 / 360,
 }
 
+color_val = {
+    "Open LLM": 0.95,
+    "Closed LLM": 0.9,
+    "Embedding": 0.85,
+    "TFIDF": 0.8,
+    "Human": 0.85,
+}
+
 embed_df = pd.read_csv(embed_path, sep="\t")
-embed_df["Colour"] = color_names["Embedding"]
+embed_df["Colour_name"] = "Embedding"
 
 prompt_df = pd.read_csv(prompt_path, sep="\t")
-prompt_df["Colour"] = prompt_df["Model"].map(
-    lambda m: (color_names["Closed LLM"] if "GPT" in m else color_names["Open LLM"])
+prompt_df["Colour_name"] = prompt_df["Model"].map(
+    lambda m: ("Closed LLM" if "GPT" in m else "Open LLM")
 )
 
 tfidf_df = pd.read_csv(tfidf_path, sep="\t")
-tfidf_df["Colour"] = color_names["TFIDF"]
+tfidf_df["Colour_name"] = "TFIDF"
 
 human_games_df = pd.read_csv(human_results_path, sep=",")
 
@@ -62,7 +70,7 @@ human_df = pd.DataFrame(
         "Success_rate_std": [0.044],
         "Mean": human_steps.mean(),
         "Mean_std": bootstrap(human_steps[None, :], np.mean).standard_error,
-        "Colour": [color_names["Human"]],
+        "Colour_name": ["Human"],
         "Language": ["English"],
         "Topic": ["Wikipedia"],
     },
@@ -182,7 +190,7 @@ ax1.hist(
     gpt_steps,
     bins=bins,
     density=True,
-    color=hsv_to_rgb((color_names["Closed LLM"], 0.55, 0.95)),
+    color=hsv_to_rgb((color_hue["Closed LLM"], 0.55, color_val["Closed LLM"])),
 )
 
 ax1.plot(
@@ -219,7 +227,7 @@ ax2.hist(
     e5_steps,
     bins=bins,
     density=True,
-    color=hsv_to_rgb((color_names["Embedding"], 0.55, 0.95)),
+    color=hsv_to_rgb((color_hue["Embedding"], 0.55, color_val["Embedding"])),
 )
 
 ax2.plot(
@@ -256,7 +264,10 @@ bars = ax3.barh(
     y_pos,
     table_df["Mean"],
     xerr=table_df["Mean_std"],
-    color=[hsv_to_rgb((c, 0.50, 0.95)) for c in table_df["Colour"]],
+    color=[
+        hsv_to_rgb((color_hue[cn], 0.50, color_val[cn]))
+        for cn in table_df["Colour_name"]
+    ],
     edgecolor="black",
     capsize=6,
     error_kw={"elinewidth": 2, "capthick": 2},
@@ -273,9 +284,11 @@ ax3.tick_params(which="both", axis="x", direction="in")
 
 
 # Adding a legend for model types
-legend_labels = list(color_names.keys())
+legend_labels = list(color_hue.keys())
 handles = [
-    plt.Line2D([0], [0], color=hsv_to_rgb((color_names[label], 0.65, 0.95)), lw=4)
+    plt.Line2D(
+        [0], [0], color=hsv_to_rgb((color_hue[label], 0.65, color_val[label])), lw=4
+    )
     for label in legend_labels
 ]
 

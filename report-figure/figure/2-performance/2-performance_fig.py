@@ -19,7 +19,7 @@ tfidf_path = results_dir / "tfidf_wiki_summary_stats.csv"
 
 # Load Data
 
-color_names = {
+color_hue = {
     "Open LLM": 185 / 360,
     "Closed LLM": 112 / 360,
     "Embedding": 28 / 360,
@@ -27,23 +27,31 @@ color_names = {
     "Human": 355 / 360,
 }
 
+color_val = {
+    "Open LLM": 0.95,
+    "Closed LLM": 0.9,
+    "Embedding": 0.85,
+    "TFIDF": 0.8,
+    "Human": 0.85,
+}
+
 embed_df = pd.read_csv(embed_path, sep="\t")
-embed_df["Colour"] = color_names["Embedding"]
+embed_df["Colour_name"] = "Embedding"
 
 prompt_df = pd.read_csv(prompt_path, sep="\t")
-prompt_df["Colour"] = prompt_df["Model"].map(
-    lambda m: (color_names["Closed LLM"] if "GPT" in m else color_names["Open LLM"])
+prompt_df["Colour_name"] = prompt_df["Model"].map(
+    lambda m: ("Closed LLM" if "GPT" in m else "Open LLM")
 )
 
 tfidf_df = pd.read_csv(tfidf_path, sep="\t")
-tfidf_df["Colour"] = color_names["TFIDF"]
+tfidf_df["Colour_name"] = "TFIDF"
 
 human_df = pd.DataFrame(
     {
         "Model": ["Human"],
         "Success_rate": [0.688],
         "Success_rate_std": [0.044],
-        "Colour": [color_names["Human"]],
+        "Colour_name": ["Human"],
         "Language": ["English"],
         "Topic": ["Wikipedia"],
     },
@@ -155,7 +163,9 @@ bars = ax1.barh(
     y_pos,
     table_df["Success_rate"],
     xerr=table_df["Success_rate_std"],
-    color=[hsv_to_rgb((c, 0.50, 0.95)) for c in table_df["Colour"]],
+    color=[
+        hsv_to_rgb((color_hue[c], 0.50, color_val[c])) for c in table_df["Colour_name"]
+    ],
     edgecolor="black",
     capsize=6,
     error_kw={"elinewidth": 2, "capthick": 2},
@@ -173,23 +183,28 @@ ax1.tick_params(which="both", axis="x", direction="in")
 
 # Adding a legend for model types
 # Adding a legend for model types
-legend_labels = list(color_names.keys())
+legend_labels = list(color_hue.keys())
 handles = [
-    plt.Line2D([0], [0], color=hsv_to_rgb((color_names[label], 0.65, 0.95)), lw=4)
+    plt.Line2D(
+        [0],
+        [0],
+        color=hsv_to_rgb((color_hue[label], 0.65, color_val[label])),
+        lw=4,
+    )
     for label in legend_labels
 ]
 
 ax1.legend(handles, legend_labels, loc="lower right")
 
 # Axis 2 - model parameters vs success rate
-for col in color_names.values():
-    col_scale_df = scale_df[scale_df["Colour"] == col]
+for col_n, col_h in color_hue.items():
+    col_scale_df = scale_df[scale_df["Colour_name"] == col_n]
     ax2.errorbar(
         col_scale_df["Parameters"] * 1e9,
         col_scale_df["Success_rate"],
         xerr=col_scale_df["Parameters_std"] * 1e9,
         yerr=col_scale_df["Success_rate_std"],
-        color=hsv_to_rgb((col, 0.95, 0.95)),
+        color=hsv_to_rgb((col_h, 0.95, color_val[col_n])),
         capsize=4,
         elinewidth=2.5,
         capthick=2.5,
@@ -206,14 +221,14 @@ ax2.plot(
     (human_df["Success_rate"].iloc[0] - human_df["Success_rate_std"].iloc[0])
     * np.array([1, 1]),
     "--",
-    color=hsv_to_rgb((color_names["Human"], 0.95, 0.95)),
+    color=hsv_to_rgb((color_hue["Human"], 0.95, color_val["Human"])),
 )
 ax2.plot(
     ax2.get_xlim(),
     (human_df["Success_rate"].iloc[0] + human_df["Success_rate_std"].iloc[0])
     * np.array([1, 1]),
     "--",
-    color=hsv_to_rgb((color_names["Human"], 0.95, 0.95)),
+    color=hsv_to_rgb((color_hue["Human"], 0.95, color_val["Human"])),
 )
 
 ax2.grid(axis="both", alpha=0.7)
