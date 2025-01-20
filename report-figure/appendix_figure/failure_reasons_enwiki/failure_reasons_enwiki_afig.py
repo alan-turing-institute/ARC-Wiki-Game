@@ -73,6 +73,9 @@ outcomes = [
     "No_response",
 ]
 
+hatch_patterns = ["//", "\\\\", "||", "--", "OO", ".."]
+
+
 # Convert absolute counts to fractions of Total_games
 for outcome in outcomes:
     enwiki_df[outcome] = enwiki_df[outcome] / enwiki_df["Total_games"]
@@ -93,6 +96,7 @@ for n, outcome in enumerate(outcomes):
         left=bottom_value,
         label=outcome.replace("_", " "),
         color=cc.glasbey_category10[n + 2],
+        hatch=hatch_patterns[n],
     )
     # Update the bottom value to stack the bars
     bottom_value = (

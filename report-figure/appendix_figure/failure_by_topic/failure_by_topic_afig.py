@@ -50,6 +50,8 @@ outcomes = [
     "No_response",
 ]
 
+hatch_patterns = ["//", "\\\\", "||", "--", "OO", ".."]
+
 # Convert absolute counts to fractions of Total_games
 for outcome in outcomes:
     all_df[outcome] = all_df[outcome] / all_df["Total_games"]
@@ -104,6 +106,7 @@ def plot_topic_bar(axis, data_df, title):
             bottom=bottom_value,
             label=outcome.replace("_", " "),
             color=cc.glasbey_category10[n + 2],
+            hatch=hatch_patterns[n],
         )
         # Update the bottom value to stack the bars
         bottom_value = (
