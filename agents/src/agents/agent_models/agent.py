@@ -824,7 +824,7 @@ class PromptAgent(Agent):
     ) -> None:
         """
         Class inherits from Agent and plays the wikipedia game by giving a
-        prompt to an OpenAI GPT model with the
+        prompt to a generative LLM, passed as a GenLM object.
 
         Parameters
         ----------

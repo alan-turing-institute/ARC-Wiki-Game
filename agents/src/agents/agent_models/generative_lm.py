@@ -15,7 +15,7 @@ class GenLM(ABC):
     @abstractmethod
     def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
         """
-        To do
+        Returns the response of the language model, given a list of messages.
         """
 
 
@@ -58,6 +58,19 @@ class OpenAIModel(GenLM):
         )
 
     def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
+        """
+        Get the response from the OpenAI model.
+
+        This will be in a JSON format.
+
+        Args:
+            messages (list[dict[Any, Any]]): The list of messages to send to the model.
+                They are un the format {"role": "user", "content": "message"}.
+
+        Returns:
+            str | None: This is the response from the model. It will only include the
+                content of the message. Should be in JSON format.
+        """
         try:
             completion = self._client.chat.completions.create(
                 model=self._deployment_name,
@@ -91,7 +104,8 @@ class OllamaLM(GenLM):
         keep_alive: int = 300,
         host_port: int = 11434,
     ):
-        """This model calls the Ollama API to get responses.
+        """
+        This model calls the Ollama API to get responses.
 
         To use call the get_response method with a list of messages.
 
@@ -118,7 +132,8 @@ class OllamaLM(GenLM):
         self.ollama_client = ollama.Client(host=f"localhost:{host_port}")
 
     def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
-        """Get the response from the Ollama model.
+        """
+        Get the response from the Ollama model.
 
         This will be in a JSON format.
 
