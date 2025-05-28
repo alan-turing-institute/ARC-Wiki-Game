@@ -45,6 +45,7 @@ class OpenAIModel(GenLM):
         temperature: float = 0.2,
         top_p: float = 0.1,
         seed: int = 42,
+        free_form: bool = False,
     ) -> None:
         self._deployment_name = deployment_name
         self._temperature = temperature
@@ -56,6 +57,11 @@ class OpenAIModel(GenLM):
             api_version="2024-02-01",
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         )
+
+        if free_form:
+            self._response_format = {"type": "text"}
+        else:
+            self._response_format = {"type": "json_object"}
 
     def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
         """
@@ -78,7 +84,7 @@ class OpenAIModel(GenLM):
                 temperature=self._temperature,
                 top_p=self._top_p,
                 seed=self._seed,
-                response_format={"type": "json_object"},
+                response_format=self._response_format,
             )
 
             return completion.choices[0].message.content
@@ -103,6 +109,7 @@ class OllamaLM(GenLM):
         options: dict | None = None,
         keep_alive: int = 300,
         host_port: int = 11434,
+        free_form: bool = False,
     ):
         """
         This model calls the Ollama API to get responses.
@@ -116,12 +123,21 @@ class OllamaLM(GenLM):
                 to 0.0.
             keep_alive (int, optional): The number of seconds to keep the model loaded
                 to RAM. Defaults to 300.
+            host_port (int, optional): The port where the Ollama server is running.
+                Defaults to 11434.
+            free_form (bool, optional): If True, the model will not be fixed to JSON.
+                Defaults to False.
         """
         if options is None:
             options = {"temperature": 0.0}
         self.options = options
 
         self.keep_alive = keep_alive
+
+        if free_form:
+            self.format = None
+        else:
+            self.format = "json"
 
         # if model not in [mod["name"] for mod in ollama.list()["models"]]:
         #     print("Model not found. Trying to download...")
@@ -148,7 +164,7 @@ class OllamaLM(GenLM):
         return self.ollama_client.chat(
             self.model,
             messages=messages,
-            format="json",
+            format=self.format,
             options=self.options,
             keep_alive=self.keep_alive,
         )["message"]["content"]
