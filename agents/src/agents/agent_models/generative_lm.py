@@ -63,6 +63,18 @@ class OpenAIModel(GenLM):
         else:
             self._response_format = {"type": "json_object"}
 
+    def set_free_form(self, free_form: bool) -> None:
+        """
+        Set the model to free form or not.
+
+        Args:
+            free_form (bool): If True, the model will not be fixed to JSON.
+        """
+        if free_form:
+            self._response_format = {"type": "text"}
+        else:
+            self._response_format = {"type": "json_object"}
+
     def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
         """
         Get the response from the OpenAI model.
@@ -146,6 +158,18 @@ class OllamaLM(GenLM):
         self.model = model
 
         self.ollama_client = ollama.Client(host=f"localhost:{host_port}")
+
+    def set_free_form(self, free_form: bool) -> None:
+        """
+        Set the model to free form or not.
+
+        Args:
+            free_form (bool): If True, the model will not be fixed to JSON.
+        """
+        if free_form:
+            self.format = None
+        else:
+            self.format = "json"
 
     def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
         """
