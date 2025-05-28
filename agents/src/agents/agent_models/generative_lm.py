@@ -123,9 +123,9 @@ class OllamaLM(GenLM):
 
         self.keep_alive = keep_alive
 
-        if model not in [mod["name"] for mod in ollama.list()["models"]]:
-            print("Model not found. Trying to download...")
-            ollama.pull(model)
+        # if model not in [mod["name"] for mod in ollama.list()["models"]]:
+        #     print("Model not found. Trying to download...")
+        #     ollama.pull(model)
 
         self.model = model
 
