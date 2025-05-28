@@ -18,6 +18,18 @@ class GenLM(ABC):
         Returns the response of the language model, given a list of messages.
         """
 
+    def set_free_form(self, free_form: bool) -> None:
+        """
+        Set the model to free form or not.
+        This is not implemented in this class as it doesn't use a generative model.
+
+        Args:
+            free_form (bool): If True, the model will not be fixed to JSON.
+        """
+        del free_form
+        msg = "This model type does not support setting free form responses."
+        raise NotImplementedError(msg)
+
 
 class MockGenLM(GenLM):
     def __init__(self, test_responses: list[dict]) -> None:

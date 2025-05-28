@@ -1165,3 +1165,28 @@ class PromptAgent(Agent):
             return -1, err_msg
         # There are no links from the current page
         return -1, "Ran out of titles to pick"
+
+
+class ReasoningAgent(PromptAgent):
+    def __init__(
+        self,
+        agent_tools: AgentToolsBase,
+        max_rounds: int,
+        model: GenLM,
+        num_retries: int = 1,
+        max_titles: int = -1,
+    ) -> None:
+        """
+        Class inherits from PromptAgent and plays the wikipedia game by giving a
+        prompt to a generative LLM, passed as a GenLM object. The agent is designed to
+        reason about the titles on the current page and select the best one to navigate
+        to the target page.
+        """
+        model.set_free_form(True)
+        super().__init__(
+            agent_tools,
+            max_rounds,
+            model,
+            num_retries=num_retries,
+            max_titles=max_titles,
+        )

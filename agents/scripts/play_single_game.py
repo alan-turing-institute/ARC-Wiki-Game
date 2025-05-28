@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import argparse
 
-from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent, TFIDFAgent
+from agents.agent_models.agent import (
+    GreedyEmbeddingAgent,
+    PromptAgent,
+    ReasoningAgent,
+    TFIDFAgent,
+)
 from agents.agent_models.generative_lm import OllamaLM, OpenAIModel
 from agents.utils.data import load_tools
 
@@ -209,7 +214,7 @@ def main():
         # by default in this script - could be updated as per the play_games.py script
         # so that a different corpus could be used.
         agent = TFIDFAgent(tools, max_rounds, iso_code, manual_seed, max_articles)
-    elif args.agent == "PromptAgent":
+    elif args.agent in ("PromptAgent", "ReasoningAgent"):
         temperature = args.temperature
         top_p = args.top_p
         manual_seed = args.manual_seed
@@ -219,13 +224,22 @@ def main():
             gen_model = OpenAIModel(model_name, temperature, top_p, manual_seed)
         elif llm == "ollama":
             gen_model = OllamaLM(model_name, options={"temperature": temperature})
-        agent = PromptAgent(
-            tools,
-            max_rounds=max_rounds,
-            model=gen_model,
-            num_retries=num_retries,
-            max_titles=max_titles,
-        )
+        if args.agent == "PromptAgent":
+            agent = PromptAgent(
+                tools,
+                max_rounds=max_rounds,
+                model=gen_model,
+                num_retries=num_retries,
+                max_titles=max_titles,
+            )
+        elif args.agent == "ReasoningAgent":
+            agent = ReasoningAgent(
+                tools,
+                max_rounds=max_rounds,
+                model=gen_model,
+                num_retries=num_retries,
+                max_titles=max_titles,
+            )
     else:
         raise ValueError(
             "Invalid name for agent provided: "
