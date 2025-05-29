@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -47,7 +48,7 @@ class Agent(ABC):
         If a route is found then the method returns True and a list of the route found
         (composed of page IDs). If a route is not found then the method returns False
         and a list of the route taken without reaching the target page. A route may not
-        be found for serveral reasons including:
+        be found for several reasons including:
         - Needing to take more than the maximum number of rounds the object has
           been set
         - Reaching a page where there are either no links, or no links to which
@@ -280,7 +281,7 @@ class Agent(ABC):
         route: list
             A list of page IDs representing the route taken
         similarity: float | None
-            A value representing the similiarity of the source and target pages - this
+            A value representing the similarity of the source and target pages - this
             will not be provided for all types of agents
         optimal_steps: int | None
             If not none, then this is the optimal number of steps to solve the game
@@ -442,7 +443,7 @@ class TFIDFAgent(Agent):
 
         Parameters
         ----------
-        candidate_vctors: list[np.array]
+        candidate_vectors: list[np.array]
             List of arrays representing the links on the current page
         target_vector: np.array
             Array representing the target page
@@ -470,7 +471,7 @@ class TFIDFAgent(Agent):
         If a route is found then the method returns True and a list of the route found
         (composed of page IDs). If a route is not found then the method returns False
         and a list of the route taken without reaching the target page. A route may not
-        be found for serveral reasons including:
+        be found for several reasons including:
         - Needing to take more than the maximum number of rounds the object has
           been set
         - Reaching a page where there are either no links, or no links to which
@@ -563,7 +564,7 @@ class TFIDFAgent(Agent):
         current_page_id: int
             The ID of the current page
         route: list[int]
-            The rotue taken so far in the current game.
+            The route taken so far in the current game.
         target_summary: array
             An embedding of the summary of the target page.
 
@@ -574,7 +575,7 @@ class TFIDFAgent(Agent):
         int
             The number of words encountered
         int
-            The number of out-of-vocabularly words
+            The number of out-of-vocabulary words
         """
         forward_text = self._tools.get_forward_summaries(current_page_id)
         if len(forward_text) == 0:
@@ -682,7 +683,7 @@ class GreedyEmbeddingAgent(Agent):
         If a route is found then the method returns True and a list of the route found
         (composed of page IDs). If a route is not found then the method returns False
         and a list of the route taken without reaching the target page. A route may not
-        be found for serveral reasons including:
+        be found for several reasons including:
         - Needing to take more than the maximum number of rounds the object has
           been set
         - Reaching a page where there are either no links, or no links to which
@@ -766,7 +767,7 @@ class GreedyEmbeddingAgent(Agent):
         current_page_id: int
             The ID of the current page
         route: list[int]
-            The rotue taken so far in the current game.
+            The route taken so far in the current game.
         target_summary: array
             An embedding of the summary of the target page.
         use_titles: bool
@@ -888,7 +889,7 @@ class PromptAgent(Agent):
         If a route is found then the method returns True and a list of the route found
         (composed of page IDs). If a route is not found then the method returns False
         and a list of the route taken without reaching the target page. A route may not
-        be found for serveral reasons including:
+        be found for several reasons including:
         - Needing to take more than the maximum number of rounds the object has
           been set
         - Reaching a page where there are either no titles, or no titles to which
@@ -997,7 +998,7 @@ class PromptAgent(Agent):
     ) -> tuple[int, str]:
         """
         Given a current page id, this method gets all the titles of the titles that
-        exist on the page. It presentes the title titles to the LLM along with a summary
+        exist on the page. It presents the title titles to the LLM along with a summary
         of the target page and asks the LLM to select a title.
         It then returns the ID of the selected title
 
@@ -1006,7 +1007,7 @@ class PromptAgent(Agent):
         current_page_id: int
             The ID of the current page
         route: list[int]
-            The rotue taken so far in the current game.
+            The route taken so far in the current game.
         messages: list[dict]
             A list of dictionaries containing the messages to be used at the start of
             the prompt - these are the same for all rounds in the game.
@@ -1190,3 +1191,199 @@ class ReasoningAgent(PromptAgent):
             num_retries=num_retries,
             max_titles=max_titles,
         )
+
+        self.answer_regex = re.compile(r"<answer>(.*?)</answer>")
+
+        self._query1_content = (
+            "If I give you the title and a summary of the target page that I am "
+            "trying to navigate to. "
+            "This will require you to reason about which steps will take you to the "
+            "target page. "
+            "Can you help me navigate to the target page? "
+        )
+
+        # Need to redefine to use <answer> tags
+        self._play_round_content = (
+            "Here is a list of titles, which one should I pick? Please reason about "
+            "which title is the best to navigate to the target page then provide your "
+            "answer. The answer need to be between <answer> tags, such as: "
+            "<answer>Title</answer>."
+            "Only the title should be listed between the tags, if you "
+            "are not sure just pick the best title you can. "
+        )
+
+    def pull_answer(self, text):
+        """
+        Extracts the answer from the given text.
+
+        Args:
+            text (str): The text containing the answer.
+
+        Returns:
+            str: The extracted answer.
+        """
+        match = self.answer_regex.search(text)
+        if match:
+            return match.group(1).strip()
+        return None
+
+    def _play_round(
+        self,
+        current_page_id: int,
+        route: list[int],
+        game_messages: list[dict],
+        target_title: str,
+    ) -> tuple[int, str]:
+        """
+        Given a current page id, this method gets all the titles of the titles that
+        exist on the page. It presents the title titles to the LLM along with a summary
+        of the target page and asks the LLM to select a title.
+        It then returns the ID of the selected title
+
+        This is adapted from the PromptAgent class to include reasoning about the
+        titles on the current page before selecting a title to navigate to.
+
+        Parameters
+        ----------
+        current_page_id: int
+            The ID of the current page
+        route: list[int]
+            The route taken so far in the current game.
+        messages: list[dict]
+            A list of dictionaries containing the messages to be used at the start of
+            the prompt - these are the same for all rounds in the game.
+        target_title: str
+            The title of the target page to provide in error messages.
+
+        Returns
+        -------
+        int
+            The ID of the page to navigate to next
+        """
+        forward_titles = self._tools.get_forward_titles(current_page_id)
+        titles: list[str] = [
+            str(forward_title[1])
+            for forward_title in forward_titles
+            if (forward_title[0] is not None)
+            and (forward_title[1] is not None)
+            and (forward_title[0] not in route)
+        ]
+        ids: list[int] = [
+            int(forward_title[0])
+            for forward_title in forward_titles
+            if (forward_title[0] is not None)
+            and (forward_title[1] is not None)
+            and (forward_title[0] not in route)
+        ]
+        if len(titles) != len(ids):
+            # If this is True, then something has gone very wrong! Throw an error.
+            err_msg = (
+                "Error creating list of IDs and Titles, they are different lengths!"
+            )
+            raise ValueError(err_msg)
+        if len(titles) > 0:
+            content = " "
+            for title in titles[: self._max_titles]:
+                content += '"' + title + '", '
+            content = "[" + content[:-2] + "]"
+
+            message = {"role": "user", "content": self._play_round_content + content}
+
+            messages = game_messages.copy()
+            messages.append(message)
+            for m in messages:
+                if m["content"] is None:
+                    return -1, ""
+
+            response = self._model.get_response(messages)
+            print(response)
+
+            retry = 0
+            err_msg = ""
+            while retry <= self._num_retries:  # allow for retries
+                if response is None:
+                    # Will be 'None' if the content filter interferes, simulate a
+                    # response and retry
+                    retry += 1
+                    response = (
+                        "I did not know which title to select. <answer>Unknown</answer>"
+                    )
+                    content_retry = (
+                        'But "Unknown" is not in the list '
+                        "that was provided! You must select a title from the "
+                        "list of titles. Please try again and provide your "
+                        "answer between <answer> tags with the selected title given "
+                        "The title to navigate to should be included between "
+                        "<answer> and </answer> such as: <answer>Title</answer>. "
+                        "You are tying to select the best page title to reach "
+                        f"the target page '{target_title}'."
+                    )
+                elif response == "BadRequestError":
+                    return -1, response
+                else:
+                    # There is a response
+                    given_answer = self.pull_answer(response)
+                    if given_answer is None:
+                        # There was no answer in the response
+                        retry += 1
+                        err_msg = "Response did not contain an answer"
+                        content_retry = (
+                            "You did not provide an answer in the response. "
+                            "- please try again!"
+                            "You should reason about which title is the best to "
+                            "navigate to the target page then provide your answer. "
+                            "The answer need to be between <answer> tags, such as: "
+                            "<answer>Title</answer>. "
+                            "Only the title should be listed between the tags, if you "
+                            "are not sure just pick the best title you can. "
+                            "You are tying to select the best page title to reach "
+                            f"the target page '{target_title}'."
+                        )
+                    else:
+                        # We have an answer in the response
+                        if given_answer in titles:
+                            # Excellent - no hallucinations!
+                            list_id = titles.index(given_answer)
+                            # list_id should always be a valid index of the ids
+                            # list as there was a check above to make sure that
+                            # the titles and ids lists were the same length and
+                            # no items are removed from the list during this process
+                            next_link_id = ids[list_id]
+                            if next_link_id is None:
+                                # This error shouldn't be reached?
+                                err_msg = "Couldn't find article ID for " + given_answer
+                                return -1, err_msg
+                            # we have a valid link and give the whole response as
+                            # the reason
+                            return next_link_id, response
+                        # *sigh* - hallucination
+                        retry += 1
+                        err_msg = "Hallucination - title not in list"
+                        content_retry = (
+                            f'But "{given_answer}" is not in the list '
+                            "that was provided! You must select a title from the "
+                            "list of titles. Please try again and include only the "
+                            "title between <answer> and </answer> tags. "
+                            "To jog your memory, 10 example titles from the "
+                            f"list are: {np.random.choice(titles, 10)}. "
+                            "You should reason about which title is the best to "
+                            "navigate to the target page then provide your answer. "
+                            "The answer needs to be from the list and between <answer> "
+                            "tags, such as: <answer>Title</answer>. "
+                            "Only the title should be listed between the tags, if you "
+                            "are not sure just pick the best title you can. "
+                            "You are tying to select the best page title to reach "
+                            f"the target page '{target_title}'."
+                        )
+
+                message_response = {"role": "assistant", "content": response}
+                messages.append(message_response)
+                message_retry = {"role": "user", "content": content_retry}
+                messages.append(message_retry)
+
+                response = self._model.get_response(messages)
+                print(response)
+            # The agent was not able to select a link
+            return -1, err_msg
+        # There are no links from the current page
+        return -1, "Ran out of titles to pick"
