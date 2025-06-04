@@ -1206,7 +1206,10 @@ class ReasoningAgent(PromptAgent):
         self._play_round_content = (
             "Here is a list of titles, which one should I pick? Please reason about "
             "which title is the best to navigate to the target page then provide your "
-            "answer. The answer need to be between <answer> tags, such as: "
+            "answer. "
+            "It would be good to think about what intermediate steps from the "
+            "current page you would take to reach the target page."
+            "The answer need to be between <answer> tags, such as: "
             "<answer>Title</answer>."
             "Only the title should be listed between the tags, if you "
             "are not sure just pick the best title you can. "
@@ -1296,7 +1299,6 @@ class ReasoningAgent(PromptAgent):
                     return -1, ""
 
             response = self._model.get_response(messages)
-            print(response)
 
             retry = 0
             err_msg = ""
@@ -1382,7 +1384,6 @@ class ReasoningAgent(PromptAgent):
                 messages.append(message_retry)
 
                 response = self._model.get_response(messages)
-                print(response)
             # The agent was not able to select a link
             return -1, err_msg
         # There are no links from the current page
