@@ -233,3 +233,20 @@ experiments:
       - intfloat/multilingual-e5-small
     params:
       max_rounds: 100
+
+  reasoning_small:
+    agent_class: ReasoningAgent
+    game_datasets:
+      - en_wiki_step_list
+    models:
+      - deepseek-r1:8b
+      - gemma2:27b
+      - llama3.1:8b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
