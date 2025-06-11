@@ -1215,7 +1215,7 @@ class ReasoningAgent(PromptAgent):
             "are not sure just pick the best title you can. "
         )
 
-    def pull_answer(self, text):
+    def pull_answer(self, text: str) -> str | None:
         """
         Extracts the answer from the given text.
 
@@ -1223,7 +1223,7 @@ class ReasoningAgent(PromptAgent):
             text (str): The text containing the answer.
 
         Returns:
-            str: The extracted answer.
+            str | None: The extracted answer, or None if no answer is found.
         """
         match = self.answer_regex.search(text)
         if match:
