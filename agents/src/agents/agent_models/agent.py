@@ -1317,7 +1317,7 @@ class ReasoningAgent(PromptAgent):
                         "answer between <answer> tags with the selected title given "
                         "The title to navigate to should be included between "
                         "<answer> and </answer> such as: <answer>Title</answer>. "
-                        "You are tying to select the best page title to reach "
+                        "You are trying to select the best page title to reach "
                         f"the target page '{target_title}'."
                     )
                 elif response == "BadRequestError":
