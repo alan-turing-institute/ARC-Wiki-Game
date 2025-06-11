@@ -239,9 +239,11 @@ experiments:
     game_datasets:
       - en_wiki_step_list
     models:
-      - deepseek-r1:8b
-      - gemma2:27b
-      - llama3.1:8b
+      # - deepseek-r1:8b
+      - deepseek-r1:32b
+      # - gemma2:27b
+      # - llama3.1:8b
+      - qwq:32b
     params:
       llm: ollama
       max_rounds: 100

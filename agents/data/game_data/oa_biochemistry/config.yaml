@@ -104,3 +104,18 @@ experiments:
       max_titles: 500
       filter_lang: en
       from_database: True
+
+  reasoning_medium:
+    agent_class: ReasoningAgent
+    game_datasets:
+      - oa_biochemistry_step_list_lang
+    models:
+      - deepseek-r1:70b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
