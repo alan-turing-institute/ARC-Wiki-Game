@@ -153,3 +153,5 @@ experiments:
       manual_seed: 42
       num_retries: 5
       max_titles: 200
+      filter_lang: en
+      from_database: True
