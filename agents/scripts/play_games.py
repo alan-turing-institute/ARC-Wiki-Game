@@ -327,6 +327,9 @@ def main():
                                     model,
                                     options={"temperature": temperature},
                                     host_port=args.ollama_host,
+                                    keep_alive=(
+                                        600 if agent_class == "ReasoningAgent" else 300
+                                    ),
                                 )
                             if agent_class == "PromptAgent":
                                 agent = PromptAgent(
