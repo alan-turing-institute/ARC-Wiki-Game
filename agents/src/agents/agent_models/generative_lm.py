@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 import ollama
+from httpx import RemoteProtocolError
 from openai import AzureOpenAI, BadRequestError
 
 
@@ -197,10 +198,14 @@ class OllamaLM(GenLM):
             str | None: This is the response from the model. It will only include the
                 content of the message. Should be in JSON format.
         """
-        return self.ollama_client.chat(
-            self.model,
-            messages=messages,
-            format=self.format,
-            options=self.options,
-            keep_alive=self.keep_alive,
-        )["message"]["content"]
+        try:
+            return self.ollama_client.chat(
+                self.model,
+                messages=messages,
+                format=self.format,
+                options=self.options,
+                keep_alive=self.keep_alive,
+            )["message"]["content"]
+        except RemoteProtocolError as e:
+            print(f"Error communicating with Ollama server: {e}")
+            return ""
