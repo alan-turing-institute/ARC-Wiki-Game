@@ -64,10 +64,16 @@ class OpenAIModel(GenLM):
         self._temperature = temperature
         self._top_p = top_p
         self._seed = seed
+        self._is_reasoning = deployment_name in ["wikigame-o3-mini", "wikigame-o3"]
+        self._api_version = (
+            "2024-02-01" if not self._is_reasoning else "2025-01-01-preview"
+        )
+        print(f"Using {self._deployment_name} with API version:")
+        print(self._api_version)
 
         self._client = AzureOpenAI(
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            api_version="2024-02-01",
+            api_version=self._api_version,
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         )
 
@@ -103,17 +109,26 @@ class OpenAIModel(GenLM):
                 content of the message. Should be in JSON format.
         """
         try:
+            extra_args = (
+                {}
+                if self._is_reasoning
+                else {
+                    "temperature": self._temperature,
+                    "top_p": self._top_p,
+                }
+            )
+
             completion = self._client.chat.completions.create(
                 model=self._deployment_name,
                 messages=messages,
-                temperature=self._temperature,
-                top_p=self._top_p,
                 seed=self._seed,
                 response_format=self._response_format,
+                **extra_args,
             )
 
             return completion.choices[0].message.content
-        except BadRequestError:
+        except BadRequestError as e:
+            print(e)
             return "BadRequestError"
 
 

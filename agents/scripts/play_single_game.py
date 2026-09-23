@@ -251,7 +251,7 @@ def main():
     if args.folder_name is not None and args.file_name is not None:
         folder_name = args.folder_name
         file_name = args.file_name
-        agent.save_games(folder_name=folder_name, file_name=file_name)
+        agent.save_games(folder_path=folder_name, file_name=file_name)
 
 
 if __name__ == "__main__":
