@@ -16,14 +16,15 @@ results_dir = current_dir.parents[2] / "agents" / "result" / "table"
 embed_path = results_dir / "embed_model_wiki_summary_stats.csv"
 prompt_path = results_dir / "prompt_wiki_summary_stats.csv"
 tfidf_path = results_dir / "tfidf_wiki_summary_stats.csv"
+reasoning_path = results_dir / "reasoning_wiki_summary_stats.csv"
 
 # Load Data
 
 color_names = {
-    "Open LLM": 185 / 360,
-    "Closed LLM": 112 / 360,
-    "Embedding": 28 / 360,
     "TFIDF": 298 / 360,
+    "Embedding": 28 / 360,
+    "LLM": 185 / 360,
+    "Reasoning LLM": 112 / 360,
     "Human": 355 / 360,
 }
 
@@ -31,12 +32,15 @@ embed_df = pd.read_csv(embed_path, sep="\t")
 embed_df["Colour"] = color_names["Embedding"]
 
 prompt_df = pd.read_csv(prompt_path, sep="\t")
-prompt_df["Colour"] = prompt_df["Model"].map(
-    lambda m: (color_names["Closed LLM"] if "GPT" in m else color_names["Open LLM"])
-)
+prompt_df["Colour"] = color_names["LLM"]
 
 tfidf_df = pd.read_csv(tfidf_path, sep="\t")
 tfidf_df["Colour"] = color_names["TFIDF"]
+
+reasoning_df = pd.read_csv(reasoning_path, sep="\t")
+# Distinguishes the models run through both agents, e.g. Llama3.1:405B.
+reasoning_df["Model"] = reasoning_df["Model"] + " (R)"
+reasoning_df["Colour"] = color_names["Reasoning LLM"]
 
 human_df = pd.DataFrame(
     {
@@ -51,9 +55,12 @@ human_df = pd.DataFrame(
 )
 
 
-all_df = pd.concat([prompt_df, embed_df, tfidf_df, human_df])
+all_df = pd.concat([prompt_df, reasoning_df, embed_df, tfidf_df, human_df])
 
 all_df = all_df[(all_df["Language"] == "English") & (all_df["Topic"] == "Wikipedia")]
+
+# Closed source models are marked with a hatch rather than a colour of their own.
+all_df["Hatch"] = all_df["Model"].str.contains("GPT")
 
 
 # Data Preparation
@@ -66,6 +73,13 @@ param_dict = {
     "Llama3.2:3B": 3,
     "Llama3.1:70B": 70,
     "Llama3.1:405B": 405,
+    "GPT-o3-mini (R)": 100,
+    "DeepSeek-R1:32B (R)": 32,
+    "DeepSeek-R1:70B (R)": 70,
+    "QwQ:32B (R)": 32,
+    "Gemma2:27B (R)": 27,
+    "Llama3.1:8B (R)": 8,
+    "Llama3.1:405B (R)": 405,
     "Intfloat Multilingual-E5-Small": 0.118,
     "MiniLM-L6 v2": 0.023,
     "Mistral-Nemo": 12,
@@ -76,6 +90,7 @@ param_dict = {
 param_err = {
     "GPT 4o": 800,
     "GPT 4o mini": 90,
+    "GPT-o3-mini (R)": 90,
 }
 
 all_df["Parameters"] = all_df["Model"].map(param_dict)
@@ -89,6 +104,9 @@ rename_dict = {
     "Roberta-Large v1": "Roberta-Large",
     "GPT 4o": "GPT-4o",
     "GPT 4o mini": "GPT-4o mini",
+    "GPT-o3-mini (R)": "GPT-o3 mini (R)",
+    "DeepSeek-R1:32B (R)": "DS-R1:32B (R)",
+    "DeepSeek-R1:70B (R)": "DS-R1:70B (R)",
     "TFIDF Self Corpus": "TFIDF",
 }
 
@@ -110,6 +128,13 @@ table_list = [
     "Llama3.2:3B",
     "Llama3.1:70B",
     "Llama3.1:405B",
+    "GPT-o3-mini (R)",
+    "DeepSeek-R1:32B (R)",
+    "DeepSeek-R1:70B (R)",
+    "QwQ:32B (R)",
+    "Gemma2:27B (R)",
+    "Llama3.1:8B (R)",
+    "Llama3.1:405B (R)",
     "Intfloat Multilingual-E5-Small",
     "MiniLM-L6 v2",
     "All-MPNet-Base v2",
@@ -129,7 +154,7 @@ ax1 = axes[0]
 ax2 = axes[1]
 
 ax1.text(
-    -0.3,
+    -0.45,
     1.0,
     "A",
     transform=ax1.transAxes,
@@ -160,6 +185,10 @@ bars = ax1.barh(
     capsize=6,
     error_kw={"elinewidth": 2, "capthick": 2},
 )
+for bar, hatched in zip(bars, table_df["Hatch"], strict=True):
+    if hatched:
+        bar.set_hatch("//")
+
 ax1.set_yticks(y_pos)
 ax1.set_yticklabels(table_df["ModelName"])
 ax1.set_xlabel("Success rate")
@@ -172,12 +201,14 @@ ax1.tick_params(which="both", axis="x", direction="in")
 
 
 # Adding a legend for model types
-# Adding a legend for model types
-legend_labels = list(color_names.keys())
+legend_labels = [*color_names, "Closed source"]
 handles = [
     plt.Line2D([0], [0], color=hsv_to_rgb((color_names[label], 0.65, 0.95)), lw=4)
-    for label in legend_labels
+    for label in color_names
 ]
+handles.append(
+    plt.Rectangle((0, 0), 1, 1, facecolor="white", edgecolor="black", hatch="//")
+)
 
 ax1.legend(handles, legend_labels, loc="lower right")
 
