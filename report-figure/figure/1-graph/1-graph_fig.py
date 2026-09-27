@@ -47,7 +47,7 @@ for dataset, topic in topic_name:
 
 ##  Set up Figure ##
 
-fig, axes = plt.subplots(1, 2, figsize=(8, 5))
+fig, axes = plt.subplots(1, 2, figsize=(8, 4.2))
 
 ax1 = axes[0]
 ax2 = axes[1]
@@ -105,7 +105,7 @@ ax1t = ax1.twinx()
 ax1t.plot(
     x_vals,
     metadata_df["LinkPage"],
-    color="red",
+    color=(0.99, 0.3, 0.3),
     ls="",
     marker="o",
     ms=8,
