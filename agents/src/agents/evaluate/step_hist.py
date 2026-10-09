@@ -128,6 +128,7 @@ def fit_nbinom(
     path_counts: np.ndarray[int],
     optimial_steps: np.ndarray[int],
     truncation: int = 100,
+    fix_n: float | None = None,
 ) -> tuple[tuple[float, float], tuple[float, float]]:
     """
     Fit a negative binomial distribution to the data and return the parameters and
@@ -138,7 +139,8 @@ def fit_nbinom(
         optimial_steps (np.ndarray): An array of minimum possible steps corresponding to
             the successful paths.
         truncation (int): The truncation point for the distribution. Defaults to 100.
-
+        fix_n (float | None): If provided, the n parameter will be fixed to one value.
+            Defaults to None.
     Returns:
         n_result (tuple[float, float]): The n parameter of the negative binomial, which
             is the required number of successful trials. This is a tuple containing the
@@ -147,13 +149,22 @@ def fit_nbinom(
             is the probability of success on each trial. This is a tuple containing the
             parameter and the standard deviation.
     """
-    nbinom_results = minimize(
-        nbinom_log_likelihood,
-        x0=[4, 0.5],
-        bounds=[(0, 100), (0, 1)],
-        args=(path_counts, optimial_steps),
-        method="Nelder-Mead",
-    )
+    if fix_n is not None:
+        nbinom_results = minimize(
+            nbinom_log_likelihood,
+            x0=[fix_n, 0.5],
+            bounds=[(fix_n, fix_n), (0, 1)],
+            args=(path_counts, optimial_steps, truncation),
+            method="Nelder-Mead",
+        )
+    else:
+        nbinom_results = minimize(
+            nbinom_log_likelihood,
+            x0=[4, 0.5],
+            bounds=[(0, 100), (0, 1)],
+            args=(path_counts, optimial_steps, truncation),
+            method="Nelder-Mead",
+        )
 
     hessian_func = nd.Hessian(
         lambda params: nbinom_log_likelihood(
@@ -167,6 +178,8 @@ def fit_nbinom(
     hessian_mat = hessian_func(nbinom_results.x)
     if np.any(np.isnan(hessian_mat)):
         return (nbinom_results.x[0], np.nan), (nbinom_results.x[1], np.nan)
+    if fix_n is not None:
+        return (fix_n, 0.0), (nbinom_results.x[1], 1 / np.sqrt(hessian_mat[1, 1]))
     cov_mat = inv(hessian_mat)
     result_std = np.sqrt(np.diag(cov_mat))
 
