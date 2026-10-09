@@ -38,7 +38,7 @@ def get_sentence_transformer(model_name: str) -> SentenceTransformer:
     # Check if the model_name is one that exists in the sentence transformers library
     hf_api = HfApi()
     # Get all sentence-transformer models
-    models = hf_api.list_models(library="sentence-transformers")
+    models = hf_api.list_models(filter="sentence-transformers")
     model_ids = [model.id for model in list(models)]
     if "sentence-transformers/" + model_name in model_ids:
         model_name = "sentence-transformers/" + model_name
