@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 import ollama
+from httpx import RemoteProtocolError
 from openai import AzureOpenAI, BadRequestError
 
 
@@ -17,6 +18,18 @@ class GenLM(ABC):
         """
         Returns the response of the language model, given a list of messages.
         """
+
+    def set_free_form(self, free_form: bool) -> None:
+        """
+        Set the model to free form or not.
+        This is not implemented in this class as it doesn't use a generative model.
+
+        Args:
+            free_form (bool): If True, the model will not be fixed to JSON.
+        """
+        del free_form
+        msg = "This model type does not support setting free form responses."
+        raise NotImplementedError(msg)
 
 
 class MockGenLM(GenLM):
@@ -45,17 +58,41 @@ class OpenAIModel(GenLM):
         temperature: float = 0.2,
         top_p: float = 0.1,
         seed: int = 42,
+        free_form: bool = False,
     ) -> None:
         self._deployment_name = deployment_name
         self._temperature = temperature
         self._top_p = top_p
         self._seed = seed
+        self._is_reasoning = deployment_name in ["wikigame-o3-mini", "wikigame-o3"]
+        self._api_version = (
+            "2024-02-01" if not self._is_reasoning else "2025-01-01-preview"
+        )
+        print(f"Using {self._deployment_name} with API version:")
+        print(self._api_version)
 
         self._client = AzureOpenAI(
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            api_version="2024-02-01",
+            api_version=self._api_version,
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         )
+
+        if free_form:
+            self._response_format = {"type": "text"}
+        else:
+            self._response_format = {"type": "json_object"}
+
+    def set_free_form(self, free_form: bool) -> None:
+        """
+        Set the model to free form or not.
+
+        Args:
+            free_form (bool): If True, the model will not be fixed to JSON.
+        """
+        if free_form:
+            self._response_format = {"type": "text"}
+        else:
+            self._response_format = {"type": "json_object"}
 
     def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
         """
@@ -72,17 +109,26 @@ class OpenAIModel(GenLM):
                 content of the message. Should be in JSON format.
         """
         try:
+            extra_args = (
+                {}
+                if self._is_reasoning
+                else {
+                    "temperature": self._temperature,
+                    "top_p": self._top_p,
+                }
+            )
+
             completion = self._client.chat.completions.create(
                 model=self._deployment_name,
                 messages=messages,
-                temperature=self._temperature,
-                top_p=self._top_p,
                 seed=self._seed,
-                response_format={"type": "json_object"},
+                response_format=self._response_format,
+                **extra_args,
             )
 
             return completion.choices[0].message.content
-        except BadRequestError:
+        except BadRequestError as e:
+            print(e)
             return "BadRequestError"
 
 
@@ -103,6 +149,7 @@ class OllamaLM(GenLM):
         options: dict | None = None,
         keep_alive: int = 300,
         host_port: int = 11434,
+        free_form: bool = False,
     ):
         """
         This model calls the Ollama API to get responses.
@@ -116,6 +163,10 @@ class OllamaLM(GenLM):
                 to 0.0.
             keep_alive (int, optional): The number of seconds to keep the model loaded
                 to RAM. Defaults to 300.
+            host_port (int, optional): The port where the Ollama server is running.
+                Defaults to 11434.
+            free_form (bool, optional): If True, the model will not be fixed to JSON.
+                Defaults to False.
         """
         if options is None:
             options = {"temperature": 0.0}
@@ -123,13 +174,30 @@ class OllamaLM(GenLM):
 
         self.keep_alive = keep_alive
 
-        if model not in [mod["name"] for mod in ollama.list()["models"]]:
-            print("Model not found. Trying to download...")
-            ollama.pull(model)
+        if free_form:
+            self.format = None
+        else:
+            self.format = "json"
+
+        # if model not in [mod["name"] for mod in ollama.list()["models"]]:
+        #     print("Model not found. Trying to download...")
+        #     ollama.pull(model)
 
         self.model = model
 
         self.ollama_client = ollama.Client(host=f"localhost:{host_port}")
+
+    def set_free_form(self, free_form: bool) -> None:
+        """
+        Set the model to free form or not.
+
+        Args:
+            free_form (bool): If True, the model will not be fixed to JSON.
+        """
+        if free_form:
+            self.format = None
+        else:
+            self.format = "json"
 
     def get_response(self, messages: list[dict[Any, Any]]) -> str | None:
         """
@@ -145,10 +213,14 @@ class OllamaLM(GenLM):
             str | None: This is the response from the model. It will only include the
                 content of the message. Should be in JSON format.
         """
-        return self.ollama_client.chat(
-            self.model,
-            messages=messages,
-            format="json",
-            options=self.options,
-            keep_alive=self.keep_alive,
-        )["message"]["content"]
+        try:
+            return self.ollama_client.chat(
+                self.model,
+                messages=messages,
+                format=self.format,
+                options=self.options,
+                keep_alive=self.keep_alive,
+            )["message"]["content"]
+        except RemoteProtocolError as e:
+            print(f"Error communicating with Ollama server: {e}")
+            return ""

@@ -6,7 +6,12 @@ import os
 import yaml
 from numpy import array, loadtxt, savetxt
 
-from agents.agent_models.agent import GreedyEmbeddingAgent, PromptAgent, TFIDFAgent
+from agents.agent_models.agent import (
+    GreedyEmbeddingAgent,
+    PromptAgent,
+    ReasoningAgent,
+    TFIDFAgent,
+)
 from agents.agent_models.generative_lm import OllamaLM, OpenAIModel
 from agents.utils.data import get_data_folders, load_tools
 
@@ -293,7 +298,7 @@ def main():
                                 ]["max_articles"],
                                 agent_tools_for_corpus=tools_for_corpus,
                             )
-                        elif agent_class == "PromptAgent":
+                        elif agent_class in ("PromptAgent", "ReasoningAgent"):
                             temperature = config["experiments"][experiment]["params"][
                                 "temperature"
                             ]
@@ -322,14 +327,27 @@ def main():
                                     model,
                                     options={"temperature": temperature},
                                     host_port=args.ollama_host,
+                                    keep_alive=(
+                                        600 if agent_class == "ReasoningAgent" else 300
+                                    ),
                                 )
-                            agent = PromptAgent(
-                                tools,
-                                max_rounds=max_rounds,
-                                model=gen_model,
-                                num_retries=num_retries,
-                                max_titles=max_titles,
-                            )
+                            if agent_class == "PromptAgent":
+                                agent = PromptAgent(
+                                    tools,
+                                    max_rounds=max_rounds,
+                                    model=gen_model,
+                                    num_retries=num_retries,
+                                    max_titles=max_titles,
+                                )
+                            elif agent_class == "ReasoningAgent":
+                                agent = ReasoningAgent(
+                                    tools,
+                                    max_rounds=max_rounds,
+                                    model=gen_model,
+                                    num_retries=num_retries,
+                                    max_titles=max_titles,
+                                )
+
                         agent.play_games(
                             source_ids[start_index : start_index + max_games],
                             target_ids[start_index : start_index + max_games],

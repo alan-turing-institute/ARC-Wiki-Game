@@ -21,7 +21,7 @@ def parse_args():
 
 def pull_game_ends(
     data_loc: str, number_list: list[int]
-) -> tuple[int, int, int, int, int, int, int]:
+) -> tuple[int, int, int, int, int, int, int, int]:
     """
     Pulls the information of how the game ends from the data files.
 
@@ -38,6 +38,7 @@ def pull_game_ends(
             - Hallucination by LLM
             - Bad request (GPT API rejection)
             - No response (Normally API timeout)
+            - No answer (Reasoning model gave no answer, always 0 for other agents)
     """
     results_list = []
 
@@ -59,7 +60,7 @@ def pull_game_ends(
         )
 
     if len(results_list) == 0:
-        return (-1, -1, -1, -1, -1, -1, -1)
+        return (-1, -1, -1, -1, -1, -1, -1, -1)
 
     results_df = pd.concat(results_list)
     total_games = len(results_df)
@@ -72,6 +73,7 @@ def pull_game_ends(
             "Hallucination - title not in list",
             "No title provided in response",
             "Response not in valid JSON format",
+            "Response not in JSON format",  # Older wording
         )
 
         results_df.loc[results_df["found_target"], "error_message"] = "Success"
@@ -89,6 +91,10 @@ def pull_game_ends(
         )
         bad_request_count = (results_df["error_message"] == "BadRequestError").sum()
         no_response_count = (results_df["error_message"] == "No response").sum()
+        # Only ReasoningAgent can produce this, so it is 0 for every other agent.
+        no_answer_count = (
+            results_df["error_message"] == "Response did not contain an answer"
+        ).sum()
     else:
         success_count = (results_df["found_target"]).sum()
         step_limit_count = (results_df["num_steps"] == 100).sum()
@@ -96,6 +102,24 @@ def pull_game_ends(
         hallucination_count = 0
         bad_request_count = 0
         no_response_count = 0
+        no_answer_count = 0
+
+    counted = (
+        success_count
+        + step_limit_count
+        + dead_end_count
+        + hallucination_count
+        + bad_request_count
+        + no_response_count
+        + no_answer_count
+    )
+    if counted != total_games:
+        msg = (
+            f"Game outcomes do not sum to the total for {data_loc}: "
+            f"{counted} counted vs {total_games} games. "
+            "An error_message value is not being classified."
+        )
+        raise ValueError(msg)
 
     return (
         total_games,
@@ -105,6 +129,7 @@ def pull_game_ends(
         hallucination_count,
         bad_request_count,
         no_response_count,
+        no_answer_count,
     )
 
 
@@ -131,6 +156,7 @@ def process_model(
         hallucination_count,
         bad_request_count,
         no_response_count,
+        no_answer_count,
     ) = pull_game_ends(data_loc, number_list)
 
     # Save the statistics to the list
@@ -146,6 +172,7 @@ def process_model(
             "Hallucination": hallucination_count,
             "Bad_requests": bad_request_count,
             "No_response": no_response_count,
+            "No_answer": no_answer_count,
         }
     )
 
@@ -202,6 +229,7 @@ def main() -> None:
             "Hallucination",
             "Bad_requests",
             "No_response",
+            "No_answer",
         ],
     )
     stats_df.to_csv(stats_file_loc, sep="\t", index=False)

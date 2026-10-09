@@ -78,3 +78,18 @@ experiments:
       manual_seed: 42
       num_retries: 5
       max_titles: 200
+
+  reasoning_medium:
+    agent_class: ReasoningAgent
+    game_datasets:
+      - bn_wiki_step_list
+    models:
+      - deepseek-r1:70b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200

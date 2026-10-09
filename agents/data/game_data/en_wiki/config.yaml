@@ -233,3 +233,67 @@ experiments:
       - intfloat/multilingual-e5-small
     params:
       max_rounds: 100
+
+  reasoning_small:
+    agent_class: ReasoningAgent
+    game_datasets:
+      - en_wiki_step_list
+    models:
+      # - deepseek-r1:8b
+      - deepseek-r1:32b
+      # - gemma2:27b
+      # - llama3.1:8b
+      - qwq:32b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
+
+  reasoning_medium:
+    agent_class: ReasoningAgent
+    game_datasets:
+      - en_wiki_step_list
+    models:
+      - deepseek-r1:70b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
+
+  reasoning_large:
+    agent_class: ReasoningAgent
+    game_datasets:
+      - en_wiki_step_list
+    models:
+      - llama3.1:405b
+    params:
+      llm: ollama
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 200
+
+  reasoning-gpt-o3-mini:
+    agent_class: PromptAgent
+    game_datasets:
+      - en_wiki_step_list
+    models:
+      - wikigame-o3-mini
+    params:
+      llm: gpt
+      max_rounds: 100
+      temperature: 0
+      top_p: 0.1
+      manual_seed: 42
+      num_retries: 5
+      max_titles: 500

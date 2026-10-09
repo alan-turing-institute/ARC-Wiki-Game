@@ -10,7 +10,7 @@ from matplotlib.ticker import AutoMinorLocator
 
 # Set up paths
 current_dir = Path(__file__).resolve().parent
-fig_path = current_dir / "fig4_topics.pdf"
+fig_path = current_dir / "fig5_topics.pdf"
 
 results_dir = current_dir.parents[2] / "agents" / "result" / "table"
 embed_path = results_dir / "embed_model_wiki_summary_stats.csv"

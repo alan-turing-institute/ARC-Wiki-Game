@@ -15,6 +15,7 @@ results_dir = current_dir.parents[2] / "agents" / "result" / "table"
 embed_path = results_dir / "embed_model_wiki_summary_game_count.csv"
 prompt_path = results_dir / "prompt_wiki_summary_game_count.csv"
 tfidf_path = results_dir / "tfidf_wiki_summary_game_count.csv"
+reasoning_path = results_dir / "reasoning_wiki_summary_game_count.csv"
 
 
 # Load Data
@@ -23,7 +24,11 @@ embed_df = pd.read_csv(embed_path, sep="\t")
 prompt_df = pd.read_csv(prompt_path, sep="\t")
 tfidf_df = pd.read_csv(tfidf_path, sep="\t")
 
-all_df = pd.concat([prompt_df, embed_df, tfidf_df])
+reasoning_df = pd.read_csv(reasoning_path, sep="\t")
+# Distinguishes the models run through both agents, e.g. Llama3.1:405B.
+reasoning_df["Model"] = reasoning_df["Model"] + " (R)"
+
+all_df = pd.concat([prompt_df, reasoning_df, embed_df, tfidf_df])
 
 # Models short names
 
@@ -34,6 +39,10 @@ rename_dict = {
     "Roberta-Large v1": "Roberta-Large",
     "GPT 4o": "GPT-4o",
     "GPT 4o mini": "GPT-4o mini",
+    "GPT-o3-mini (R)": "GPT-o3 mini (R)",
+    "DeepSeek-R1:8B (R)": "DS-R1:8B (R)",
+    "DeepSeek-R1:32B (R)": "DS-R1:32B (R)",
+    "DeepSeek-R1:70B (R)": "DS-R1:70B (R)",
     "TFIDF Self Corpus": "TFIDF",
 }
 
@@ -51,6 +60,14 @@ model_compare_list = [
     "Llama3.2:3B",
     "Llama3.1:70B",
     "Llama3.1:405B",
+    "GPT-o3-mini (R)",
+    "DeepSeek-R1:8B (R)",
+    "DeepSeek-R1:32B (R)",
+    "DeepSeek-R1:70B (R)",
+    "QwQ:32B (R)",
+    "Gemma2:27B (R)",
+    "Llama3.1:8B (R)",
+    "Llama3.1:405B (R)",
     "Intfloat Multilingual-E5-Small",
     "MiniLM-L6 v2",
     "All-MPNet-Base v2",
@@ -71,7 +88,13 @@ outcomes = [
     "Hallucination",
     "Bad_requests",
     "No_response",
+    "No_answer",
 ]
+
+hatch_patterns = ["//", "\\\\", "||", "--", "OO", "..", "xx"]
+
+# Only the reasoning table has a No_answer column.
+enwiki_df[outcomes] = enwiki_df[outcomes].fillna(0)
 
 # Convert absolute counts to fractions of Total_games
 for outcome in outcomes:
@@ -81,7 +104,7 @@ enwiki_df = enwiki_df.sort_values("Success", ascending=True)
 
 
 # Setting up the figure
-fig, ax1 = plt.subplots(1, 1, figsize=(8, 5))
+fig, ax1 = plt.subplots(1, 1, figsize=(8, 6))
 
 
 # Plot each outcome as a stacked bar
@@ -93,6 +116,9 @@ for n, outcome in enumerate(outcomes):
         left=bottom_value,
         label=outcome.replace("_", " "),
         color=cc.glasbey_category10[n + 2],
+        hatch=hatch_patterns[n],
+        edgecolor="black",  # Without an opaque edge the PDF sets a stroke alpha=0
+        linewidth=0,
     )
     # Update the bottom value to stack the bars
     bottom_value = (
