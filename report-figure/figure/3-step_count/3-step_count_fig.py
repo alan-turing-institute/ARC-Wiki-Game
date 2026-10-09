@@ -247,6 +247,7 @@ ax1.plot(
 
 ax1.set_ylabel("Game Frequency")
 ax1.set_xlim(0, 100)
+ax1.set_ylim(0, 0.095)
 
 ax1.grid(alpha=0.7)
 ax1.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=1))
@@ -259,7 +260,7 @@ ax1.text(
     0.95,
     "GPT-4o",
     transform=ax1.transAxes,
-    fontsize=13.5,
+    fontsize=12,
     va="top",
     ha="right",
 )
@@ -293,9 +294,9 @@ ax2.yaxis.set_minor_locator(AutoMinorLocator(4))
 ax2.text(
     0.95,
     0.95,
-    "DeepSeek(DS)-R1:70B",
+    "DeepSeek(DS)-R1:70B (R)",
     transform=ax2.transAxes,
-    fontsize=13.5,
+    fontsize=12,
     va="top",
     ha="right",
 )
@@ -333,7 +334,7 @@ ax3.text(
     0.95,
     "E5-Small",
     transform=ax3.transAxes,
-    fontsize=13.5,
+    fontsize=12,
     va="top",
     ha="right",
 )

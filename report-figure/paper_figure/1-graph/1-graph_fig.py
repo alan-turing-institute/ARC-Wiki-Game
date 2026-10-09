@@ -86,7 +86,7 @@ x_vals = np.arange(len(metadata_df))  # the label locations
 # bar chart for article count
 
 bars = ax1.bar(x_vals, metadata_df["Article"], color="blue", label="Article")
-ax1.set_xlabel("Wikipedia" + " " * 30 + "Open Alex")
+ax1.set_xlabel("Wikipedia" + " " * 30 + "OpenAlex")
 ax1.set_ylabel("Article count in millions", color="blue")
 ax1.tick_params(axis="y", labelcolor="blue")
 ax1.set_xticks(x_vals)

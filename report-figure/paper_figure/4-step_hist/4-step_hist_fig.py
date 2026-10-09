@@ -125,7 +125,7 @@ ax1, ax2, ax3, ax4 = axes.flatten()
 # Set up plotting function
 
 
-def plot_step_hist(axis, steps, fit_n, fit_p, colour_name, label, panel):
+def plot_step_hist(axis, steps, fit_n, fit_p, colour_name, label, panel, y_max=0.145):
     axis.hist(
         steps,
         bins=bins,
@@ -142,7 +142,7 @@ def plot_step_hist(axis, steps, fit_n, fit_p, colour_name, label, panel):
     axis.set_xlabel("Number of steps above optimal")
     axis.set_ylabel("Game Frequency")
     axis.set_xlim(0, 100)
-    axis.set_ylim(0, 0.145)
+    axis.set_ylim(0, y_max)
 
     axis.grid(alpha=0.7)
     axis.yaxis.set_major_formatter(PercentFormatter(1.0, decimals=1))
@@ -173,9 +173,11 @@ def plot_step_hist(axis, steps, fit_n, fit_p, colour_name, label, panel):
 
 
 plot_step_hist(ax1, gpt_steps, gpt_n, gpt_p, "LLM", "GPT-4o", "A")
-plot_step_hist(ax2, r1_steps, r1_n, r1_p, "Reasoning LLM", "DeepSeek(DS)-R1:70B", "B")
+plot_step_hist(
+    ax2, r1_steps, r1_n, r1_p, "Reasoning LLM", "DeepSeek(DS)-R1:70B (R)", "B"
+)
 plot_step_hist(ax3, e5_steps, e5_n, e5_p, "Embedding", "E5-Small", "C")
-plot_step_hist(ax4, human_steps, human_n, human_p, "Human", "Human", "D")
+plot_step_hist(ax4, human_steps, human_n, human_p, "Human", "Human", "D", y_max=0.24)
 
 fig.tight_layout()  # Adjust layout to prevent overlap
 

@@ -251,6 +251,8 @@ for n, outcome in enumerate(outcomes):
         label=outcome.replace("_", " "),
         color=cc.glasbey_category10[n + 2],
         hatch=hatch_patterns[n],
+        edgecolor="black",  # Without an opaque edge the PDF sets a stroke alpha=0
+        linewidth=0,
     )
     # Update the left value to stack the bars
     left_value = (
